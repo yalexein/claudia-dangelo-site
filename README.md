@@ -38,3 +38,5 @@ Se la parte “collagista” avrà molte immagini pesanti, opzioni tipiche:
 Consiglio: prima di decidere, stimiamo quante immagini (numero, dimensione media, max).
 
 Dettagli e strategie: `docs/ASSETS.md`.
+
+Dominio custom (DNS + Pages): `docs/DOMAIN.md`.

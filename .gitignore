@@ -4,3 +4,6 @@ dist/
 .npm-cache/
 .npm-logs/
 .DS_Store
+.imagegen.env
+.imagegen_vendor/
+tmp/

@@ -1,0 +1,2086 @@
+---
+import "../styles/editor-panel.css";
+
+type SelectOption = {
+  label: string;
+  value: string;
+};
+
+type PageControl = {
+  key: string;
+  type: "range" | "color" | "select" | "toggle";
+  label: string;
+  default: string | number | boolean;
+  cssVar?: string;
+  min?: number;
+  max?: number;
+  step?: number;
+  unit?: string;
+  options?: SelectOption[];
+  storageKey?: string;
+  wide?: boolean;
+};
+
+type ContentBounds = {
+  minX?: number;
+  maxX?: number;
+  minY?: number;
+  maxY?: number;
+  minRotate?: number;
+  maxRotate?: number;
+};
+
+type ContentBlockStyle = {
+  fontFamily?: string;
+  fontSize?: number;
+  lineHeight?: number;
+  letterSpacing?: number;
+  wordSpacing?: number;
+  textAlign?: "left" | "center" | "right" | "justify";
+  fontWeight?: string;
+  fontStyle?: string;
+  color?: string;
+};
+
+type ContentBlockDefinition = {
+  id: string;
+  label?: string;
+  selector: string;
+  defaultText: string;
+  editable?: boolean;
+  transform?: "none" | "xy" | "xy-rotate";
+  desktopOnlyTransform?: boolean;
+  bounds?: ContentBounds;
+  styleEditable?: boolean;
+  defaultStyle?: Partial<ContentBlockStyle>;
+};
+
+const fontOptions = [
+  {
+    label: "Baskerville",
+    value:
+      '"Baskerville", "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Garamond, Georgia, serif',
+  },
+  {
+    label: "Didot",
+    value: '"Didot", "Bodoni 72", "Bodoni MT", "Times New Roman", serif',
+  },
+  {
+    label: "Garamond",
+    value: '"Cormorant Garamond", "Adobe Garamond Pro", Garamond, Georgia, serif',
+  },
+  {
+    label: "Caslon",
+    value: '"Big Caslon", "Book Antiqua", "Palatino Linotype", serif',
+  },
+  {
+    label: "Hoefler Text",
+    value: '"Hoefler Text", "Iowan Old Style", Georgia, serif',
+  },
+  {
+    label: "Times New Roman",
+    value: '"Times New Roman", Times, serif',
+  },
+  {
+    label: "Georgia",
+    value: 'Georgia, "Times New Roman", serif',
+  },
+  {
+    label: "Cormorant",
+    value: '"Cormorant Infant", "Cormorant Garamond", Georgia, serif',
+  },
+  {
+    label: "IBM Plex Mono",
+    value: '"IBM Plex Mono", "Courier New", monospace',
+  },
+  {
+    label: "PT Mono Local",
+    value: '"PT Mono Local", "IBM Plex Mono", "Courier New", monospace',
+  },
+  {
+    label: "Space Mono",
+    value: '"Space Mono", "Courier New", monospace',
+  },
+  {
+    label: "Comic Neue",
+    value: '"Comic Neue", "Comic Sans MS", cursive',
+  },
+  {
+    label: "Bradley Hand Local",
+    value: '"Bradley Hand Local", "Comic Neue", "Comic Sans MS", cursive',
+  },
+  {
+    label: "Patrick Hand",
+    value: '"Patrick Hand", "Comic Sans MS", cursive',
+  },
+];
+
+const defaultPresets = {
+  background: "#fffdfb",
+  background2: "#f5efe8",
+  background3: "#ffe4e8",
+  backgroundMode: "solid",
+  backgroundAngle: 90,
+  text: "#1f1a17",
+  text2: "#6d4a42",
+  text3: "#ef4b5b",
+  textMode: "solid",
+  textAngle: 90,
+  accent: "#ef4b5b",
+  font:
+    '"Baskerville", "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Garamond, Georgia, serif',
+  titleFont: '"Didot", "Bodoni 72", "Bodoni MT", "Times New Roman", serif',
+  fontSize: 23,
+  lineHeight: 1.47,
+  letterSpacing: -0.012,
+  wordSpacing: 0,
+  copyWidth: 72,
+  align: "left",
+  x: 0,
+  y: 0,
+};
+
+const {
+  panelTitle = "Style editor",
+  storageNamespace = "bio",
+  presets = {},
+  pageControls = [],
+  pageDefaults = {},
+  pageSectionTitle = "Impostazioni pagina",
+  contentSchema = [],
+  contentStorageNamespace = storageNamespace,
+  contentSectionTitle = "Contenuti",
+} = Astro.props as {
+  panelTitle?: string;
+  storageNamespace?: string;
+  presets?: Record<string, string | number>;
+  pageControls?: PageControl[];
+  pageDefaults?: Record<string, string | number | boolean>;
+  pageSectionTitle?: string;
+  contentSchema?: ContentBlockDefinition[];
+  contentStorageNamespace?: string;
+  contentSectionTitle?: string;
+};
+
+const mergedPresets = { ...defaultPresets, ...presets };
+
+const normalizedPageControls = pageControls.map((control) => {
+  const fallbackDefault = pageDefaults[control.key] ?? control.default;
+  return { ...control, default: fallbackDefault };
+});
+
+const pageDefaultMap = Object.fromEntries(
+  normalizedPageControls.map((control) => [control.key, control.default]),
+);
+
+const mergedDefaults = { ...mergedPresets, ...pageDefaultMap };
+
+const pageControlMeta = normalizedPageControls.map((control) => ({
+  key: control.key,
+  type: control.type,
+  unit: control.unit ?? "",
+  cssVar: control.cssVar ?? "",
+  storageKey: control.storageKey ?? "",
+  fallback: control.default,
+}));
+
+const normalizeContentStyle = (rawStyle?: Partial<ContentBlockStyle>) => {
+  if (!rawStyle || typeof rawStyle !== "object") return {};
+  const normalized: Partial<ContentBlockStyle> = {};
+
+  if (typeof rawStyle.fontFamily === "string" && rawStyle.fontFamily.trim()) normalized.fontFamily = rawStyle.fontFamily;
+  if (typeof rawStyle.fontSize === "number" && Number.isFinite(rawStyle.fontSize)) normalized.fontSize = rawStyle.fontSize;
+  if (typeof rawStyle.lineHeight === "number" && Number.isFinite(rawStyle.lineHeight)) normalized.lineHeight = rawStyle.lineHeight;
+  if (typeof rawStyle.letterSpacing === "number" && Number.isFinite(rawStyle.letterSpacing))
+    normalized.letterSpacing = rawStyle.letterSpacing;
+  if (typeof rawStyle.wordSpacing === "number" && Number.isFinite(rawStyle.wordSpacing)) normalized.wordSpacing = rawStyle.wordSpacing;
+  if (typeof rawStyle.textAlign === "string" && rawStyle.textAlign.trim()) normalized.textAlign = rawStyle.textAlign as ContentBlockStyle["textAlign"];
+  if (typeof rawStyle.fontWeight === "string" && rawStyle.fontWeight.trim()) normalized.fontWeight = rawStyle.fontWeight;
+  if (typeof rawStyle.fontStyle === "string" && rawStyle.fontStyle.trim()) normalized.fontStyle = rawStyle.fontStyle;
+  if (typeof rawStyle.color === "string" && rawStyle.color.trim()) normalized.color = rawStyle.color;
+
+  return normalized;
+};
+
+const normalizedContentSchema = contentSchema.map((block) => ({
+  id: block.id,
+  label: block.label ?? block.id,
+  selector: block.selector,
+  defaultText: block.defaultText,
+  editable: block.editable !== false,
+  transform: block.transform ?? "none",
+  desktopOnlyTransform: Boolean(block.desktopOnlyTransform),
+  bounds: block.bounds ?? {},
+  styleEditable: block.styleEditable !== false,
+  defaultStyle: normalizeContentStyle(block.defaultStyle),
+}));
+
+const toBoolean = (value: unknown) =>
+  value === true || value === 1 || value === "1" || value === "true" || value === "on";
+
+const formatControlValue = (control: PageControl) => {
+  if (control.type === "toggle") {
+    return toBoolean(control.default) ? "On" : "Off";
+  }
+
+  if (control.unit) {
+    return `${control.default}${control.unit}`;
+  }
+
+  return `${control.default}`;
+};
+
+const storageKey = `claudia-editor-${storageNamespace}-settings`;
+const panelStateKey = `claudia-editor-${storageNamespace}-panel-open`;
+const contentNamespace = contentStorageNamespace || storageNamespace;
+const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
+---
+
+<aside
+  class="style-editor-panel"
+  data-style-editor
+  data-storage-key={storageKey}
+  data-panel-key={panelStateKey}
+  data-content-storage-key={contentStorageKey}
+  data-content-namespace={contentNamespace}
+>
+  <div class="style-editor-panel__topbar">
+    <h2>{panelTitle}</h2>
+    <button class="style-editor-collapse" type="button" data-style-collapse aria-expanded="true">
+      Nascondi
+    </button>
+  </div>
+
+  <div class="style-editor-panel__content">
+    <div class="style-editor-grid">
+      <div class="style-editor-field">
+        <label for={`editor-bg-mode-${storageNamespace}`}>Sfondo</label>
+        <select id={`editor-bg-mode-${storageNamespace}`} data-style-control="backgroundMode">
+          <option value="solid" selected={mergedPresets.backgroundMode === "solid"}>Solido</option>
+          <option value="linear-2" selected={mergedPresets.backgroundMode === "linear-2"}>Lineare 2</option>
+          <option value="linear-3" selected={mergedPresets.backgroundMode === "linear-3"}>Lineare 3</option>
+          <option value="radial-2" selected={mergedPresets.backgroundMode === "radial-2"}>Radiale 2</option>
+          <option value="radial-3" selected={mergedPresets.backgroundMode === "radial-3"}>Radiale 3</option>
+        </select>
+      </div>
+
+      <div class="style-editor-field">
+        <label for={`editor-text-mode-${storageNamespace}`}>Testo</label>
+        <select id={`editor-text-mode-${storageNamespace}`} data-style-control="textMode">
+          <option value="solid" selected={mergedPresets.textMode === "solid"}>Solido</option>
+          <option value="linear-2" selected={mergedPresets.textMode === "linear-2"}>Lineare 2</option>
+          <option value="linear-3" selected={mergedPresets.textMode === "linear-3"}>Lineare 3</option>
+          <option value="radial-2" selected={mergedPresets.textMode === "radial-2"}>Radiale 2</option>
+          <option value="radial-3" selected={mergedPresets.textMode === "radial-3"}>Radiale 3</option>
+        </select>
+      </div>
+
+      <div class="style-editor-field">
+        <label for={`editor-bg-1-${storageNamespace}`}>Sfondo 1</label>
+        <input
+          id={`editor-bg-1-${storageNamespace}`}
+          type="color"
+          value={mergedPresets.background}
+          data-style-control="background"
+        />
+      </div>
+
+      <div class="style-editor-field">
+        <label for={`editor-text-1-${storageNamespace}`}>Testo 1</label>
+        <input
+          id={`editor-text-1-${storageNamespace}`}
+          type="color"
+          value={mergedPresets.text}
+          data-style-control="text"
+        />
+      </div>
+
+      <div class="style-editor-field">
+        <label for={`editor-bg-2-${storageNamespace}`}>Sfondo 2</label>
+        <input
+          id={`editor-bg-2-${storageNamespace}`}
+          type="color"
+          value={mergedPresets.background2}
+          data-style-control="background2"
+        />
+      </div>
+
+      <div class="style-editor-field">
+        <label for={`editor-text-2-${storageNamespace}`}>Testo 2</label>
+        <input id={`editor-text-2-${storageNamespace}`} type="color" value={mergedPresets.text2} data-style-control="text2" />
+      </div>
+
+      <div class="style-editor-field">
+        <label for={`editor-bg-3-${storageNamespace}`}>Sfondo 3</label>
+        <input
+          id={`editor-bg-3-${storageNamespace}`}
+          type="color"
+          value={mergedPresets.background3}
+          data-style-control="background3"
+        />
+      </div>
+
+      <div class="style-editor-field">
+        <label for={`editor-text-3-${storageNamespace}`}>Testo 3</label>
+        <input id={`editor-text-3-${storageNamespace}`} type="color" value={mergedPresets.text3} data-style-control="text3" />
+      </div>
+
+      <div class="style-editor-field">
+        <label for={`editor-accent-${storageNamespace}`}>Accento</label>
+        <input id={`editor-accent-${storageNamespace}`} type="color" value={mergedPresets.accent} data-style-control="accent" />
+      </div>
+
+      <div class="style-editor-field">
+        <label for={`editor-align-${storageNamespace}`}>Allineamento</label>
+        <select id={`editor-align-${storageNamespace}`} data-style-control="align">
+          <option value="left" selected={mergedPresets.align === "left"}>Sinistra</option>
+          <option value="center" selected={mergedPresets.align === "center"}>Centro</option>
+          <option value="right" selected={mergedPresets.align === "right"}>Destra</option>
+          <option value="justify" selected={mergedPresets.align === "justify"}>Giustificato</option>
+        </select>
+      </div>
+
+      <div class="style-editor-field">
+        <label for={`editor-bg-angle-${storageNamespace}`}>Angolo sfondo</label>
+        <input
+          id={`editor-bg-angle-${storageNamespace}`}
+          type="range"
+          min="0"
+          max="360"
+          step="1"
+          value={mergedPresets.backgroundAngle}
+          data-style-control="backgroundAngle"
+        />
+        <span class="style-editor-range-value" data-style-value="backgroundAngle">{mergedPresets.backgroundAngle}°</span>
+      </div>
+
+      <div class="style-editor-field">
+        <label for={`editor-text-angle-${storageNamespace}`}>Angolo testo</label>
+        <input
+          id={`editor-text-angle-${storageNamespace}`}
+          type="range"
+          min="0"
+          max="360"
+          step="1"
+          value={mergedPresets.textAngle}
+          data-style-control="textAngle"
+        />
+        <span class="style-editor-range-value" data-style-value="textAngle">{mergedPresets.textAngle}°</span>
+      </div>
+
+      <div class="style-editor-field style-editor-field--wide">
+        <label for={`editor-font-${storageNamespace}`}>Font</label>
+        <select id={`editor-font-${storageNamespace}`} data-style-control="font">
+          {fontOptions.map((option) => (
+            <option value={option.value} selected={mergedPresets.font === option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div class="style-editor-field style-editor-field--wide">
+        <label for={`editor-title-font-${storageNamespace}`}>Font titolo</label>
+        <select id={`editor-title-font-${storageNamespace}`} data-style-control="titleFont">
+          {fontOptions.map((option) => (
+            <option value={option.value} selected={mergedPresets.titleFont === option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div class="style-editor-field">
+        <label for={`editor-font-size-${storageNamespace}`}>Font size</label>
+        <input
+          id={`editor-font-size-${storageNamespace}`}
+          type="range"
+          min="12"
+          max="64"
+          step="1"
+          value={mergedPresets.fontSize}
+          data-style-control="fontSize"
+        />
+        <span class="style-editor-range-value" data-style-value="fontSize">{mergedPresets.fontSize}px</span>
+      </div>
+
+      <div class="style-editor-field">
+        <label for={`editor-line-height-${storageNamespace}`}>Interlinea</label>
+        <input
+          id={`editor-line-height-${storageNamespace}`}
+          type="range"
+          min="0.8"
+          max="3"
+          step="0.01"
+          value={mergedPresets.lineHeight}
+          data-style-control="lineHeight"
+        />
+        <span class="style-editor-range-value" data-style-value="lineHeight">{mergedPresets.lineHeight}</span>
+      </div>
+
+      <div class="style-editor-field">
+        <label for={`editor-letter-spacing-${storageNamespace}`}>Tracking</label>
+        <input
+          id={`editor-letter-spacing-${storageNamespace}`}
+          type="range"
+          min="-0.08"
+          max="0.18"
+          step="0.001"
+          value={mergedPresets.letterSpacing}
+          data-style-control="letterSpacing"
+        />
+        <span class="style-editor-range-value" data-style-value="letterSpacing">{mergedPresets.letterSpacing}em</span>
+      </div>
+
+      <div class="style-editor-field">
+        <label for={`editor-word-spacing-${storageNamespace}`}>Spazio parole</label>
+        <input
+          id={`editor-word-spacing-${storageNamespace}`}
+          type="range"
+          min="-0.2"
+          max="0.8"
+          step="0.005"
+          value={mergedPresets.wordSpacing}
+          data-style-control="wordSpacing"
+        />
+        <span class="style-editor-range-value" data-style-value="wordSpacing">{mergedPresets.wordSpacing}em</span>
+      </div>
+
+      <div class="style-editor-field">
+        <label for={`editor-copy-width-${storageNamespace}`}>Larghezza testo</label>
+        <input
+          id={`editor-copy-width-${storageNamespace}`}
+          type="range"
+          min="20"
+          max="190"
+          step="1"
+          value={mergedPresets.copyWidth}
+          data-style-control="copyWidth"
+        />
+        <span class="style-editor-range-value" data-style-value="copyWidth">{mergedPresets.copyWidth}ch</span>
+      </div>
+
+      <div class="style-editor-field">
+        <label for={`editor-x-${storageNamespace}`}>Posizione X</label>
+        <input id={`editor-x-${storageNamespace}`} type="range" min="-700" max="700" step="2" value={mergedPresets.x} data-style-control="x" />
+        <span class="style-editor-range-value" data-style-value="x">{mergedPresets.x}px</span>
+      </div>
+
+      <div class="style-editor-field">
+        <label for={`editor-y-${storageNamespace}`}>Posizione Y</label>
+        <input id={`editor-y-${storageNamespace}`} type="range" min="-320" max="320" step="2" value={mergedPresets.y} data-style-control="y" />
+        <span class="style-editor-range-value" data-style-value="y">{mergedPresets.y}px</span>
+      </div>
+
+      {normalizedPageControls.length > 0 && (
+        <>
+          <div class="style-editor-divider" aria-hidden="true"></div>
+          <h3 class="style-editor-subtitle">{pageSectionTitle}</h3>
+
+          {normalizedPageControls.map((control) => (
+            <div class:list={["style-editor-field", control.wide && "style-editor-field--wide"]}>
+              <label for={`editor-page-${control.key}-${storageNamespace}`}>{control.label}</label>
+
+              {control.type === "color" && (
+                <input
+                  id={`editor-page-${control.key}-${storageNamespace}`}
+                  type="color"
+                  value={String(control.default)}
+                  data-style-control={control.key}
+                  data-style-type={control.type}
+                  data-style-css-var={control.cssVar ?? ""}
+                  data-style-unit={control.unit ?? ""}
+                  data-style-storage-key={control.storageKey ?? ""}
+                />
+              )}
+
+              {control.type === "range" && (
+                <>
+                  <input
+                    id={`editor-page-${control.key}-${storageNamespace}`}
+                    type="range"
+                    min={control.min}
+                    max={control.max}
+                    step={control.step}
+                    value={String(control.default)}
+                    data-style-control={control.key}
+                    data-style-type={control.type}
+                    data-style-css-var={control.cssVar ?? ""}
+                    data-style-unit={control.unit ?? ""}
+                    data-style-storage-key={control.storageKey ?? ""}
+                  />
+                  <span class="style-editor-range-value" data-style-value={control.key}>
+                    {formatControlValue(control)}
+                  </span>
+                </>
+              )}
+
+              {control.type === "select" && (
+                <select
+                  id={`editor-page-${control.key}-${storageNamespace}`}
+                  data-style-control={control.key}
+                  data-style-type={control.type}
+                  data-style-css-var={control.cssVar ?? ""}
+                  data-style-unit={control.unit ?? ""}
+                  data-style-storage-key={control.storageKey ?? ""}
+                >
+                  {(control.options ?? []).map((option) => (
+                    <option value={option.value} selected={String(control.default) === option.value}>{option.label}</option>
+                  ))}
+                </select>
+              )}
+
+              {control.type === "toggle" && (
+                <>
+                  <label class="style-editor-toggle" for={`editor-page-${control.key}-${storageNamespace}`}>
+                    <input
+                      id={`editor-page-${control.key}-${storageNamespace}`}
+                      type="checkbox"
+                      checked={toBoolean(control.default)}
+                      data-style-control={control.key}
+                      data-style-type={control.type}
+                      data-style-css-var={control.cssVar ?? ""}
+                      data-style-unit={control.unit ?? ""}
+                      data-style-storage-key={control.storageKey ?? ""}
+                    />
+                    <span>Attiva</span>
+                  </label>
+                  <span class="style-editor-range-value" data-style-value={control.key}>
+                    {formatControlValue(control)}
+                  </span>
+                </>
+              )}
+            </div>
+          ))}
+        </>
+      )}
+    </div>
+
+    <div class="style-editor-actions">
+      <button class="style-editor-save" type="button" data-style-save>Salva</button>
+      <button class="style-editor-reset" type="button" data-style-reset>Reset</button>
+    </div>
+    <p class="style-editor-status" data-style-status aria-live="polite"></p>
+
+    {normalizedContentSchema.length > 0 && (
+      <div class="style-editor-content">
+        <div class="style-editor-divider" aria-hidden="true"></div>
+        <h3 class="style-editor-subtitle">{contentSectionTitle}</h3>
+
+        <div class="style-editor-grid">
+          <div class="style-editor-field style-editor-field--wide">
+            <label class="style-editor-toggle" for={`editor-content-mode-${storageNamespace}`}>
+              <input id={`editor-content-mode-${storageNamespace}`} type="checkbox" data-content-edit-mode />
+              <span>Edit mode</span>
+            </label>
+          </div>
+
+          <div class="style-editor-field style-editor-field--wide">
+            <label for={`editor-content-block-${storageNamespace}`}>Blocco testo</label>
+            <select id={`editor-content-block-${storageNamespace}`} data-content-block-select>
+              {normalizedContentSchema.map((block) => (
+                <option value={block.id}>{block.label}</option>
+              ))}
+            </select>
+            <p class="style-editor-context-note" data-content-active-label>Stai modificando: —</p>
+          </div>
+
+          <div class="style-editor-field style-editor-field--wide">
+            <label for={`editor-content-text-${storageNamespace}`}>Testo</label>
+            <textarea id={`editor-content-text-${storageNamespace}`} rows={6} data-content-text></textarea>
+          </div>
+
+          <details class="style-editor-advanced style-editor-field--wide" data-content-style-advanced>
+            <summary>Tipografia box (Advanced)</summary>
+            <p class="style-editor-context-note style-editor-context-note--compact" data-content-style-scope>
+              Le impostazioni qui sotto si applicano solo al box selezionato.
+            </p>
+            <div class="style-editor-grid style-editor-grid--content-style">
+              <div class="style-editor-field style-editor-field--wide">
+                <label for={`editor-content-style-font-${storageNamespace}`}>Font box</label>
+                <select id={`editor-content-style-font-${storageNamespace}`} data-content-style-font>
+                  {fontOptions.map((option) => (
+                    <option value={option.value}>{option.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div class="style-editor-field">
+                <label for={`editor-content-style-size-${storageNamespace}`}>Font size</label>
+                <input
+                  id={`editor-content-style-size-${storageNamespace}`}
+                  type="range"
+                  min="10"
+                  max="96"
+                  step="0.1"
+                  data-content-style-size
+                />
+                <span class="style-editor-range-value" data-content-style-value="fontSize">0px</span>
+              </div>
+
+              <div class="style-editor-field">
+                <label for={`editor-content-style-line-height-${storageNamespace}`}>Interlinea</label>
+                <input
+                  id={`editor-content-style-line-height-${storageNamespace}`}
+                  type="range"
+                  min="0.8"
+                  max="3"
+                  step="0.01"
+                  data-content-style-line-height
+                />
+                <span class="style-editor-range-value" data-content-style-value="lineHeight">0</span>
+              </div>
+
+              <div class="style-editor-field">
+                <label for={`editor-content-style-letter-spacing-${storageNamespace}`}>Tracking</label>
+                <input
+                  id={`editor-content-style-letter-spacing-${storageNamespace}`}
+                  type="range"
+                  min="-0.1"
+                  max="0.3"
+                  step="0.001"
+                  data-content-style-letter-spacing
+                />
+                <span class="style-editor-range-value" data-content-style-value="letterSpacing">0em</span>
+              </div>
+
+              <div class="style-editor-field">
+                <label for={`editor-content-style-word-spacing-${storageNamespace}`}>Spazio parole</label>
+                <input
+                  id={`editor-content-style-word-spacing-${storageNamespace}`}
+                  type="range"
+                  min="-0.2"
+                  max="1"
+                  step="0.005"
+                  data-content-style-word-spacing
+                />
+                <span class="style-editor-range-value" data-content-style-value="wordSpacing">0em</span>
+              </div>
+
+              <div class="style-editor-field">
+                <label for={`editor-content-style-align-${storageNamespace}`}>Allineamento</label>
+                <select id={`editor-content-style-align-${storageNamespace}`} data-content-style-align>
+                  <option value="left">Sinistra</option>
+                  <option value="center">Centro</option>
+                  <option value="right">Destra</option>
+                  <option value="justify">Giustificato</option>
+                </select>
+              </div>
+
+              <div class="style-editor-field">
+                <label for={`editor-content-style-color-${storageNamespace}`}>Colore testo</label>
+                <input id={`editor-content-style-color-${storageNamespace}`} type="color" data-content-style-color />
+              </div>
+
+              <div class="style-editor-field">
+                <label class="style-editor-toggle" for={`editor-content-style-bold-${storageNamespace}`}>
+                  <input id={`editor-content-style-bold-${storageNamespace}`} type="checkbox" data-content-style-bold />
+                  <span>Grassetto</span>
+                </label>
+              </div>
+
+              <div class="style-editor-field">
+                <label class="style-editor-toggle" for={`editor-content-style-italic-${storageNamespace}`}>
+                  <input id={`editor-content-style-italic-${storageNamespace}`} type="checkbox" data-content-style-italic />
+                  <span>Corsivo</span>
+                </label>
+              </div>
+            </div>
+          </details>
+
+          <div class="style-editor-transform-grid" data-content-transform-controls>
+            <div class="style-editor-field">
+              <label for={`editor-content-x-${storageNamespace}`}>Posizione X</label>
+              <input id={`editor-content-x-${storageNamespace}`} type="range" data-content-x />
+              <span class="style-editor-range-value" data-content-value="x">0px</span>
+            </div>
+
+            <div class="style-editor-field">
+              <label for={`editor-content-y-${storageNamespace}`}>Posizione Y</label>
+              <input id={`editor-content-y-${storageNamespace}`} type="range" data-content-y />
+              <span class="style-editor-range-value" data-content-value="y">0px</span>
+            </div>
+
+            <div class="style-editor-field">
+              <label for={`editor-content-rotate-${storageNamespace}`}>Rotazione</label>
+              <input id={`editor-content-rotate-${storageNamespace}`} type="range" data-content-rotate />
+              <span class="style-editor-range-value" data-content-value="rotate">0°</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="style-editor-content-actions">
+          <button type="button" data-content-save>Salva contenuti</button>
+          <button type="button" data-content-reset>Reset contenuti</button>
+          <button type="button" data-content-reset-style-block>Reset stile blocco</button>
+          <button type="button" data-content-reset-style-all>Reset tutti stili</button>
+          <button type="button" data-content-export>Export JSON</button>
+          <button type="button" data-content-import>Import JSON</button>
+          <input type="file" accept=".json,application/json" hidden data-content-import-file />
+        </div>
+        <p class="style-editor-status style-editor-status--content" data-content-status aria-live="polite"></p>
+      </div>
+    )}
+  </div>
+</aside>
+
+<script define:vars={{ mergedPresets, mergedDefaults, pageControlMeta }}>
+  const globalNumericKeys = new Set([
+    "fontSize",
+    "lineHeight",
+    "letterSpacing",
+    "wordSpacing",
+    "copyWidth",
+    "x",
+    "y",
+    "backgroundAngle",
+    "textAngle",
+  ]);
+
+  const pageMetaByKey = new Map((pageControlMeta ?? []).map((item) => [item.key, item]));
+  const pageNumericKeys = new Set(
+    (pageControlMeta ?? []).filter((item) => item.type === "range").map((item) => item.key),
+  );
+  const pageBooleanKeys = new Set(
+    (pageControlMeta ?? []).filter((item) => item.type === "toggle").map((item) => item.key),
+  );
+
+  const buildGradientValue = (mode, color1, color2, color3, angle) => {
+    if (mode === "linear-2") return `linear-gradient(${angle}deg, ${color1}, ${color2})`;
+    if (mode === "linear-3") return `linear-gradient(${angle}deg, ${color1}, ${color2}, ${color3})`;
+    if (mode === "radial-2") return `radial-gradient(circle at center, ${color1}, ${color2})`;
+    if (mode === "radial-3") return `radial-gradient(circle at center, ${color1}, ${color2}, ${color3})`;
+    return color1;
+  };
+
+  const toBoolean = (value) =>
+    value === true || value === 1 || value === "1" || value === "true" || value === "on";
+
+  const initContentEditors = () => {
+    document.querySelectorAll("[data-style-editor]").forEach((panel) => {
+    if (!(panel instanceof HTMLElement) || panel.dataset.styleEditorBound === "true") return;
+    panel.dataset.styleEditorBound = "true";
+
+    const storageKey = panel.dataset.storageKey ?? "";
+    const panelKey = panel.dataset.panelKey ?? "";
+    const controls = panel.querySelectorAll("[data-style-control]");
+    const valueNodes = panel.querySelectorAll("[data-style-value]");
+    const resetButton = panel.querySelector("[data-style-reset]");
+    const saveButton = panel.querySelector("[data-style-save]");
+    const collapseButton = panel.querySelector("[data-style-collapse]");
+    const statusNode = panel.querySelector("[data-style-status]");
+    const root = document.documentElement;
+    let statusTimerId = 0;
+
+    const state = { ...mergedDefaults };
+
+    const setStatus = (message) => {
+      if (!(statusNode instanceof HTMLElement)) return;
+      statusNode.textContent = message;
+      window.clearTimeout(statusTimerId);
+      if (!message) return;
+      statusTimerId = window.setTimeout(() => {
+        if (statusNode instanceof HTMLElement) statusNode.textContent = "";
+      }, 2200);
+    };
+
+    const setPanelOpen = (isOpen) => {
+      panel.classList.toggle("is-collapsed", !isOpen);
+      if (collapseButton instanceof HTMLButtonElement) {
+        collapseButton.textContent = isOpen ? "Nascondi" : "Apri";
+        collapseButton.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      }
+
+      try {
+        if (panelKey) window.localStorage.setItem(panelKey, isOpen ? "open" : "closed");
+      } catch (error) {
+        console.warn("Impossibile salvare lo stato del pannello.", error);
+      }
+    };
+
+    const applyStateToCss = () => {
+      const backgroundFill = buildGradientValue(
+        state.backgroundMode,
+        state.background,
+        state.background2,
+        state.background3,
+        state.backgroundAngle,
+      );
+
+      const textFill = buildGradientValue(
+        state.textMode,
+        state.text,
+        state.text2,
+        state.text3,
+        state.textAngle,
+      );
+
+      root.style.setProperty("--editor-bg-1", state.background);
+      root.style.setProperty("--editor-bg-2", state.background2);
+      root.style.setProperty("--editor-bg-3", state.background3);
+      root.style.setProperty("--editor-bg-fill", backgroundFill);
+      root.style.setProperty("--editor-fg", state.text);
+      root.style.setProperty("--editor-text-fill", textFill);
+      root.style.setProperty("--editor-accent", state.accent);
+      root.style.setProperty("--editor-font", state.font);
+      root.style.setProperty("--editor-title-font", state.titleFont);
+      root.style.setProperty("--editor-font-size", `${state.fontSize}px`);
+      root.style.setProperty("--editor-line-height", `${state.lineHeight}`);
+      root.style.setProperty("--editor-letter-spacing", `${state.letterSpacing}em`);
+      root.style.setProperty("--editor-word-spacing", `${state.wordSpacing}em`);
+      root.style.setProperty("--editor-copy-width", `${state.copyWidth}ch`);
+      root.style.setProperty("--editor-align", state.align);
+      root.style.setProperty("--editor-x", `${state.x}px`);
+      root.style.setProperty("--editor-y", `${state.y}px`);
+
+      document.body.classList.toggle("editor-has-text-gradient", state.textMode !== "solid");
+      document.body.classList.toggle("editor-has-bg-gradient", state.backgroundMode !== "solid");
+    };
+
+    const applyPageCssVar = (key, value) => {
+      const meta = pageMetaByKey.get(key);
+      if (!meta || !meta.cssVar) return;
+
+      if (meta.type === "toggle") {
+        root.style.setProperty(meta.cssVar, value ? "1" : "0");
+        return;
+      }
+
+      if (meta.type === "range" && meta.unit) {
+        root.style.setProperty(meta.cssVar, `${value}${meta.unit}`);
+        return;
+      }
+
+      root.style.setProperty(meta.cssVar, `${value}`);
+    };
+
+    const updateValueLabel = (key, value) => {
+      valueNodes.forEach((node) => {
+        if (!(node instanceof HTMLElement) || node.dataset.styleValue !== key) return;
+
+        const pageMeta = pageMetaByKey.get(key);
+        if (pageMeta) {
+          if (pageMeta.type === "toggle") {
+            node.textContent = value ? "On" : "Off";
+            return;
+          }
+
+          if (pageMeta.unit) {
+            node.textContent = `${value}${pageMeta.unit}`;
+            return;
+          }
+
+          node.textContent = `${value}`;
+          return;
+        }
+
+        if (key === "fontSize" || key === "x" || key === "y") {
+          node.textContent = `${value}px`;
+          return;
+        }
+
+        if (key === "copyWidth") {
+          node.textContent = `${value}ch`;
+          return;
+        }
+
+        if (key === "letterSpacing" || key === "wordSpacing") {
+          node.textContent = `${value}em`;
+          return;
+        }
+
+        if (key === "backgroundAngle" || key === "textAngle") {
+          node.textContent = `${value}°`;
+          return;
+        }
+
+        node.textContent = `${value}`;
+      });
+    };
+
+    const castValue = (key, value, fallbackValue) => {
+      if (pageBooleanKeys.has(key)) return toBoolean(value);
+
+      if (globalNumericKeys.has(key) || pageNumericKeys.has(key)) {
+        const parsed = Number(value);
+        if (Number.isFinite(parsed)) return parsed;
+        return fallbackValue;
+      }
+
+      return value;
+    };
+
+    const getControlValue = (control) => {
+      if (control instanceof HTMLInputElement && control.type === "checkbox") {
+        return control.checked;
+      }
+
+      return control.value;
+    };
+
+    const setControlValue = (control, value) => {
+      if (control instanceof HTMLInputElement && control.type === "checkbox") {
+        control.checked = toBoolean(value);
+        return;
+      }
+
+      control.value = `${value}`;
+    };
+
+    const readStorage = (key) => {
+      if (!key) return {};
+      try {
+        return JSON.parse(window.localStorage.getItem(key) ?? "{}");
+      } catch (error) {
+        return {};
+      }
+    };
+
+    const customStorageKeys = new Set();
+    controls.forEach((control) => {
+      if (!(control instanceof HTMLInputElement || control instanceof HTMLSelectElement)) return;
+      const customKey = control.dataset.styleStorageKey ?? "";
+      if (customKey) customStorageKeys.add(customKey);
+    });
+
+    const storedPrimary = readStorage(storageKey);
+    const storedByBucket = new Map();
+    customStorageKeys.forEach((bucketKey) => {
+      storedByBucket.set(bucketKey, readStorage(bucketKey));
+    });
+
+    const applySetting = (key, rawValue) => {
+      const fallback = mergedDefaults[key] ?? mergedPresets[key] ?? rawValue;
+      state[key] = castValue(key, rawValue, fallback);
+      applyStateToCss();
+      applyPageCssVar(key, state[key]);
+      updateValueLabel(key, state[key]);
+    };
+
+    controls.forEach((control) => {
+      if (!(control instanceof HTMLInputElement || control instanceof HTMLSelectElement)) return;
+      const key = control.dataset.styleControl ?? "";
+      const bucketKey = control.dataset.styleStorageKey ?? "";
+      const bucketData = bucketKey ? storedByBucket.get(bucketKey) ?? {} : storedPrimary;
+      const fallbackValue = mergedDefaults[key] ?? mergedPresets[key] ?? getControlValue(control);
+      const initialValue = bucketData[key] ?? fallbackValue;
+
+      setControlValue(control, initialValue);
+      applySetting(key, getControlValue(control));
+
+      const handler = () => {
+        applySetting(key, getControlValue(control));
+      };
+
+      control.addEventListener("input", handler);
+      control.addEventListener("change", handler);
+    });
+
+    const persistState = (showFeedback = false) => {
+      try {
+        const primaryPayload = {};
+        const customPayloadMap = new Map();
+
+        controls.forEach((control) => {
+          if (!(control instanceof HTMLInputElement || control instanceof HTMLSelectElement)) return;
+          const key = control.dataset.styleControl ?? "";
+          const bucketKey = control.dataset.styleStorageKey ?? "";
+          if (!bucketKey) {
+            primaryPayload[key] = state[key];
+            return;
+          }
+
+          if (!customPayloadMap.has(bucketKey)) {
+            customPayloadMap.set(bucketKey, {});
+          }
+
+          customPayloadMap.get(bucketKey)[key] = state[key];
+        });
+
+        if (storageKey) window.localStorage.setItem(storageKey, JSON.stringify(primaryPayload));
+        customPayloadMap.forEach((payload, bucketKey) => {
+          if (!bucketKey) return;
+          window.localStorage.setItem(bucketKey, JSON.stringify(payload));
+        });
+
+        if (showFeedback) setStatus("Impostazioni salvate");
+      } catch (error) {
+        if (showFeedback) setStatus("Salvataggio non riuscito");
+        console.warn("Impossibile salvare le impostazioni.", error);
+      }
+    };
+
+    resetButton?.addEventListener("click", () => {
+      controls.forEach((control) => {
+        if (!(control instanceof HTMLInputElement || control instanceof HTMLSelectElement)) return;
+        const key = control.dataset.styleControl ?? "";
+        const fallbackValue = mergedDefaults[key] ?? mergedPresets[key] ?? getControlValue(control);
+        setControlValue(control, fallbackValue);
+        applySetting(key, getControlValue(control));
+      });
+
+      try {
+        if (storageKey) window.localStorage.removeItem(storageKey);
+        customStorageKeys.forEach((bucketKey) => {
+          window.localStorage.removeItem(bucketKey);
+        });
+      } catch (error) {
+        console.warn("Impossibile rimuovere le impostazioni.", error);
+      }
+      setStatus("Impostazioni resettate");
+    });
+
+    saveButton?.addEventListener("click", () => {
+      persistState(true);
+    });
+
+    collapseButton?.addEventListener("click", () => {
+      setPanelOpen(panel.classList.contains("is-collapsed"));
+    });
+
+    try {
+      const storedPanelState = panelKey ? window.localStorage.getItem(panelKey) : null;
+      if (storedPanelState === "closed") setPanelOpen(false);
+    } catch (error) {
+      console.warn("Impossibile leggere lo stato pannello.", error);
+    }
+    });
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initContentEditors, { once: true });
+  } else {
+    initContentEditors();
+  }
+</script>
+
+<script define:vars={{ normalizedContentSchema, contentStorageKey, contentNamespace }}>
+  const contentVersion = 2;
+  const supportedContentVersions = new Set([1, 2]);
+  const defaultBounds = {
+    minX: -700,
+    maxX: 700,
+    minY: -450,
+    maxY: 450,
+    minRotate: -180,
+    maxRotate: 180,
+  };
+  const styleRanges = {
+    fontSize: { min: 10, max: 96 },
+    lineHeight: { min: 0.8, max: 3 },
+    letterSpacing: { min: -0.1, max: 0.3 },
+    wordSpacing: { min: -0.2, max: 1 },
+  };
+  const alignOptions = new Set(["left", "center", "right", "justify"]);
+  const fallbackColor = "#1f1a17";
+
+  const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+  const toNumber = (value, fallback = 0) => {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : fallback;
+  };
+  const normalizeText = (value) => `${value ?? ""}`.replace(/\s+/g, " ").trim();
+  const isDesktop = () => window.matchMedia("(min-width: 981px)").matches;
+  const escapeHtml = (value) =>
+    `${value ?? ""}`
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+
+  const normalizeColor = (value, fallback = fallbackColor) => {
+    if (typeof value !== "string") return fallback;
+    const raw = value.trim();
+    if (!raw) return fallback;
+
+    if (/^#([0-9a-f]{3})$/i.test(raw)) {
+      return `#${raw[1]}${raw[1]}${raw[2]}${raw[2]}${raw[3]}${raw[3]}`.toLowerCase();
+    }
+
+    if (/^#([0-9a-f]{6})$/i.test(raw)) {
+      return raw.toLowerCase();
+    }
+
+    const rgbMatch = raw.match(/^rgba?\(([^)]+)\)$/i);
+    if (!rgbMatch) return fallback;
+    const channels = rgbMatch[1].split(",").map((item) => Number.parseFloat(item.trim()));
+    if (channels.length < 3) return fallback;
+    const [r, g, b] = channels.map((channel) => clamp(Math.round(channel), 0, 255));
+    const hex = [r, g, b]
+      .map((channel) => channel.toString(16).padStart(2, "0"))
+      .join("");
+    return `#${hex}`;
+  };
+
+  const sanitizeBlockStyle = (rawStyle) => {
+    if (!rawStyle || typeof rawStyle !== "object") return {};
+    const style = {};
+
+    if (typeof rawStyle.fontFamily === "string" && rawStyle.fontFamily.trim()) {
+      style.fontFamily = rawStyle.fontFamily;
+    }
+
+    if (rawStyle.fontSize !== undefined) {
+      style.fontSize = clamp(
+        toNumber(rawStyle.fontSize, styleRanges.fontSize.min),
+        styleRanges.fontSize.min,
+        styleRanges.fontSize.max,
+      );
+    }
+
+    if (rawStyle.lineHeight !== undefined) {
+      style.lineHeight = clamp(
+        toNumber(rawStyle.lineHeight, styleRanges.lineHeight.min),
+        styleRanges.lineHeight.min,
+        styleRanges.lineHeight.max,
+      );
+    }
+
+    if (rawStyle.letterSpacing !== undefined) {
+      style.letterSpacing = clamp(
+        toNumber(rawStyle.letterSpacing, 0),
+        styleRanges.letterSpacing.min,
+        styleRanges.letterSpacing.max,
+      );
+    }
+
+    if (rawStyle.wordSpacing !== undefined) {
+      style.wordSpacing = clamp(
+        toNumber(rawStyle.wordSpacing, 0),
+        styleRanges.wordSpacing.min,
+        styleRanges.wordSpacing.max,
+      );
+    }
+
+    if (typeof rawStyle.textAlign === "string" && alignOptions.has(rawStyle.textAlign)) {
+      style.textAlign = rawStyle.textAlign;
+    }
+
+    if (typeof rawStyle.fontWeight === "string" && rawStyle.fontWeight.trim()) {
+      style.fontWeight = rawStyle.fontWeight;
+    }
+
+    if (typeof rawStyle.fontStyle === "string" && rawStyle.fontStyle.trim()) {
+      style.fontStyle = rawStyle.fontStyle;
+    }
+
+    if (typeof rawStyle.color === "string" && rawStyle.color.trim()) {
+      style.color = normalizeColor(rawStyle.color);
+    }
+
+    return style;
+  };
+
+  const parseCssNumber = (value, fallback = 0) => {
+    if (typeof value !== "string") return fallback;
+    const match = value.trim().match(/-?\d+(\.\d+)?/);
+    return match ? toNumber(match[0], fallback) : fallback;
+  };
+
+  const initContentEditors = () => {
+    document.querySelectorAll("[data-style-editor]").forEach((panel) => {
+      if (!(panel instanceof HTMLElement) || panel.dataset.contentEditorBound === "true") return;
+      if (!Array.isArray(normalizedContentSchema) || normalizedContentSchema.length === 0) return;
+      panel.dataset.contentEditorBound = "true";
+
+      const storageKey = panel.dataset.contentStorageKey ?? contentStorageKey ?? "";
+      const namespace = panel.dataset.contentNamespace ?? contentNamespace ?? "";
+      if (!storageKey || !namespace) return;
+
+      const editModeToggle = panel.querySelector("[data-content-edit-mode]");
+      const blockSelect = panel.querySelector("[data-content-block-select]");
+      const textArea = panel.querySelector("[data-content-text]");
+      const transformControls = panel.querySelector("[data-content-transform-controls]");
+      const xRange = panel.querySelector("[data-content-x]");
+      const yRange = panel.querySelector("[data-content-y]");
+      const rotateRange = panel.querySelector("[data-content-rotate]");
+      const saveButton = panel.querySelector("[data-content-save]");
+      const resetButton = panel.querySelector("[data-content-reset]");
+      const resetStyleBlockButton = panel.querySelector("[data-content-reset-style-block]");
+      const resetStyleAllButton = panel.querySelector("[data-content-reset-style-all]");
+      const exportButton = panel.querySelector("[data-content-export]");
+      const importButton = panel.querySelector("[data-content-import]");
+      const importInput = panel.querySelector("[data-content-import-file]");
+      const statusNode = panel.querySelector("[data-content-status]");
+      const activeLabelNode = panel.querySelector("[data-content-active-label]");
+      const styleScopeNode = panel.querySelector("[data-content-style-scope]");
+      const valueX = panel.querySelector('[data-content-value="x"]');
+      const valueY = panel.querySelector('[data-content-value="y"]');
+      const valueRotate = panel.querySelector('[data-content-value="rotate"]');
+      const styleAdvanced = panel.querySelector("[data-content-style-advanced]");
+
+      const styleFont = panel.querySelector("[data-content-style-font]");
+      const styleSize = panel.querySelector("[data-content-style-size]");
+      const styleLineHeight = panel.querySelector("[data-content-style-line-height]");
+      const styleLetterSpacing = panel.querySelector("[data-content-style-letter-spacing]");
+      const styleWordSpacing = panel.querySelector("[data-content-style-word-spacing]");
+      const styleAlign = panel.querySelector("[data-content-style-align]");
+      const styleColor = panel.querySelector("[data-content-style-color]");
+      const styleBold = panel.querySelector("[data-content-style-bold]");
+      const styleItalic = panel.querySelector("[data-content-style-italic]");
+      const styleFontSizeValue = panel.querySelector('[data-content-style-value="fontSize"]');
+      const styleLineHeightValue = panel.querySelector('[data-content-style-value="lineHeight"]');
+      const styleLetterSpacingValue = panel.querySelector('[data-content-style-value="letterSpacing"]');
+      const styleWordSpacingValue = panel.querySelector('[data-content-style-value="wordSpacing"]');
+
+      if (
+        !(editModeToggle instanceof HTMLInputElement) ||
+        !(blockSelect instanceof HTMLSelectElement) ||
+        !(textArea instanceof HTMLTextAreaElement) ||
+        !(transformControls instanceof HTMLElement) ||
+        !(xRange instanceof HTMLInputElement) ||
+        !(yRange instanceof HTMLInputElement) ||
+        !(rotateRange instanceof HTMLInputElement)
+      ) {
+        return;
+      }
+
+      if (
+        !(styleFont instanceof HTMLSelectElement) ||
+        !(styleSize instanceof HTMLInputElement) ||
+        !(styleLineHeight instanceof HTMLInputElement) ||
+        !(styleLetterSpacing instanceof HTMLInputElement) ||
+        !(styleWordSpacing instanceof HTMLInputElement) ||
+        !(styleAlign instanceof HTMLSelectElement) ||
+        !(styleColor instanceof HTMLInputElement) ||
+        !(styleBold instanceof HTMLInputElement) ||
+        !(styleItalic instanceof HTMLInputElement)
+      ) {
+        return;
+      }
+
+      const styleControls = [
+        styleFont,
+        styleSize,
+        styleLineHeight,
+        styleLetterSpacing,
+        styleWordSpacing,
+        styleAlign,
+        styleColor,
+        styleBold,
+        styleItalic,
+      ];
+
+      const blockEntries = normalizedContentSchema
+        .map((schemaBlock) => {
+          const element = document.querySelector(schemaBlock.selector);
+          if (!(element instanceof HTMLElement)) return null;
+
+          const richMode = element.dataset.contentRich ?? "";
+          const domDefaultText =
+            richMode === "paragraphs"
+              ? Array.from(element.querySelectorAll("p"))
+                  .map((paragraph) => `${paragraph.innerText ?? paragraph.textContent ?? ""}`.trim())
+                  .filter(Boolean)
+                  .join("\n\n")
+              : normalizeText(element.textContent ?? "");
+          const schemaDefaultText =
+            typeof schemaBlock.defaultText === "string" ? normalizeText(schemaBlock.defaultText) : "";
+          const defaultText = domDefaultText || schemaDefaultText;
+
+          element.dataset.contentBlockId = schemaBlock.id;
+          element.dataset.contentEditable = schemaBlock.editable ? "true" : "false";
+          element.dataset.contentTransform = schemaBlock.transform;
+          element.classList.add("content-editor-block");
+
+          return {
+            ...schemaBlock,
+            defaultText,
+            defaultHtml: element.innerHTML,
+            defaultStyle: sanitizeBlockStyle(schemaBlock.defaultStyle),
+            styleEditable: schemaBlock.styleEditable !== false,
+            richMode,
+            element,
+          };
+        })
+        .filter(Boolean);
+
+      if (!blockEntries.length) return;
+
+      const blockById = new Map(blockEntries.map((block) => [block.id, block]));
+      const stateById = new Map(
+        blockEntries.map((block) => [
+          block.id,
+          {
+            text: block.defaultText,
+            x: 0,
+            y: 0,
+            rotate: 0,
+            style: { ...block.defaultStyle },
+          },
+        ]),
+      );
+
+      const getGlobalStyleDefaults = () => {
+        const root = getComputedStyle(document.documentElement);
+        return {
+          fontFamily: root.getPropertyValue("--editor-font").trim() || "",
+          fontSize: parseCssNumber(root.getPropertyValue("--editor-font-size"), 23),
+          lineHeight: parseCssNumber(root.getPropertyValue("--editor-line-height"), 1.47),
+          letterSpacing: parseCssNumber(root.getPropertyValue("--editor-letter-spacing"), 0),
+          wordSpacing: parseCssNumber(root.getPropertyValue("--editor-word-spacing"), 0),
+          textAlign: alignOptions.has(root.getPropertyValue("--editor-align").trim())
+            ? root.getPropertyValue("--editor-align").trim()
+            : "left",
+          color: normalizeColor(root.getPropertyValue("--editor-fg"), fallbackColor),
+        };
+      };
+
+      const isBoldValue = (value) => {
+        const raw = `${value ?? ""}`.trim().toLowerCase();
+        if (!raw) return false;
+        if (raw === "bold") return true;
+        const numeric = Number(raw);
+        return Number.isFinite(numeric) ? numeric >= 600 : false;
+      };
+
+      const isItalicValue = (value) => `${value ?? ""}`.trim().toLowerCase().includes("italic");
+
+      const editModeStorageKey = `${storageKey}-edit-mode`;
+      let editMode = true;
+      let activeBlockId = blockEntries[0].id;
+      let statusTimerId = 0;
+
+      const dragHandle = document.createElement("button");
+      dragHandle.type = "button";
+      dragHandle.className = "content-editor-drag-handle";
+      dragHandle.textContent = "⇳";
+      dragHandle.title = "Trascina blocco";
+      document.body.appendChild(dragHandle);
+
+      const setStatus = (message) => {
+        if (!(statusNode instanceof HTMLElement)) return;
+        statusNode.textContent = message;
+        window.clearTimeout(statusTimerId);
+        if (!message) return;
+        statusTimerId = window.setTimeout(() => {
+          if (statusNode instanceof HTMLElement) statusNode.textContent = "";
+        }, 2400);
+      };
+
+      const getBounds = (block) => ({
+        ...defaultBounds,
+        ...(block.bounds ?? {}),
+      });
+
+      const applyTransform = (block) => {
+        const state = stateById.get(block.id);
+        if (!state) return;
+
+        if (block.transform === "none") {
+          block.element.style.transform = "";
+          block.element.style.removeProperty("--content-editor-x");
+          block.element.style.removeProperty("--content-editor-y");
+          block.element.style.removeProperty("--content-editor-rotate");
+          return;
+        }
+
+        const x = toNumber(state.x, 0);
+        const y = toNumber(state.y, 0);
+        const rotate = block.transform === "xy-rotate" ? toNumber(state.rotate, 0) : 0;
+
+        block.element.style.setProperty("--content-editor-x", `${x}px`);
+        block.element.style.setProperty("--content-editor-y", `${y}px`);
+        block.element.style.setProperty("--content-editor-rotate", `${rotate}deg`);
+        block.element.style.transform =
+          block.transform === "xy-rotate"
+            ? `translate(${x}px, ${y}px) rotate(${rotate}deg)`
+            : `translate(${x}px, ${y}px)`;
+        block.element.style.transformOrigin = "center center";
+      };
+
+      const extractBlockText = (block) => {
+        if (block.richMode === "paragraphs") {
+          const paragraphs = Array.from(block.element.querySelectorAll("p"));
+          if (!paragraphs.length) return normalizeText(block.element.textContent ?? "");
+          return paragraphs
+            .map((paragraph) => `${paragraph.innerText ?? paragraph.textContent ?? ""}`.trim())
+            .filter(Boolean)
+            .join("\n\n");
+        }
+        return normalizeText(block.element.textContent ?? "");
+      };
+
+      const writeBlockText = (block, text) => {
+        if (block.richMode === "paragraphs") {
+          const paragraphChunks = `${text ?? ""}`
+            .split(/\n{2,}/)
+            .map((chunk) => chunk.trim())
+            .filter(Boolean);
+
+          if (!paragraphChunks.length) {
+            block.element.innerHTML = "<p></p>";
+            return;
+          }
+
+          block.element.innerHTML = paragraphChunks
+            .map((chunk) => `<p>${escapeHtml(chunk).replace(/\n/g, "<br>")}</p>`)
+            .join("");
+          return;
+        }
+
+        block.element.textContent = `${text ?? ""}`;
+      };
+
+      const applyBlockStyle = (block) => {
+        const state = stateById.get(block.id);
+        if (!state) return;
+        const style = sanitizeBlockStyle(state.style);
+        state.style = style;
+
+        if (style.fontFamily) block.element.style.fontFamily = style.fontFamily;
+        else block.element.style.removeProperty("font-family");
+
+        if (style.fontSize !== undefined) block.element.style.fontSize = `${style.fontSize}px`;
+        else block.element.style.removeProperty("font-size");
+
+        if (style.lineHeight !== undefined) block.element.style.lineHeight = `${style.lineHeight}`;
+        else block.element.style.removeProperty("line-height");
+
+        if (style.letterSpacing !== undefined) block.element.style.letterSpacing = `${style.letterSpacing}em`;
+        else block.element.style.removeProperty("letter-spacing");
+
+        if (style.wordSpacing !== undefined) block.element.style.wordSpacing = `${style.wordSpacing}em`;
+        else block.element.style.removeProperty("word-spacing");
+
+        if (style.textAlign) block.element.style.textAlign = style.textAlign;
+        else block.element.style.removeProperty("text-align");
+
+        if (style.fontWeight) block.element.style.fontWeight = style.fontWeight;
+        else block.element.style.removeProperty("font-weight");
+
+        if (style.fontStyle) block.element.style.fontStyle = style.fontStyle;
+        else block.element.style.removeProperty("font-style");
+
+        if (style.color) {
+          block.element.style.setProperty("color", style.color, "important");
+          block.element.style.setProperty("-webkit-text-fill-color", style.color);
+          block.element.style.setProperty("background-image", "none");
+          block.element.style.setProperty("background-clip", "border-box");
+          block.element.style.setProperty("-webkit-background-clip", "border-box");
+        } else {
+          block.element.style.removeProperty("color");
+          block.element.style.removeProperty("-webkit-text-fill-color");
+          block.element.style.removeProperty("background-image");
+          block.element.style.removeProperty("background-clip");
+          block.element.style.removeProperty("-webkit-background-clip");
+        }
+      };
+
+      const applyBlockState = (block) => {
+        const state = stateById.get(block.id);
+        if (!state) return;
+        block.element.dataset.contentEditable = block.editable ? "true" : "false";
+        block.element.dataset.contentTransform = block.transform;
+        if (extractBlockText(block) !== state.text) {
+          writeBlockText(block, state.text);
+        }
+        applyTransform(block);
+        applyBlockStyle(block);
+      };
+
+      const getEffectiveStyle = (block) => {
+        const state = stateById.get(block.id);
+        const style = sanitizeBlockStyle(state?.style);
+        const globalStyle = getGlobalStyleDefaults();
+        const computed = getComputedStyle(block.element);
+
+        return {
+          fontFamily: style.fontFamily ?? globalStyle.fontFamily,
+          fontSize: style.fontSize ?? globalStyle.fontSize,
+          lineHeight: style.lineHeight ?? globalStyle.lineHeight,
+          letterSpacing: style.letterSpacing ?? globalStyle.letterSpacing,
+          wordSpacing: style.wordSpacing ?? globalStyle.wordSpacing,
+          textAlign: style.textAlign ?? globalStyle.textAlign,
+          color: style.color ?? normalizeColor(computed.color, globalStyle.color),
+          fontWeight: style.fontWeight ?? computed.fontWeight ?? "400",
+          fontStyle: style.fontStyle ?? computed.fontStyle ?? "normal",
+        };
+      };
+
+      const updateStyleValueLabels = (effectiveStyle) => {
+        if (styleFontSizeValue instanceof HTMLElement) {
+          styleFontSizeValue.textContent = `${toNumber(effectiveStyle.fontSize, 0).toFixed(1)}px`;
+        }
+        if (styleLineHeightValue instanceof HTMLElement) {
+          styleLineHeightValue.textContent = `${toNumber(effectiveStyle.lineHeight, 0).toFixed(2)}`;
+        }
+        if (styleLetterSpacingValue instanceof HTMLElement) {
+          styleLetterSpacingValue.textContent = `${toNumber(effectiveStyle.letterSpacing, 0).toFixed(3)}em`;
+        }
+        if (styleWordSpacingValue instanceof HTMLElement) {
+          styleWordSpacingValue.textContent = `${toNumber(effectiveStyle.wordSpacing, 0).toFixed(3)}em`;
+        }
+      };
+
+      const setStyleControlsEnabled = (enabled) => {
+        styleControls.forEach((control) => {
+          control.disabled = !enabled;
+        });
+      };
+
+      const syncStyleControls = () => {
+        const block = blockById.get(activeBlockId);
+        if (!block) return;
+
+        const canEditStyle = block.styleEditable !== false;
+        setStyleControlsEnabled(canEditStyle);
+
+        if (!canEditStyle) return;
+        const effectiveStyle = getEffectiveStyle(block);
+
+        styleFont.value = effectiveStyle.fontFamily;
+        styleSize.value = `${toNumber(effectiveStyle.fontSize, 23)}`;
+        styleLineHeight.value = `${toNumber(effectiveStyle.lineHeight, 1.47)}`;
+        styleLetterSpacing.value = `${toNumber(effectiveStyle.letterSpacing, 0)}`;
+        styleWordSpacing.value = `${toNumber(effectiveStyle.wordSpacing, 0)}`;
+        styleAlign.value = alignOptions.has(effectiveStyle.textAlign) ? effectiveStyle.textAlign : "left";
+        styleColor.value = normalizeColor(effectiveStyle.color, fallbackColor);
+        styleBold.checked = isBoldValue(effectiveStyle.fontWeight);
+        styleItalic.checked = isItalicValue(effectiveStyle.fontStyle);
+        updateStyleValueLabels(effectiveStyle);
+      };
+
+      const serializePayload = () => ({
+        version: contentVersion,
+        page: namespace,
+        updatedAt: new Date().toISOString(),
+        blocks: blockEntries.map((block) => {
+          const state = stateById.get(block.id) ?? {
+            text: "",
+            x: 0,
+            y: 0,
+            rotate: 0,
+            style: {},
+          };
+          return {
+            id: block.id,
+            text: `${state.text ?? ""}`,
+            x: toNumber(state.x, 0),
+            y: toNumber(state.y, 0),
+            rotate: toNumber(state.rotate, 0),
+            style: sanitizeBlockStyle(state.style),
+          };
+        }),
+      });
+
+      const savePayload = (showFeedback = false) => {
+        try {
+          window.localStorage.setItem(storageKey, JSON.stringify(serializePayload()));
+          if (showFeedback) setStatus("Contenuti salvati");
+        } catch (error) {
+          if (showFeedback) setStatus("Salvataggio contenuti non riuscito");
+        }
+      };
+
+      const isSupportedVersion = (value) => {
+        if (value === undefined || value === null) return true;
+        const parsed = Number(value);
+        return supportedContentVersions.has(parsed);
+      };
+
+      const loadPayload = () => {
+        let hasLoadedEntries = false;
+        try {
+          const raw = window.localStorage.getItem(storageKey);
+          if (!raw) return false;
+          const parsed = JSON.parse(raw);
+          if (!parsed || typeof parsed !== "object") return false;
+          if (!isSupportedVersion(parsed.version)) return false;
+          if (parsed.page && parsed.page !== namespace) return false;
+          if (!Array.isArray(parsed.blocks)) return false;
+
+          parsed.blocks.forEach((entry) => {
+            if (!entry || typeof entry !== "object") return;
+            if (typeof entry.id !== "string") return;
+            const block = blockById.get(entry.id);
+            if (!block) return;
+            const state = stateById.get(entry.id);
+            if (!state) return;
+
+            if (typeof entry.text === "string") {
+              if (block.richMode === "paragraphs") {
+                const fallbackWithParagraphs = block.defaultText;
+                const fallbackFlat = normalizeText(fallbackWithParagraphs);
+                const incomingFlat = normalizeText(entry.text);
+                const hasParagraphSeparators = entry.text.includes("\n\n");
+                state.text =
+                  !hasParagraphSeparators && incomingFlat === fallbackFlat
+                    ? fallbackWithParagraphs
+                    : entry.text;
+              } else {
+                state.text = entry.text;
+              }
+            }
+            state.x = toNumber(entry.x, 0);
+            state.y = toNumber(entry.y, 0);
+            state.rotate = toNumber(entry.rotate, 0);
+            if (entry.style && typeof entry.style === "object") {
+              state.style = {
+                ...state.style,
+                ...sanitizeBlockStyle(entry.style),
+              };
+            }
+            hasLoadedEntries = true;
+          });
+        } catch (error) {
+          return false;
+        }
+        return hasLoadedEntries;
+      };
+
+      const updateHandlePosition = () => {
+        const block = blockById.get(activeBlockId);
+        if (!block) {
+          dragHandle.classList.remove("is-visible");
+          return;
+        }
+
+        const canDrag = editMode && block.transform !== "none" && (!block.desktopOnlyTransform || isDesktop());
+
+        if (!canDrag) {
+          dragHandle.classList.remove("is-visible");
+          return;
+        }
+
+        const rect = block.element.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0) {
+          dragHandle.classList.remove("is-visible");
+          return;
+        }
+
+        dragHandle.classList.add("is-visible");
+        dragHandle.style.left = `${Math.max(6, rect.left - 14)}px`;
+        dragHandle.style.top = `${Math.max(6, rect.top + 8)}px`;
+      };
+
+      const updateTransformControls = () => {
+        const block = blockById.get(activeBlockId);
+        if (!block) return;
+        const state = stateById.get(block.id);
+        if (!state) return;
+
+        const showTransform = block.transform !== "none";
+        transformControls.classList.toggle("is-hidden", !showTransform);
+        if (!showTransform) return;
+
+        const bounds = getBounds(block);
+        xRange.min = `${bounds.minX}`;
+        xRange.max = `${bounds.maxX}`;
+        xRange.step = "1";
+
+        yRange.min = `${bounds.minY}`;
+        yRange.max = `${bounds.maxY}`;
+        yRange.step = "1";
+
+        rotateRange.min = `${bounds.minRotate}`;
+        rotateRange.max = `${bounds.maxRotate}`;
+        rotateRange.step = "1";
+        rotateRange.disabled = block.transform !== "xy-rotate";
+
+        xRange.value = `${toNumber(state.x, 0)}`;
+        yRange.value = `${toNumber(state.y, 0)}`;
+        rotateRange.value = `${toNumber(state.rotate, 0)}`;
+
+        if (valueX instanceof HTMLElement) valueX.textContent = `${toNumber(state.x, 0)}px`;
+        if (valueY instanceof HTMLElement) valueY.textContent = `${toNumber(state.y, 0)}px`;
+        if (valueRotate instanceof HTMLElement) {
+          valueRotate.textContent =
+            block.transform === "xy-rotate" ? `${toNumber(state.rotate, 0)}°` : "N/A";
+        }
+      };
+
+      const setActiveBlock = (blockId) => {
+        if (!blockById.has(blockId)) return;
+        activeBlockId = blockId;
+        const activeBlock = blockById.get(activeBlockId);
+
+        blockEntries.forEach((block) => {
+          block.element.classList.toggle("content-editor-block--active", block.id === activeBlockId);
+        });
+
+        if (activeLabelNode instanceof HTMLElement) {
+          activeLabelNode.textContent = `Stai modificando: ${activeBlock?.label ?? activeBlockId}`;
+        }
+        if (styleScopeNode instanceof HTMLElement) {
+          styleScopeNode.textContent = `Le impostazioni qui sotto si applicano solo a: ${activeBlock?.label ?? activeBlockId}.`;
+        }
+
+        blockSelect.value = activeBlockId;
+        const state = stateById.get(activeBlockId);
+        textArea.value = state?.text ?? "";
+        updateTransformControls();
+        syncStyleControls();
+        updateHandlePosition();
+      };
+
+      const setEditMode = (enabled) => {
+        editMode = enabled;
+        editModeToggle.checked = enabled;
+        document.body.classList.toggle("content-edit-mode", enabled);
+
+        blockEntries.forEach((block) => {
+          if (enabled && block.editable) {
+            block.element.setAttribute("contenteditable", "true");
+            block.element.classList.add("content-editor-editable");
+          } else {
+            block.element.removeAttribute("contenteditable");
+            block.element.classList.remove("content-editor-editable");
+          }
+        });
+
+        if (!enabled) {
+          blockEntries.forEach((block) => block.element.classList.remove("content-editor-block--active"));
+        } else {
+          setActiveBlock(activeBlockId);
+        }
+
+        updateHandlePosition();
+
+        try {
+          window.localStorage.setItem(editModeStorageKey, enabled ? "1" : "0");
+        } catch (error) {
+        }
+      };
+
+      const resetContent = () => {
+        blockEntries.forEach((block) => {
+          block.element.innerHTML = block.defaultHtml;
+          stateById.set(block.id, {
+            text: extractBlockText(block) || block.defaultText,
+            x: 0,
+            y: 0,
+            rotate: 0,
+            style: { ...block.defaultStyle },
+          });
+          applyTransform(block);
+          applyBlockStyle(block);
+        });
+
+        try {
+          window.localStorage.removeItem(storageKey);
+        } catch (error) {
+        }
+
+        setActiveBlock(activeBlockId);
+        setStatus("Contenuti resettati");
+      };
+
+      const resetActiveBlockStyle = () => {
+        const block = blockById.get(activeBlockId);
+        if (!block) return;
+        const state = stateById.get(activeBlockId);
+        if (!state) return;
+        state.style = { ...block.defaultStyle };
+        applyBlockStyle(block);
+        syncStyleControls();
+        setStatus("Stile blocco resettato");
+      };
+
+      const resetAllBlockStyles = () => {
+        blockEntries.forEach((block) => {
+          const state = stateById.get(block.id);
+          if (!state) return;
+          state.style = { ...block.defaultStyle };
+          applyBlockStyle(block);
+        });
+        syncStyleControls();
+        setStatus("Stili contenuti resettati");
+      };
+
+      const importPayload = (payload) => {
+        if (!payload || typeof payload !== "object") return false;
+        if (!isSupportedVersion(payload.version)) {
+          setStatus("Versione JSON non compatibile");
+          return false;
+        }
+        if (payload.page && payload.page !== namespace) {
+          setStatus("JSON non compatibile con questa pagina");
+          return false;
+        }
+        if (!Array.isArray(payload.blocks)) {
+          setStatus("JSON contenuti non valido");
+          return false;
+        }
+
+        payload.blocks.forEach((entry) => {
+          if (!entry || typeof entry !== "object") return;
+          if (typeof entry.id !== "string") return;
+          const block = blockById.get(entry.id);
+          if (!block) return;
+          const state = stateById.get(entry.id);
+          if (!state) return;
+
+          if (typeof entry.text === "string") state.text = entry.text;
+
+          const bounds = getBounds(block);
+          state.x = clamp(toNumber(entry.x, 0), bounds.minX, bounds.maxX);
+          state.y = clamp(toNumber(entry.y, 0), bounds.minY, bounds.maxY);
+          state.rotate = clamp(toNumber(entry.rotate, 0), bounds.minRotate, bounds.maxRotate);
+          if (entry.style && typeof entry.style === "object") {
+            state.style = {
+              ...state.style,
+              ...sanitizeBlockStyle(entry.style),
+            };
+          }
+        });
+
+        blockEntries.forEach((block) => applyBlockState(block));
+        savePayload(false);
+        setActiveBlock(activeBlockId);
+        setStatus("Contenuti importati");
+        return true;
+      };
+
+      const updateActiveStyle = (partialStyle) => {
+        const block = blockById.get(activeBlockId);
+        if (!block || block.styleEditable === false) return;
+        const state = stateById.get(activeBlockId);
+        if (!state) return;
+        state.style = sanitizeBlockStyle({ ...state.style, ...partialStyle });
+        applyBlockStyle(block);
+        syncStyleControls();
+      };
+
+      blockEntries.forEach((block) => {
+        block.element.addEventListener("click", (event) => {
+          if (block.element instanceof HTMLAnchorElement) event.preventDefault();
+          setActiveBlock(block.id);
+        });
+
+        block.element.addEventListener("dblclick", (event) => {
+          if (!block.editable) return;
+          if (block.element instanceof HTMLAnchorElement) event.preventDefault();
+          if (!editMode) setEditMode(true);
+          setActiveBlock(block.id);
+        });
+
+        block.element.addEventListener("input", () => {
+          if (!editMode || !block.editable) return;
+          const text = extractBlockText(block);
+          const state = stateById.get(block.id);
+          if (!state) return;
+          state.text = text;
+          if (activeBlockId === block.id) textArea.value = text;
+        });
+
+        block.element.addEventListener("paste", (event) => {
+          if (!editMode || !block.editable) return;
+          event.preventDefault();
+          const clipboard = event.clipboardData?.getData("text/plain") ?? "";
+          document.execCommand("insertText", false, clipboard);
+        });
+      });
+
+      textArea.addEventListener("input", () => {
+        const block = blockById.get(activeBlockId);
+        if (!block) return;
+        const state = stateById.get(block.id);
+        if (!state) return;
+        state.text = textArea.value;
+        writeBlockText(block, textArea.value);
+      });
+
+      const applyTransformFromControls = () => {
+        const block = blockById.get(activeBlockId);
+        if (!block || block.transform === "none") return;
+        const state = stateById.get(block.id);
+        if (!state) return;
+
+        const bounds = getBounds(block);
+        state.x = clamp(toNumber(xRange.value, 0), bounds.minX, bounds.maxX);
+        state.y = clamp(toNumber(yRange.value, 0), bounds.minY, bounds.maxY);
+        if (block.transform === "xy-rotate") {
+          state.rotate = clamp(toNumber(rotateRange.value, 0), bounds.minRotate, bounds.maxRotate);
+        } else {
+          state.rotate = 0;
+        }
+
+        applyTransform(block);
+        updateTransformControls();
+        updateHandlePosition();
+      };
+
+      xRange.addEventListener("input", applyTransformFromControls);
+      yRange.addEventListener("input", applyTransformFromControls);
+      rotateRange.addEventListener("input", applyTransformFromControls);
+
+      styleFont.addEventListener("change", () => updateActiveStyle({ fontFamily: styleFont.value }));
+      styleSize.addEventListener("input", () =>
+        updateActiveStyle({
+          fontSize: clamp(
+            toNumber(styleSize.value, styleRanges.fontSize.min),
+            styleRanges.fontSize.min,
+            styleRanges.fontSize.max,
+          ),
+        }),
+      );
+      styleLineHeight.addEventListener("input", () =>
+        updateActiveStyle({
+          lineHeight: clamp(
+            toNumber(styleLineHeight.value, styleRanges.lineHeight.min),
+            styleRanges.lineHeight.min,
+            styleRanges.lineHeight.max,
+          ),
+        }),
+      );
+      styleLetterSpacing.addEventListener("input", () =>
+        updateActiveStyle({
+          letterSpacing: clamp(
+            toNumber(styleLetterSpacing.value, 0),
+            styleRanges.letterSpacing.min,
+            styleRanges.letterSpacing.max,
+          ),
+        }),
+      );
+      styleWordSpacing.addEventListener("input", () =>
+        updateActiveStyle({
+          wordSpacing: clamp(
+            toNumber(styleWordSpacing.value, 0),
+            styleRanges.wordSpacing.min,
+            styleRanges.wordSpacing.max,
+          ),
+        }),
+      );
+      styleAlign.addEventListener("change", () =>
+        updateActiveStyle({
+          textAlign: alignOptions.has(styleAlign.value) ? styleAlign.value : "left",
+        }),
+      );
+      styleColor.addEventListener("input", () =>
+        updateActiveStyle({
+          color: normalizeColor(styleColor.value, fallbackColor),
+        }),
+      );
+      styleBold.addEventListener("change", () =>
+        updateActiveStyle({
+          fontWeight: styleBold.checked ? "700" : "400",
+        }),
+      );
+      styleItalic.addEventListener("change", () =>
+        updateActiveStyle({
+          fontStyle: styleItalic.checked ? "italic" : "normal",
+        }),
+      );
+
+      blockSelect.addEventListener("change", () => {
+        setActiveBlock(blockSelect.value);
+      });
+
+      editModeToggle.addEventListener("change", () => {
+        setEditMode(editModeToggle.checked);
+      });
+
+      saveButton?.addEventListener("click", () => savePayload(true));
+      resetButton?.addEventListener("click", resetContent);
+      resetStyleBlockButton?.addEventListener("click", resetActiveBlockStyle);
+      resetStyleAllButton?.addEventListener("click", resetAllBlockStyles);
+
+      exportButton?.addEventListener("click", () => {
+        try {
+          const payload = serializePayload();
+          const blob = new Blob([JSON.stringify(payload, null, 2)], {
+            type: "application/json",
+          });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = `${namespace}-content.json`;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          URL.revokeObjectURL(url);
+          setStatus("JSON esportato");
+        } catch (error) {
+          setStatus("Export non riuscito");
+        }
+      });
+
+      importButton?.addEventListener("click", () => {
+        if (!(importInput instanceof HTMLInputElement)) return;
+        importInput.click();
+      });
+
+      importInput?.addEventListener("change", async () => {
+        if (!(importInput instanceof HTMLInputElement)) return;
+        const [file] = importInput.files ?? [];
+        if (!file) return;
+
+        try {
+          const text = await file.text();
+          const payload = JSON.parse(text);
+          importPayload(payload);
+        } catch (error) {
+          setStatus("Import non riuscito");
+        } finally {
+          importInput.value = "";
+        }
+      });
+
+      dragHandle.addEventListener("pointerdown", (event) => {
+        const block = blockById.get(activeBlockId);
+        if (!block || !editMode || block.transform === "none") return;
+        if (block.desktopOnlyTransform && !isDesktop()) return;
+
+        event.preventDefault();
+
+        const state = stateById.get(block.id);
+        if (!state) return;
+        const bounds = getBounds(block);
+        const startPointerX = event.clientX;
+        const startPointerY = event.clientY;
+        const startX = toNumber(state.x, 0);
+        const startY = toNumber(state.y, 0);
+
+        const onMove = (moveEvent) => {
+          const deltaX = moveEvent.clientX - startPointerX;
+          const deltaY = moveEvent.clientY - startPointerY;
+          state.x = clamp(startX + deltaX, bounds.minX, bounds.maxX);
+          state.y = clamp(startY + deltaY, bounds.minY, bounds.maxY);
+          applyTransform(block);
+          updateTransformControls();
+          updateHandlePosition();
+        };
+
+        const onUp = () => {
+          window.removeEventListener("pointermove", onMove);
+          window.removeEventListener("pointerup", onUp);
+        };
+
+        window.addEventListener("pointermove", onMove);
+        window.addEventListener("pointerup", onUp);
+      });
+
+      window.addEventListener("resize", updateHandlePosition);
+      window.addEventListener("scroll", updateHandlePosition, { passive: true });
+
+      try {
+        const storedEditMode = window.localStorage.getItem(editModeStorageKey);
+        if (storedEditMode === "0") editMode = false;
+        if (storedEditMode === "1") editMode = true;
+      } catch (error) {
+      }
+
+      const hasStoredContent = loadPayload();
+      blockEntries.forEach((block) => {
+        if (hasStoredContent) {
+          applyBlockState(block);
+          return;
+        }
+        applyTransform(block);
+        applyBlockStyle(block);
+      });
+
+      setActiveBlock(activeBlockId);
+      setEditMode(editMode);
+      if (styleAdvanced instanceof HTMLDetailsElement) styleAdvanced.open = false;
+    });
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initContentEditors, { once: true });
+  } else {
+    initContentEditors();
+  }
+</script>

@@ -1,0 +1,420 @@
+---
+import BioLayout from "../../layouts/BioLayout.astro";
+import StyleEditorPanel from "../../components/StyleEditorPanel.astro";
+import "../../styles/ricerche.css";
+
+const base = import.meta.env.BASE_URL;
+const overlayStorageKey = "claudia-editor-ricerche-overlay-settings";
+
+const ricerchePresets = {
+  background: "#f6f6f4",
+  background2: "#f1f1ee",
+  background3: "#ffffff",
+  backgroundMode: "solid",
+  backgroundAngle: 180,
+  text: "#2f59d9",
+  text2: "#2550d8",
+  text3: "#5a83ff",
+  textMode: "solid",
+  textAngle: 95,
+  accent: "#2f59d9",
+  font: '"Bradley Hand Local", "Comic Neue", "Comic Sans MS", cursive',
+  titleFont: '"Bradley Hand Local", "Comic Neue", "Comic Sans MS", cursive',
+  fontSize: 19.5,
+  lineHeight: 1.43,
+  letterSpacing: 0.002,
+  wordSpacing: 0.01,
+  copyWidth: 104,
+  align: "left",
+  x: 0,
+  y: 0,
+};
+
+const ricerchePageDefaults = {
+  sheetBorderColor: "#d7dce7",
+  sheetBorderWidth: 1,
+  sheetRadius: 10,
+  rulesGap: 30,
+  rulesTint: 0.28,
+  marginLineX: 31,
+  marginLineColor: "#e89bb1",
+  marginLineWidth: 1,
+  contentWidth: 1020,
+  contentTop: 56,
+  contentSide: 28,
+  contentBottom: 88,
+  headerGap: 28,
+  leftColumnWidth: 260,
+  itemGap: 50,
+  itemBorderWidth: 1,
+  itemBorderTint: 0.26,
+  itemPaddingTop: 16,
+  headingSize: 60,
+  bodySize: 19.5,
+  dateSize: 15,
+  heartSize: 24,
+  doodleScale: 1,
+  doodleX: 0,
+  doodleY: 0,
+  doodleOpacity: 0.95,
+  doodleVisible: true,
+  overlayVisible: false,
+  overlayOpacity: 0.35,
+  overlayScale: 1,
+  overlayX: 0,
+  overlayY: 0,
+};
+
+const ricerchePageControls = [
+  { key: "sheetBorderColor", type: "color", label: "Colore bordo foglio", default: "#d7dce7", cssVar: "--ricerche-sheet-border-color" },
+  { key: "sheetBorderWidth", type: "range", label: "Spessore bordo foglio", default: 1, min: 0, max: 6, step: 1, unit: "px", cssVar: "--ricerche-sheet-border-width" },
+  { key: "sheetRadius", type: "range", label: "Raggio foglio", default: 10, min: 0, max: 30, step: 1, unit: "px", cssVar: "--ricerche-sheet-radius" },
+  { key: "rulesGap", type: "range", label: "Passo righe", default: 30, min: 18, max: 52, step: 1, unit: "px", cssVar: "--ricerche-rules-gap" },
+  { key: "rulesTint", type: "range", label: "Intensità righe", default: 0.28, min: 0.05, max: 0.85, step: 0.01, cssVar: "--ricerche-rules-tint" },
+  { key: "marginLineX", type: "range", label: "Margine rosso X", default: 31, min: 8, max: 120, step: 1, unit: "px", cssVar: "--ricerche-margin-line-x" },
+  { key: "marginLineColor", type: "color", label: "Colore margine rosso", default: "#e89bb1", cssVar: "--ricerche-margin-line-color" },
+  { key: "marginLineWidth", type: "range", label: "Spessore margine rosso", default: 1, min: 1, max: 5, step: 1, unit: "px", cssVar: "--ricerche-margin-line-width" },
+  { key: "contentWidth", type: "range", label: "Larghezza contenuto", default: 1020, min: 720, max: 1400, step: 1, unit: "px", cssVar: "--ricerche-content-width" },
+  { key: "contentTop", type: "range", label: "Padding alto contenuto", default: 56, min: 10, max: 180, step: 1, unit: "px", cssVar: "--ricerche-content-top" },
+  { key: "contentSide", type: "range", label: "Padding laterale contenuto", default: 28, min: 4, max: 120, step: 1, unit: "px", cssVar: "--ricerche-content-side" },
+  { key: "contentBottom", type: "range", label: "Padding basso contenuto", default: 88, min: 20, max: 220, step: 1, unit: "px", cssVar: "--ricerche-content-bottom" },
+  { key: "headerGap", type: "range", label: "Gap header", default: 28, min: 8, max: 90, step: 1, unit: "px", cssVar: "--ricerche-header-gap" },
+  { key: "leftColumnWidth", type: "range", label: "Larghezza colonna sx", default: 260, min: 170, max: 520, step: 1, unit: "px", cssVar: "--ricerche-left-column-width" },
+  { key: "itemGap", type: "range", label: "Gap articoli", default: 50, min: 8, max: 140, step: 1, unit: "px", cssVar: "--ricerche-item-gap" },
+  { key: "itemBorderWidth", type: "range", label: "Spessore linea articolo", default: 1, min: 0, max: 4, step: 1, unit: "px", cssVar: "--ricerche-item-border-width" },
+  { key: "itemBorderTint", type: "range", label: "Intensità linea articolo", default: 0.26, min: 0.05, max: 0.9, step: 0.01, cssVar: "--ricerche-item-border-tint" },
+  { key: "itemPaddingTop", type: "range", label: "Padding alto articolo", default: 16, min: 0, max: 60, step: 1, unit: "px", cssVar: "--ricerche-item-padding-top" },
+  { key: "headingSize", type: "range", label: "Size titoli articoli", default: 60, min: 28, max: 90, step: 1, unit: "px", cssVar: "--ricerche-heading-size" },
+  { key: "bodySize", type: "range", label: "Size corpo testo", default: 19.5, min: 12, max: 34, step: 0.1, unit: "px", cssVar: "--ricerche-body-size" },
+  { key: "dateSize", type: "range", label: "Size data", default: 15, min: 9, max: 26, step: 0.2, unit: "px", cssVar: "--ricerche-date-size" },
+  { key: "heartSize", type: "range", label: "Size cuore", default: 24, min: 10, max: 56, step: 1, unit: "px", cssVar: "--ricerche-heart-size" },
+  { key: "doodleScale", type: "range", label: "Scala illustrazione", default: 1, min: 0.2, max: 2.4, step: 0.01, cssVar: "--ricerche-doodle-scale" },
+  { key: "doodleX", type: "range", label: "Illustrazione X", default: 0, min: -420, max: 420, step: 1, unit: "px", cssVar: "--ricerche-doodle-x" },
+  { key: "doodleY", type: "range", label: "Illustrazione Y", default: 0, min: -420, max: 420, step: 1, unit: "px", cssVar: "--ricerche-doodle-y" },
+  { key: "doodleOpacity", type: "range", label: "Opacità illustrazione", default: 0.95, min: 0, max: 1, step: 0.01, cssVar: "--ricerche-doodle-opacity" },
+  { key: "doodleVisible", type: "toggle", label: "Mostra illustrazione", default: true, cssVar: "--ricerche-doodle-visible", wide: true },
+  { key: "overlayVisible", type: "toggle", label: "Mostra riferimento", default: false, cssVar: "--ricerche-overlay-visible", storageKey: overlayStorageKey, wide: true },
+  { key: "overlayOpacity", type: "range", label: "Opacità riferimento", default: 0.35, min: 0, max: 1, step: 0.01, cssVar: "--ricerche-overlay-opacity", storageKey: overlayStorageKey },
+  { key: "overlayScale", type: "range", label: "Scala riferimento", default: 1, min: 0.4, max: 1.8, step: 0.005, cssVar: "--ricerche-overlay-scale", storageKey: overlayStorageKey },
+  { key: "overlayX", type: "range", label: "Riferimento X", default: 0, min: -1000, max: 1000, step: 1, unit: "px", cssVar: "--ricerche-overlay-x", storageKey: overlayStorageKey },
+  { key: "overlayY", type: "range", label: "Riferimento Y", default: 0, min: -1200, max: 1200, step: 1, unit: "px", cssVar: "--ricerche-overlay-y", storageKey: overlayStorageKey },
+];
+
+const ricercheContentSchema = [
+  {
+    id: "ricerche-header-title",
+    label: "Header titolo",
+    selector: '[data-content-block="ricerche-header-title"]',
+    defaultText: "A HANDBOOK OF SMALL OBSERVATIONS",
+    editable: true,
+    transform: "xy-rotate",
+    desktopOnlyTransform: true,
+  },
+  {
+    id: "ricerche-header-subtitle",
+    label: "Header sottotitolo",
+    selector: '[data-content-block="ricerche-header-subtitle"]',
+    defaultText: "Notes written slowly",
+    editable: true,
+    transform: "xy-rotate",
+    desktopOnlyTransform: true,
+  },
+  {
+    id: "ricerche-nav-all-posts",
+    label: "Nav all posts",
+    selector: '[data-content-block="ricerche-nav-all-posts"]',
+    defaultText: "All posts",
+    editable: true,
+    transform: "xy-rotate",
+    desktopOnlyTransform: true,
+  },
+  {
+    id: "ricerche-nav-info",
+    label: "Nav informazioni",
+    selector: '[data-content-block="ricerche-nav-info"]',
+    defaultText: "Informazioni",
+    editable: true,
+    transform: "xy-rotate",
+    desktopOnlyTransform: true,
+  },
+  {
+    id: "ricerche-nav-doodles",
+    label: "Nav doodles",
+    selector: '[data-content-block="ricerche-nav-doodles"]',
+    defaultText: "Doodles",
+    editable: true,
+    transform: "xy-rotate",
+    desktopOnlyTransform: true,
+  },
+  {
+    id: "ricerche-intro",
+    label: "Intro testo",
+    selector: '[data-content-block="ricerche-intro"]',
+    defaultText:
+      "I started writing because I was afraid of how easily thoughts would disappear. Not the important but the small ones. How light shifts when I leave a room. The sound of a page turning in the night. Small observations. They don't ask to be understood. Only to be recorded and maybe read, slowly.",
+    editable: true,
+    transform: "xy-rotate",
+    desktopOnlyTransform: true,
+  },
+  {
+    id: "ricerche-social-linkedin",
+    label: "Social Linkedin",
+    selector: '[data-content-block="ricerche-social-linkedin"]',
+    defaultText: "in",
+    editable: true,
+    transform: "xy-rotate",
+    desktopOnlyTransform: true,
+  },
+  {
+    id: "ricerche-social-medium",
+    label: "Social Medium",
+    selector: '[data-content-block="ricerche-social-medium"]',
+    defaultText: "m",
+    editable: true,
+    transform: "xy-rotate",
+    desktopOnlyTransform: true,
+  },
+  {
+    id: "ricerche-social-butterfly",
+    label: "Social Butterfly",
+    selector: '[data-content-block="ricerche-social-butterfly"]',
+    defaultText: "🦋",
+    editable: true,
+    transform: "xy-rotate",
+    desktopOnlyTransform: true,
+  },
+  {
+    id: "ricerche-signature",
+    label: "Firma",
+    selector: '[data-content-block="ricerche-signature"]',
+    defaultText: "- Lucia M.",
+    editable: true,
+    transform: "xy-rotate",
+    desktopOnlyTransform: true,
+  },
+  {
+    id: "ricerche-item-title-1",
+    label: "Articolo 1 titolo",
+    selector: '[data-content-block="ricerche-item-title-1"]',
+    defaultText: "The Table in the Morning Still Holds Yesterday's Marks",
+    editable: true,
+    transform: "xy-rotate",
+    desktopOnlyTransform: true,
+  },
+  {
+    id: "ricerche-item-date-1",
+    label: "Articolo 1 data",
+    selector: '[data-content-block="ricerche-item-date-1"]',
+    defaultText: "↳ GEN 23",
+    editable: true,
+    transform: "xy-rotate",
+    desktopOnlyTransform: true,
+  },
+  {
+    id: "ricerche-item-excerpt-1",
+    label: "Articolo 1 estratto",
+    selector: '[data-content-block="ricerche-item-excerpt-1"]',
+    defaultText:
+      "Every morning, the table looks surprised to see me again. It holds yesterday's marks without complaint, the faint circle left by a cup, a...",
+    editable: true,
+    transform: "xy-rotate",
+    desktopOnlyTransform: true,
+  },
+  {
+    id: "ricerche-item-link-1",
+    label: "Articolo 1 link",
+    selector: '[data-content-block="ricerche-item-link-1"]',
+    defaultText: ">",
+    editable: true,
+    transform: "xy-rotate",
+    desktopOnlyTransform: true,
+  },
+  {
+    id: "ricerche-item-title-2",
+    label: "Articolo 2 titolo",
+    selector: '[data-content-block="ricerche-item-title-2"]',
+    defaultText: "QUIET AFTERNOONS",
+    editable: true,
+    transform: "xy-rotate",
+    desktopOnlyTransform: true,
+  },
+  {
+    id: "ricerche-item-date-2",
+    label: "Articolo 2 data",
+    selector: '[data-content-block="ricerche-item-date-2"]',
+    defaultText: "↳ GEN 22",
+    editable: true,
+    transform: "xy-rotate",
+    desktopOnlyTransform: true,
+  },
+  {
+    id: "ricerche-item-excerpt-2",
+    label: "Articolo 2 estratto",
+    selector: '[data-content-block="ricerche-item-excerpt-2"]',
+    defaultText:
+      "Afternoons sometimes stretch without asking for anything. Light rests on surfaces longer than expected. Sounds arrive softened, as if they had traveled a great distance. These...",
+    editable: true,
+    transform: "xy-rotate",
+    desktopOnlyTransform: true,
+  },
+  {
+    id: "ricerche-item-link-2",
+    label: "Articolo 2 link",
+    selector: '[data-content-block="ricerche-item-link-2"]',
+    defaultText: ">",
+    editable: true,
+    transform: "xy-rotate",
+    desktopOnlyTransform: true,
+  },
+  {
+    id: "ricerche-item-title-3",
+    label: "Articolo 3 titolo",
+    selector: '[data-content-block="ricerche-item-title-3"]',
+    defaultText: "Paper Weighs Nothing Until It Is Covered in Words",
+    editable: true,
+    transform: "xy-rotate",
+    desktopOnlyTransform: true,
+  },
+  {
+    id: "ricerche-item-date-3",
+    label: "Articolo 3 data",
+    selector: '[data-content-block="ricerche-item-date-3"]',
+    defaultText: "↳ GEN 22",
+    editable: true,
+    transform: "xy-rotate",
+    desktopOnlyTransform: true,
+  },
+  {
+    id: "ricerche-item-excerpt-3",
+    label: "Articolo 3 estratto",
+    selector: '[data-content-block="ricerche-item-excerpt-3"]',
+    defaultText:
+      "A single sheet of paper weighs almost nothing. And yet, once covered in words, it becomes difficult to throw away. As if meaning added a...",
+    editable: true,
+    transform: "xy-rotate",
+    desktopOnlyTransform: true,
+  },
+  {
+    id: "ricerche-item-link-3",
+    label: "Articolo 3 link",
+    selector: '[data-content-block="ricerche-item-link-3"]',
+    defaultText: ">",
+    editable: true,
+    transform: "xy-rotate",
+    desktopOnlyTransform: true,
+  },
+];
+---
+
+<BioLayout title="Ricerche">
+  <section class="ricerche-page">
+    <StyleEditorPanel
+      panelTitle="Ricerche editor"
+      storageNamespace="ricerche"
+      presets={ricerchePresets}
+      pageControls={ricerchePageControls}
+      pageDefaults={ricerchePageDefaults}
+      pageSectionTitle="Ricerche • fine tune"
+      contentSchema={ricercheContentSchema}
+      contentStorageNamespace="ricerche"
+    />
+
+    <div class="ricerche-sheet">
+      <div class="ricerche-margin"></div>
+
+      <div class="ricerche-content">
+        <header class="ricerche-header">
+          <div class="ricerche-header__left">
+            <h1 class="editable-text" data-content-block="ricerche-header-title">A HANDBOOK OF SMALL OBSERVATIONS</h1>
+            <p class="editable-text" data-content-block="ricerche-header-subtitle">Notes written slowly</p>
+            <nav class="editable-text">
+              <a href="#" data-content-block="ricerche-nav-all-posts">All posts</a>
+              <a href="#" data-content-block="ricerche-nav-info">Informazioni</a>
+              <a href="#" data-content-block="ricerche-nav-doodles">Doodles</a>
+            </nav>
+          </div>
+
+          <div class="ricerche-header__right editable-text">
+            <p data-content-block="ricerche-intro">
+              I started writing because I was afraid of how easily thoughts would disappear. Not the
+              important but the small ones. How light shifts when I leave a room. The sound of a page
+              turning in the night. Small observations. They don't ask to be understood. Only to be
+              recorded and maybe read, slowly.
+            </p>
+            <p class="ricerche-signature" data-content-block="ricerche-signature">- Lucia M.</p>
+            <div class="ricerche-social">
+              <a href="#" aria-label="Linkedin" data-content-block="ricerche-social-linkedin">in</a>
+              <a href="#" aria-label="Medium" data-content-block="ricerche-social-medium">m</a>
+              <a href="#" aria-label="Butterfly" data-content-block="ricerche-social-butterfly">🦋</a>
+            </div>
+          </div>
+        </header>
+
+        <main class="ricerche-list">
+          <article class="ricerche-item">
+            <div class="ricerche-item__title editable-text">
+              <h2 data-content-block="ricerche-item-title-1">The Table in the Morning Still Holds Yesterday's Marks</h2>
+              <p class="ricerche-date" data-content-block="ricerche-item-date-1">↳ GEN 23</p>
+            </div>
+            <div class="ricerche-item__excerpt editable-text">
+              <p data-content-block="ricerche-item-excerpt-1">
+                Every morning, the table looks surprised to see me again. It holds yesterday's marks
+                without complaint, the faint circle left by a cup, a...
+              </p>
+              <a href="#" data-content-block="ricerche-item-link-1">&gt;</a>
+            </div>
+            <span class="ricerche-heart" aria-hidden="true">❤</span>
+          </article>
+
+          <article class="ricerche-item">
+            <div class="ricerche-item__title editable-text">
+              <h2 data-content-block="ricerche-item-title-2">QUIET AFTERNOONS</h2>
+              <p class="ricerche-date" data-content-block="ricerche-item-date-2">↳ GEN 22</p>
+            </div>
+            <div class="ricerche-item__excerpt editable-text">
+              <p data-content-block="ricerche-item-excerpt-2">
+                Afternoons sometimes stretch without asking for anything. Light rests on surfaces longer
+                than expected. Sounds arrive softened, as if they had traveled a great distance. These...
+              </p>
+              <a href="#" data-content-block="ricerche-item-link-2">&gt;</a>
+            </div>
+          </article>
+
+          <article class="ricerche-item">
+            <div class="ricerche-item__title editable-text">
+              <h2 data-content-block="ricerche-item-title-3">Paper Weighs Nothing Until It Is Covered in Words</h2>
+              <p class="ricerche-date" data-content-block="ricerche-item-date-3">↳ GEN 22</p>
+            </div>
+            <div class="ricerche-item__excerpt editable-text">
+              <p data-content-block="ricerche-item-excerpt-3">
+                A single sheet of paper weighs almost nothing. And yet, once covered in words, it
+                becomes difficult to throw away. As if meaning added a...
+              </p>
+              <a href="#" data-content-block="ricerche-item-link-3">&gt;</a>
+            </div>
+          </article>
+        </main>
+
+        <svg class="ricerche-doodle" viewBox="0 0 260 190" aria-hidden="true">
+          <g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M86 138c18-24 42-31 67-31 30 0 56 15 72 42"></path>
+            <path d="M58 153c-8-20-1-41 13-56"></path>
+            <path d="M116 83c15-22 42-35 68-35 30 0 54 15 63 37"></path>
+            <path d="M121 83c9 15 13 30 13 45"></path>
+            <path d="M155 84c8 14 10 27 10 42"></path>
+            <path d="M92 157c9-19 16-31 27-42"></path>
+            <path d="M195 152c4-19 2-34-6-47"></path>
+            <circle cx="182" cy="51" r="19"></circle>
+            <path d="M172 45c6-6 16-6 22 0"></path>
+            <path d="M45 124c11-11 23-8 34 5"></path>
+            <path d="M28 134c12-14 24-10 37 5"></path>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <div class="ricerche-reference-overlay" aria-hidden="true">
+      <img src={`${base}references/ricerche-reference.png`} alt="" />
+    </div>
+  </section>
+</BioLayout>

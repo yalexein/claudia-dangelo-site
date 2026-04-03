@@ -1,0 +1,227 @@
+---
+const { element, className = "" } = Astro.props;
+
+if (!element) {
+  throw new Error("InteractiveSwapImage richiede la prop `element`.");
+}
+
+const {
+  id,
+  alt,
+  defaultSrc,
+  hoverSrc = defaultSrc,
+  position = {},
+  size = {},
+  aspectRatio = "4 / 3",
+  hotspots = [],
+} = element;
+
+const preloadSources = Array.from(
+  new Set(
+    [hoverSrc, ...hotspots.map((hotspot) => hotspot.hoverSrc)]
+      .filter((value) => typeof value === "string" && value.length > 0 && value !== defaultSrc),
+  ),
+);
+
+const hotspotOverlayStyle = (hotspot) => {
+  const clip = hotspot.clip ?? hotspot;
+  const left = clip.left ?? "0%";
+  const top = clip.top ?? "0%";
+  const width = clip.width ?? "0%";
+  const height = clip.height ?? "0%";
+
+  return joinStyle([
+    ["clip-path", `inset(${top} calc(100% - ${left} - ${width}) calc(100% - ${top} - ${height}) ${left})`],
+  ]);
+};
+
+const toStyle = (value) => {
+  if (typeof value === "number") return `${value}px`;
+  return value;
+};
+
+const joinStyle = (entries) =>
+  entries
+    .filter(([, value]) => value !== undefined && value !== null && value !== "")
+    .map(([key, value]) => `${key}:${toStyle(value)}`)
+    .join(";");
+
+const elementStyle = joinStyle([
+  ["left", position.left],
+  ["right", position.right],
+  ["top", position.top],
+  ["bottom", position.bottom],
+  ["width", size.width ?? position.width],
+  ["height", size.height ?? position.height],
+]);
+
+const hotspotStyle = (hotspot) =>
+  joinStyle([
+    ["left", hotspot.left],
+    ["right", hotspot.right],
+    ["top", hotspot.top],
+    ["bottom", hotspot.bottom],
+    ["width", hotspot.width],
+    ["height", hotspot.height],
+  ]);
+---
+
+<div
+  class={`landing-element interactive-swap ${className}`.trim()}
+  style={elementStyle}
+  data-hover-swap-root
+  data-element-id={id}
+>
+  <div class="interactive-swap__frame" style={`aspect-ratio:${aspectRatio};`}>
+    <img
+      class="interactive-swap__image"
+      src={defaultSrc}
+      alt={alt}
+      loading="eager"
+      decoding="async"
+      draggable="false"
+      data-hover-swap-image
+      data-default-src={defaultSrc}
+      data-hover-src={hoverSrc}
+    />
+
+    {hotspots.map((hotspot, index) => {
+      const overlaySrc = hotspot.hoverSrc ?? hoverSrc;
+      if (!overlaySrc || overlaySrc === defaultSrc) return null;
+
+      return (
+        <img
+          class="interactive-swap__overlay"
+          src={overlaySrc}
+          alt=""
+          aria-hidden="true"
+          loading="eager"
+          decoding="async"
+          draggable="false"
+          style={hotspotOverlayStyle(hotspot)}
+          data-hover-overlay
+          data-hotspot-id={hotspot.id ?? `${id}-hotspot-${index + 1}`}
+        />
+      );
+    })}
+
+    {preloadSources.map((src) => (
+      <img
+        class="interactive-swap__preload"
+        src={src}
+        alt=""
+        aria-hidden="true"
+        loading="eager"
+        decoding="async"
+        draggable="false"
+      />
+    ))}
+
+    {hotspots.map((hotspot, index) => {
+      const label = hotspot.ariaLabel ?? `${alt} - hotspot ${index + 1}`;
+      const dataAction = hotspot.action ?? "";
+      return hotspot.href ? (
+        <a
+          class="interactive-swap__zone"
+          href={hotspot.href}
+          aria-label={label}
+          style={hotspotStyle(hotspot)}
+          data-hover-zone
+          data-hotspot-id={hotspot.id ?? `${id}-hotspot-${index + 1}`}
+          data-action={dataAction}
+          data-hover-src={hotspot.hoverSrc ?? hoverSrc}
+        />
+      ) : (
+        <button
+          class="interactive-swap__zone"
+          type="button"
+          aria-label={label}
+          style={hotspotStyle(hotspot)}
+          data-hover-zone
+          data-hotspot-id={hotspot.id ?? `${id}-hotspot-${index + 1}`}
+          data-action={dataAction}
+          data-hover-src={hotspot.hoverSrc ?? hoverSrc}
+        />
+      );
+    })}
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll("[data-hover-swap-root]").forEach((root) => {
+    if (root.dataset.hoverSwapBound === "true") return;
+    root.dataset.hoverSwapBound = "true";
+
+    const image = root.querySelector("[data-hover-swap-image]");
+    const zones = root.querySelectorAll("[data-hover-zone]");
+    const overlays = root.querySelectorAll("[data-hover-overlay]");
+
+    if (!(image instanceof HTMLImageElement) || zones.length === 0) return;
+
+    const defaultSrc = image.dataset.defaultSrc ?? image.src;
+    const hoverSrc = image.dataset.hoverSrc ?? image.src;
+
+    let hoveredZone = null;
+    let focusedZone = null;
+    let pressedZone = null;
+
+    const updateImage = () => {
+      const activeZone = pressedZone ?? focusedZone ?? hoveredZone;
+      const activeHotspotId =
+        activeZone instanceof HTMLElement ? activeZone.dataset.hotspotId ?? "" : "";
+
+      if (overlays.length > 0) {
+        image.setAttribute("src", defaultSrc);
+        overlays.forEach((overlay) => {
+          if (!(overlay instanceof HTMLElement)) return;
+          overlay.classList.toggle("is-active", overlay.dataset.hotspotId === activeHotspotId);
+        });
+        return;
+      }
+
+      const nextSrc =
+        activeZone instanceof HTMLElement
+          ? activeZone.dataset.hoverSrc ?? hoverSrc
+          : defaultSrc;
+      if (image.getAttribute("src") !== nextSrc) image.setAttribute("src", nextSrc);
+    };
+
+    zones.forEach((zone) => {
+      zone.addEventListener("mouseenter", () => {
+        hoveredZone = zone instanceof HTMLElement ? zone : null;
+        updateImage();
+      });
+
+      zone.addEventListener("mouseleave", () => {
+        if (hoveredZone === zone) hoveredZone = null;
+        if (pressedZone === zone) pressedZone = null;
+        updateImage();
+      });
+
+      zone.addEventListener("focus", () => {
+        focusedZone = zone instanceof HTMLElement ? zone : null;
+        updateImage();
+      });
+
+      zone.addEventListener("blur", () => {
+        if (focusedZone === zone) focusedZone = null;
+        updateImage();
+      });
+
+      zone.addEventListener("pointerdown", () => {
+        pressedZone = zone instanceof HTMLElement ? zone : null;
+        updateImage();
+      });
+
+      zone.addEventListener("pointerup", () => {
+        if (pressedZone === zone) pressedZone = null;
+        updateImage();
+      });
+
+      zone.addEventListener("pointercancel", () => {
+        if (pressedZone === zone) pressedZone = null;
+        updateImage();
+      });
+    });
+  });
+</script>

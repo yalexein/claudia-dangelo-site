@@ -1,29 +1,7 @@
 ---
 import LandingLayout from "../layouts/LandingLayout.astro";
-const base = import.meta.env.BASE_URL;
+import LandingScene from "../components/LandingScene.astro";
 ---
-<LandingLayout title="Benvenutə">
-  <section class="hero">
-    <p class="kicker">Sito personale</p>
-    <h1>Due mondi, due estetiche.</h1>
-    <p class="lead">
-      Qui puoi entrare nella sezione dedicata alla scrittura o in quella dedicata ai collage.
-      Sono indipendenti per stile, tipografia e layout.
-    </p>
-    <div class="actions">
-      <a class="btn primary" href={`${base}scrittrice/`}>Scrittrice</a>
-      <a class="btn ghost" href={`${base}collagista/`}>Collagista</a>
-    </div>
-  </section>
-
-  <section class="cards">
-    <a class="card" href={`${base}scrittrice/`}>
-      <h2>Scrittrice</h2>
-      <p>Bio, libri, testi, rassegna, contatti editoriali.</p>
-    </a>
-    <a class="card" href={`${base}collagista/`}>
-      <h2>Collagista</h2>
-      <p>Portfolio, serie, immagini, mostre, stampa.</p>
-    </a>
-  </section>
+<LandingLayout title="Claudia D'Angelo">
+  <LandingScene />
 </LandingLayout>

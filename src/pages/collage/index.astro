@@ -1,0 +1,22 @@
+---
+import LandingLayout from "../../layouts/LandingLayout.astro";
+const base = import.meta.env.BASE_URL;
+---
+
+<LandingLayout title="Collage">
+  <section class="placeholder-page">
+    <p class="placeholder-kicker">collage</p>
+    <h1>Questa stanza apre sulla parte visiva del sito.</h1>
+    <p class="placeholder-text">
+      Qui arriveranno serie, immagini, dettagli di opere, eventuali mostre e una struttura pensata
+      per far respirare bene i lavori senza trasformare tutto in una griglia standard.
+    </p>
+    <p class="placeholder-text">
+      La pagina è pronta come placeholder di navigazione e possiamo poi svilupparla con un tema del
+      tutto autonomo.
+    </p>
+    <p>
+      <a class="btn ghost" href={base}>Torna alla stanza</a>
+    </p>
+  </section>
+</LandingLayout>

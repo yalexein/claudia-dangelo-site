@@ -1,0 +1,94 @@
+---
+import BioLayout from "../../layouts/BioLayout.astro";
+import StyleEditorPanel from "../../components/StyleEditorPanel.astro";
+import "../../styles/bio.css";
+
+const bioPresets = {
+  background: "#fffdfb",
+  background2: "#f7f2eb",
+  background3: "#ffe1e6",
+  backgroundMode: "solid",
+  backgroundAngle: 90,
+  text: "#1f1a17",
+  text2: "#65453d",
+  text3: "#ef4b5b",
+  textMode: "solid",
+  textAngle: 90,
+  accent: "#ef4b5b",
+  font:
+    '"Baskerville", "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Garamond, Georgia, serif',
+  titleFont: '"Didot", "Bodoni 72", "Bodoni MT", "Times New Roman", serif',
+  fontSize: 23,
+  lineHeight: 1.47,
+  letterSpacing: -0.012,
+  wordSpacing: 0,
+  copyWidth: 72,
+  align: "left",
+  x: 6,
+  y: 6,
+};
+
+const bioContentSchema = [
+  {
+    id: "bio-title",
+    label: "Titolo",
+    selector: '[data-content-block="bio-title"]',
+    defaultText: "claudia,",
+    editable: true,
+    transform: "none",
+  },
+  {
+    id: "bio-body",
+    label: "Corpo",
+    selector: '[data-content-block="bio-body"]',
+    defaultText:
+      "Claudia D'Angelo e una scrittrice e artista visiva italiana che lavora tra scrittura breve, collage analogico e immagini d'archivio. La sua pratica nasce dall'osservazione di materiali minimi, fotografie trovate, lettere incomplete, margini annotati, che vengono ricomposti in testi e pagine dove il bianco, il ritmo e la voce hanno lo stesso peso delle parole.\n\nNel suo lavoro convivono memoria, precisione editoriale e una forma di intimita trattenuta. Costruisce libri d'artista, sequenze di collage e prose essenziali, cercando un equilibrio tra nitidezza visiva e sospensione narrativa, con attenzione per il dettaglio che resta, per cio che si perde e per cio che ritorna.\n\nLa sua ricerca si muove attorno a una domanda semplice: come si racconta una presenza senza esaurirla? In questa traiettoria, la biografia non e un elenco di tappe ma una forma di montaggio, un modo di avvicinare il lettore a un paesaggio interiore sobrio, silenzioso e profondamente umano.",
+    editable: true,
+    transform: "none",
+  },
+];
+---
+
+<BioLayout title="Bio">
+  <section class="bio-page">
+    <StyleEditorPanel
+      panelTitle="Bio editor"
+      storageNamespace="bio"
+      presets={bioPresets}
+      contentSchema={bioContentSchema}
+      contentStorageNamespace="bio"
+    />
+
+    <div class="bio-frame">
+      <div class="bio-canvas">
+        <article class="bio-copy">
+          <h1 class="bio-title editable-text" data-content-block="bio-title">claudia<span>,</span></h1>
+
+          <div class="bio-body editable-text" data-content-block="bio-body" data-content-rich="paragraphs">
+            <p>
+              Claudia D'Angelo e una <span class="accent">scrittrice</span> e artista visiva italiana che
+              lavora tra <span class="accent">scrittura breve</span>, collage analogico e immagini d'archivio.
+              La sua pratica nasce dall'osservazione di materiali minimi, fotografie trovate,
+              <span class="accent">lettere incomplete</span>, margini annotati, che vengono ricomposti in testi e
+              pagine dove il bianco, il ritmo e la voce hanno lo stesso peso delle parole.
+            </p>
+
+            <p>
+              Nel suo lavoro convivono <span class="accent">memoria</span>, precisione editoriale e una forma di
+              intimita trattenuta. Costruisce libri d'artista, sequenze di collage e prose essenziali,
+              cercando un equilibrio tra nitidezza visiva e sospensione narrativa, con attenzione per il
+              dettaglio che resta, per cio che si perde e per cio che ritorna.
+            </p>
+
+            <p>
+              La sua ricerca si muove attorno a una domanda semplice: come si racconta una presenza senza
+              esaurirla? In questa traiettoria, la <span class="accent">biografia</span> non e un elenco di tappe
+              ma una forma di montaggio, un modo di avvicinare il lettore a un paesaggio interiore sobrio,
+              silenzioso e profondamente umano.
+            </p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+</BioLayout>

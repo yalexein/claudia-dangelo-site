@@ -1,11 +1,11 @@
 :root {
   color-scheme: light;
-  --bg: #0b0f19;
-  --fg: #f3f4f6;
-  --muted: rgba(243, 244, 246, 0.72);
-  --card: rgba(255, 255, 255, 0.06);
-  --border: rgba(255, 255, 255, 0.12);
-  --accent: #a78bfa;
+  --paper: #f7efe3;
+  --paper-soft: #ece0cf;
+  --shadow: rgba(72, 51, 38, 0.12);
+  --ink: #3f302c;
+  --muted: rgba(63, 48, 44, 0.7);
+  --line: rgba(96, 72, 59, 0.24);
 }
 
 * {
@@ -16,12 +16,12 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background: radial-gradient(1200px 600px at 20% 0%, rgba(167, 139, 250, 0.18), transparent 55%),
-    radial-gradient(900px 500px at 90% 30%, rgba(56, 189, 248, 0.12), transparent 55%),
-    var(--bg);
-  color: var(--fg);
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial,
-    "Apple Color Emoji", "Segoe UI Emoji";
+  min-height: 100%;
+  background:
+    radial-gradient(circle at top, rgba(255, 252, 245, 0.92), transparent 36%),
+    linear-gradient(180deg, #fbf8f3 0%, #efe4d4 100%);
+  color: var(--ink);
+  font-family: Georgia, "Times New Roman", serif;
 }
 
 a {
@@ -30,101 +30,604 @@ a {
 }
 
 .container {
-  max-width: 980px;
-  padding: 48px 20px 72px;
+  max-width: 1240px;
+  min-height: 100vh;
+  padding: 30px 20px 64px;
   margin: 0 auto;
 }
 
-.hero {
-  padding: 44px 24px;
-  border: 1px solid var(--border);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
-  border-radius: 18px;
+.landing-stage {
+  display: grid;
+  place-items: center;
+  gap: 20px;
+  min-height: calc(100vh - 94px);
 }
 
-.kicker {
+.site-signature {
+  text-align: center;
+  display: grid;
+  gap: 6px;
+}
+
+.site-name {
+  margin: 0;
+  font-size: 18px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.site-whisper {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+.landing-scene {
+  position: relative;
+  width: min(100%, 1040px);
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at 50% 14%, rgba(255, 252, 247, 0.92), transparent 26%),
+    linear-gradient(180deg, #f7f0e4 0%, #e4d2bd 66%, #ceb49b 66%, #bc9d81 100%);
+  box-shadow: 0 32px 70px var(--shadow);
+}
+
+.landing-scene::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, transparent 0, transparent 61%, rgba(122, 89, 64, 0.08) 61%, rgba(122, 89, 64, 0.08) 62%, transparent 62%),
+    repeating-linear-gradient(
+      90deg,
+      rgba(113, 82, 61, 0.03) 0,
+      rgba(113, 82, 61, 0.03) 1px,
+      transparent 1px,
+      transparent 14px
+    );
+  pointer-events: none;
+}
+
+.landing-element {
+  position: absolute;
+  transform: translateX(-50%);
+}
+
+.window-bird {
+  --bird-x: 0px;
+  --bird-y: 0px;
+  --bird-direction: 1;
+  --bird-tilt: 0deg;
+  --bird-shadow-scale: 1;
+  --bird-shadow-opacity: 0.2;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: clamp(112px, 14.3vw, 161px);
+  aspect-ratio: 3 / 2;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  z-index: 3;
+  touch-action: manipulation;
+  transform: translate3d(var(--bird-x), var(--bird-y), 0) translate(-50%, -50%);
+  will-change: transform;
+}
+
+.window-bird__shadow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 58%;
+  height: 14%;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(73, 55, 44, 0.35) 0%, rgba(73, 55, 44, 0.04) 72%, transparent 100%);
+  transform: translate(-50%, 28px) scaleX(var(--bird-shadow-scale));
+  opacity: var(--bird-shadow-opacity);
+  filter: blur(1px);
+  pointer-events: none;
+}
+
+.window-bird__sprite {
+  position: absolute;
+  inset: 0;
+  transform: scaleX(var(--bird-direction)) rotate(var(--bird-tilt));
+  transform-origin: 50% 58%;
+  will-change: transform;
+}
+
+.window-bird__frame-set {
+  position: absolute;
+  inset: 0;
+}
+
+.window-bird__frame {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity 180ms ease, transform 180ms ease, filter 180ms ease;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.window-bird__frame.is-active {
+  opacity: 1;
+}
+
+.window-bird__art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 9px 16px rgba(82, 58, 43, 0.14));
+  transition: opacity 180ms ease;
+}
+
+.window-bird.show-fallback .window-bird__fallback {
+  opacity: 1;
+}
+
+.window-bird.has-raster-assets .window-bird__fallback {
+  opacity: 0;
+}
+
+.window-bird__wash {
+  fill: rgba(255, 255, 255, 0.42);
+  opacity: 0.85;
+}
+
+.window-bird__tail {
+  fill: #25272d;
+  transform-box: fill-box;
+  transform-origin: right center;
+  animation: bird-tail-sway 3.4s ease-in-out infinite;
+}
+
+.window-bird__tail-feather {
+  fill: rgba(255, 255, 255, 0.98);
+  transform-box: fill-box;
+  transform-origin: right center;
+  animation: bird-tail-sway 3.4s ease-in-out infinite;
+}
+
+.window-bird__body {
+  fill: #fcfcfb;
+  stroke: rgba(91, 85, 78, 0.12);
+  stroke-width: 1.1;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: bird-body-breathe 4.6s ease-in-out infinite;
+}
+
+.window-bird__back {
+  fill: #b6bcc3;
+  opacity: 0.95;
+}
+
+.window-bird__belly {
+  fill: #ffffff;
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0.92;
+}
+
+.window-bird__wing {
+  fill: #6b7077;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: bird-idle-wing 4s ease-in-out infinite;
+}
+
+.window-bird__wing-bar {
+  fill: rgba(255, 255, 255, 0.88);
+  opacity: 0.9;
+}
+
+.window-bird__head {
+  fill: #ffffff;
+  stroke: rgba(91, 85, 78, 0.1);
+  stroke-width: 1;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: bird-head-nod 5.6s ease-in-out infinite;
+}
+
+.window-bird__cap,
+.window-bird__mask,
+.window-bird__bib {
+  fill: #1b1d23;
+}
+
+.window-bird__eye {
+  fill: #221d1c;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.window-bird__eye-spark {
+  fill: rgba(255, 255, 255, 0.82);
+}
+
+.window-bird__face {
+  fill: rgba(255, 255, 255, 0.96);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.window-bird__beak {
+  fill: #262931;
+}
+
+.window-bird__legs {
+  fill: none;
+  stroke: rgba(40, 43, 51, 0.88);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.window-bird__beak--upper,
+.window-bird__beak--lower {
+  transform-box: fill-box;
+  transform-origin: left center;
+  transition: transform 180ms ease;
+}
+
+.window-bird__wash,
+.window-bird__tail,
+.window-bird__tail-feather,
+.window-bird__body,
+.window-bird__back,
+.window-bird__belly,
+.window-bird__wing,
+.window-bird__head,
+.window-bird__face,
+.window-bird__eye {
+  transition: transform 220ms ease, fill 220ms ease, opacity 220ms ease;
+}
+
+.window-bird:hover .window-bird__body,
+.window-bird:focus-visible .window-bird__body {
+  fill: #ffffff;
+}
+
+.window-bird:hover .window-bird__back,
+.window-bird:focus-visible .window-bird__back {
+  fill: #c1c8cf;
+}
+
+.window-bird:hover .window-bird__wash,
+.window-bird:focus-visible .window-bird__wash {
+  opacity: 1;
+}
+
+.window-bird.is-flying .window-bird__wing {
+  animation: bird-flight-wing 0.42s ease-in-out infinite;
+}
+
+.window-bird.is-flying .window-bird__body,
+.window-bird.is-flying .window-bird__head {
+  animation: none;
+}
+
+.window-bird.is-flying .window-bird__tail {
+  animation: bird-flight-tail 0.42s ease-in-out infinite;
+}
+
+.window-bird.is-flying .window-bird__tail-feather {
+  animation: bird-flight-tail 0.42s ease-in-out infinite;
+}
+
+.window-bird.is-flying .window-bird__wash {
+  opacity: 0.7;
+}
+
+.window-bird.is-chirping .window-bird__body,
+.window-bird.is-chirping .window-bird__head,
+.window-bird.is-chirping .window-bird__tail,
+.window-bird.is-chirping .window-bird__tail-feather,
+.window-bird.is-chirping .window-bird__wing {
+  animation: none;
+}
+
+.window-bird.is-chirping .window-bird__head {
+  transform: translate(1px, -1px);
+}
+
+.window-bird.is-chirping .window-bird__body,
+.window-bird.is-chirping .window-bird__belly {
+  transform: scale(0.98, 1.03);
+}
+
+.window-bird.is-chirping .window-bird__wing {
+  transform: rotate(-17deg) translate(-1px, -4px);
+}
+
+.window-bird.is-chirping .window-bird__tail {
+  transform: rotate(-16deg) translate(-2px, -1px);
+}
+
+.window-bird.is-chirping .window-bird__tail-feather {
+  transform: rotate(-18deg) translate(-2px, -1px);
+}
+
+.window-bird.is-chirping .window-bird__face {
+  transform: scale(1.03);
+}
+
+.window-bird.is-chirping .window-bird__eye {
+  transform: scaleY(0.72);
+}
+
+.window-bird.is-chirping .window-bird__beak--upper {
+  transform: rotate(-12deg) translateY(-1px);
+}
+
+.window-bird.is-chirping .window-bird__beak--lower {
+  transform: rotate(14deg) translateY(3px);
+}
+
+.window-bird:focus-visible {
+  outline: 2px solid rgba(93, 66, 53, 0.44);
+  outline-offset: 6px;
+  border-radius: 999px;
+}
+
+.interactive-swap {
+  user-select: none;
+}
+
+.interactive-swap__frame {
+  position: relative;
+  width: 100%;
+}
+
+.interactive-swap__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  image-rendering: auto;
+  -webkit-user-drag: none;
+}
+
+.interactive-swap__overlay {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity 160ms ease;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.interactive-swap__overlay.is-active {
+  opacity: 1;
+}
+
+.interactive-swap__preload {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.interactive-swap__zone {
+  position: absolute;
+  appearance: none;
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  outline: none;
+}
+
+.placeholder-page {
+  max-width: 720px;
+  margin: 8vh auto 0;
+  padding: 36px 28px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: rgba(251, 246, 238, 0.72);
+  box-shadow: 0 24px 50px rgba(102, 75, 56, 0.09);
+}
+
+.placeholder-kicker {
   margin: 0 0 10px;
+  font-size: 12px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  font-size: 12px;
   color: var(--muted);
 }
 
 h1 {
-  margin: 0 0 10px;
-  font-size: 44px;
-  line-height: 1.08;
+  margin: 0 0 14px;
+  font-size: clamp(34px, 5vw, 58px);
+  line-height: 1.02;
   letter-spacing: -0.02em;
 }
 
-.lead {
-  margin: 0;
+.placeholder-text {
+  margin: 0 0 14px;
   max-width: 64ch;
   color: var(--muted);
-  font-size: 16px;
-  line-height: 1.6;
-}
-
-.actions {
-  margin-top: 22px;
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
+  font-size: 18px;
+  line-height: 1.7;
 }
 
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 44px;
+  min-height: 44px;
   padding: 0 16px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: transparent;
+  border-radius: 999px;
+  border: 1px solid rgba(83, 61, 50, 0.18);
+  background: rgba(252, 246, 238, 0.88);
 }
 
-.btn.primary {
-  border-color: rgba(167, 139, 250, 0.5);
-  background: rgba(167, 139, 250, 0.18);
+.btn:hover,
+.btn:focus-visible {
+  background: #fff8ee;
 }
 
-.btn.ghost:hover,
-.btn.primary:hover {
-  transform: translateY(-1px);
-  transition: transform 120ms ease;
+.btn:focus-visible,
+.interactive-swap__zone:focus-visible {
+  outline: 2px solid rgba(93, 66, 53, 0.38);
+  outline-offset: 3px;
 }
 
-.cards {
-  margin-top: 18px;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+@media (max-width: 900px) {
+  .container {
+    padding-top: 22px;
+  }
+
+  .landing-scene {
+    width: 100%;
+    border-radius: 24px;
+  }
 }
 
-.card {
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  background: var(--card);
-  padding: 18px 18px 16px;
-}
+@media (max-width: 700px) {
+  .landing-stage {
+    gap: 20px;
+    min-height: auto;
+  }
 
-.card h2 {
-  margin: 0 0 6px;
-  font-size: 18px;
-}
+  .site-name {
+    font-size: 15px;
+  }
 
-.card p {
-  margin: 0;
-  color: var(--muted);
-  line-height: 1.5;
-}
+  .site-whisper {
+    font-size: 12px;
+  }
 
-@media (max-width: 720px) {
   h1 {
-    font-size: 36px;
+    font-size: clamp(28px, 9vw, 40px);
   }
-  .cards {
-    grid-template-columns: 1fr;
+
+  .landing-scene {
+    aspect-ratio: 4 / 5;
+  }
+
+  .window-bird {
+    width: clamp(94px, 31.2vw, 140px);
+  }
+
+  .landing-element {
+    width: 88% !important;
+    left: 50% !important;
+    bottom: 14% !important;
+  }
+
+  .placeholder-page {
+    margin-top: 4vh;
+    padding: 24px 18px;
+  }
+
+  .placeholder-text {
+    font-size: 17px;
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .window-bird__tail,
+  .window-bird__tail-feather,
+  .window-bird__body,
+  .window-bird__head,
+  .window-bird__wing {
+    animation: none;
+  }
+}
+
+@keyframes bird-body-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.014, 0.99) translateY(0.4px);
+  }
+}
+
+@keyframes bird-head-nod {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+
+  36% {
+    transform: translate(0.6px, -1.3px) rotate(-2deg);
+  }
+
+  72% {
+    transform: translate(-0.4px, 0.3px) rotate(0.9deg);
+  }
+}
+
+@keyframes bird-tail-sway {
+  0%,
+  100% {
+    transform: rotate(-14deg) translate(0, 0);
+  }
+
+  45% {
+    transform: rotate(8deg) translate(-1px, -1px);
+  }
+
+  74% {
+    transform: rotate(-4deg) translate(0, 1px);
+  }
+}
+
+@keyframes bird-idle-wing {
+  0%,
+  100% {
+    transform: rotate(-6deg) translate(0, 0);
+  }
+
+  50% {
+    transform: rotate(-1deg) translate(0, -1px);
+  }
+}
+
+@keyframes bird-flight-wing {
+  0%,
+  100% {
+    transform: rotate(-18deg) translate(0, 1px);
+  }
+
+  50% {
+    transform: rotate(18deg) translate(-1px, -6px);
+  }
+}
+
+@keyframes bird-flight-tail {
+  0%,
+  100% {
+    transform: rotate(-22deg) translate(0, 1px);
+  }
+
+  50% {
+    transform: rotate(20deg) translate(-2px, -3px);
+  }
+}

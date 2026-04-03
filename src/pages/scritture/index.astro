@@ -1,0 +1,21 @@
+---
+import LandingLayout from "../../layouts/LandingLayout.astro";
+const base = import.meta.env.BASE_URL;
+---
+
+<LandingLayout title="Scritture">
+  <section class="placeholder-page">
+    <p class="placeholder-kicker">scritture</p>
+    <h1>Questa stanza apre sulla parte dedicata ai testi.</h1>
+    <p class="placeholder-text">
+      Qui possiamo organizzare racconti, estratti, progetti editoriali, note e pubblicazioni con una
+      gerarchia più letteraria e un ritmo visivo diverso rispetto al resto del sito.
+    </p>
+    <p class="placeholder-text">
+      Il link è già attivo, così la homepage può funzionare fin da subito come interfaccia narrativa.
+    </p>
+    <p>
+      <a class="btn ghost" href={base}>Torna alla stanza</a>
+    </p>
+  </section>
+</LandingLayout>

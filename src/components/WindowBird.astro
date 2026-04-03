@@ -1,0 +1,622 @@
+---
+const base = import.meta.env.BASE_URL;
+
+const birdFrames = [
+  {
+    id: "idle",
+    src: `${base}images/landing/bird/bird-idle.webp`,
+    core: true,
+  },
+  {
+    id: "look",
+    src: `${base}images/landing/bird/bird-look.webp`,
+    core: false,
+  },
+  {
+    id: "flight-1",
+    src: `${base}images/landing/bird/bird-flight-1.webp`,
+    core: false,
+  },
+  {
+    id: "flight-2",
+    src: `${base}images/landing/bird/bird-flight-2.webp`,
+    core: false,
+  },
+  {
+    id: "flight-3",
+    src: `${base}images/landing/bird/bird-flight-3.webp`,
+    core: false,
+  },
+  {
+    id: "flight",
+    src: `${base}images/landing/bird/bird-flight.webp`,
+    core: true,
+  },
+  {
+    id: "chirp",
+    src: `${base}images/landing/bird/bird-chirp.webp`,
+    core: true,
+  },
+];
+---
+
+<button class="window-bird" type="button" aria-label="Fai cinguettare l'uccellino" data-window-bird>
+  <span class="window-bird__shadow" aria-hidden="true"></span>
+
+  <span class="window-bird__sprite" aria-hidden="true">
+    <span class="window-bird__frame-set" aria-hidden="true">
+      {birdFrames.map((frame) => (
+        <img
+          class={`window-bird__frame window-bird__frame--${frame.id}`}
+          src={frame.src}
+          alt=""
+          loading="eager"
+          decoding="async"
+          draggable="false"
+          data-bird-frame={frame.id}
+          data-bird-core={frame.core ? "true" : "false"}
+        />
+      ))}
+    </span>
+
+    <svg class="window-bird__art window-bird__fallback" viewBox="0 0 240 140" role="presentation">
+      <path class="window-bird__wash" d="M87 73C95 50 120 36 150 37C175 38 193 49 199 63C189 54 168 49 148 52C124 55 102 64 87 73Z"></path>
+      <path class="window-bird__tail" d="M92 72C61 86 26 93 10 88C29 72 56 58 95 59Z"></path>
+      <path class="window-bird__tail-feather" d="M84 77C60 92 30 100 17 96C33 84 55 74 87 71Z"></path>
+      <path class="window-bird__body" d="M82 84C82 58 104 41 137 40C168 39 192 55 194 75C195 91 180 103 153 106C117 111 87 103 82 84Z"></path>
+      <path class="window-bird__back" d="M87 79C95 56 116 44 142 44C165 44 183 54 190 67C180 67 169 68 156 66C130 63 109 68 87 79Z"></path>
+      <path class="window-bird__belly" d="M93 84C103 95 122 100 147 98C166 97 179 92 186 85C175 101 152 109 126 108C108 107 96 99 93 84Z"></path>
+      <path class="window-bird__wing" d="M119 58C100 63 87 78 94 93C110 99 131 95 147 83C145 66 134 56 119 58Z"></path>
+      <path class="window-bird__wing-bar" d="M111 77C121 72 132 69 142 70C133 78 122 84 109 88Z"></path>
+      <path class="window-bird__head" d="M146 55C148 40 159 30 175 30C190 30 201 40 202 54C203 66 194 77 180 79C163 81 151 71 146 55Z"></path>
+      <path class="window-bird__cap" d="M153 49C156 37 164 31 175 31C186 31 194 37 197 47C186 43 169 43 153 49Z"></path>
+      <path class="window-bird__mask" d="M152 56C161 49 173 47 186 49C180 59 168 66 156 67Z"></path>
+      <path class="window-bird__bib" d="M151 69C161 69 170 77 170 90C159 88 151 82 148 72Z"></path>
+      <path class="window-bird__face" d="M154 58C159 51 167 47 176 47C173 57 164 65 154 67Z"></path>
+      <circle class="window-bird__eye" cx="178" cy="48" r="2.9"></circle>
+      <circle class="window-bird__eye-spark" cx="179.1" cy="47.1" r="0.95"></circle>
+
+      <g class="window-bird__beak window-bird__beak--upper">
+        <path d="M196 52L218 48L198 56Z"></path>
+      </g>
+      <g class="window-bird__beak window-bird__beak--lower">
+        <path d="M196 54L216 59L198 58Z"></path>
+      </g>
+
+      <g class="window-bird__legs">
+        <path d="M118 101L116 124"></path>
+        <path d="M136 99L135 124"></path>
+        <path d="M110 124L120 124"></path>
+        <path d="M129 124L140 124"></path>
+      </g>
+    </svg>
+  </span>
+</button>
+
+<script>
+  const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+  const easeInOutCubic = (value) =>
+    value < 0.5 ? 4 * value * value * value : 1 - Math.pow(-2 * value + 2, 3) / 2;
+  const quadraticPoint = (start, control, end, t) => {
+    const inverse = 1 - t;
+
+    return {
+      x: inverse * inverse * start.x + 2 * inverse * t * control.x + t * t * end.x,
+      y: inverse * inverse * start.y + 2 * inverse * t * control.y + t * t * end.y,
+    };
+  };
+
+  const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  const playSynthChirp = async (audioContext) => {
+    const volumeBoost = 1.4;
+    const chirpAt = (startTime, from, to, duration, peak, harmonicRatio = 1.82) => {
+      const oscillator = audioContext.createOscillator();
+      const harmonic = audioContext.createOscillator();
+      const filter = audioContext.createBiquadFilter();
+      const gain = audioContext.createGain();
+      const harmonicMix = audioContext.createGain();
+
+      oscillator.type = "triangle";
+      harmonic.type = "sine";
+
+      oscillator.frequency.setValueAtTime(from, startTime);
+      oscillator.frequency.exponentialRampToValueAtTime(to, startTime + duration * 0.42);
+      oscillator.frequency.exponentialRampToValueAtTime(from * 0.84, startTime + duration);
+
+      harmonic.frequency.setValueAtTime(from * harmonicRatio, startTime);
+      harmonic.frequency.exponentialRampToValueAtTime(to * (harmonicRatio + 0.04), startTime + duration * 0.4);
+      harmonic.frequency.exponentialRampToValueAtTime(from * harmonicRatio * 0.82, startTime + duration);
+      harmonic.detune.setValueAtTime(4, startTime);
+
+      filter.type = "bandpass";
+      filter.frequency.setValueAtTime(to * 0.94, startTime);
+      filter.Q.setValueAtTime(8.2, startTime);
+
+      gain.gain.setValueAtTime(0.0001, startTime);
+      gain.gain.exponentialRampToValueAtTime(peak * volumeBoost, startTime + 0.014);
+      gain.gain.exponentialRampToValueAtTime(peak * volumeBoost * 0.56, startTime + duration * 0.34);
+      gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+      harmonicMix.gain.setValueAtTime(0.28, startTime);
+
+      oscillator.connect(filter);
+      harmonic.connect(harmonicMix);
+      harmonicMix.connect(filter);
+      filter.connect(gain);
+      gain.connect(audioContext.destination);
+
+      oscillator.start(startTime);
+      harmonic.start(startTime);
+      oscillator.stop(startTime + duration + 0.02);
+      harmonic.stop(startTime + duration + 0.02);
+    };
+
+    if (audioContext.state === "suspended") {
+      await audioContext.resume();
+    }
+
+    const now = audioContext.currentTime + 0.02;
+    chirpAt(now, 1760, 2620, 0.09, 0.028);
+    chirpAt(now + 0.13, 1580, 2360, 0.11, 0.024, 1.76);
+  };
+
+  document.querySelectorAll("[data-window-bird]").forEach((root) => {
+    if (!(root instanceof HTMLButtonElement) || root.dataset.windowBirdBound === "true") return;
+    root.dataset.windowBirdBound = "true";
+
+    const stage = root.closest(".landing-scene");
+    if (!(stage instanceof HTMLElement)) return;
+
+    const perchAnchors = {
+      intro: { x: 0.58, y: 0.27 },
+      upperLeft: { x: 0.18, y: 0.2 },
+      midLeft: { x: 0.28, y: 0.31 },
+      upperCenter: { x: 0.5, y: 0.18 },
+      upperRight: { x: 0.82, y: 0.2 },
+      midRight: { x: 0.72, y: 0.32 },
+    };
+    const perchKeys = Object.keys(perchAnchors);
+
+    let stageSize = { width: 0, height: 0 };
+    let perchPoints = Object.fromEntries(perchKeys.map((key) => [key, { x: 0, y: 0 }]));
+    let targetPoint = { x: 0, y: 0 };
+    let position = { x: 0, y: 0 };
+    let velocity = { x: 0, y: 0 };
+    let target = { x: 0, y: 0 };
+    let phase = "resting";
+    let flightPlan = null;
+    let currentPerch = "intro";
+    let previousPerch = "intro";
+    let nextPerch = "upperRight";
+    let chirpStart = -Infinity;
+    let landingStart = -Infinity;
+    const flightFrameIds = ["flight-1", "flight-2", "flight-3"];
+    let chirpTimeoutId = 0;
+    let flightTimeoutId = 0;
+    let takeoffTimeoutId = 0;
+    let lookStartTimeoutId = 0;
+    let lookEndTimeoutId = 0;
+    let frameId = 0;
+    let lastTime = performance.now();
+    let audioContext;
+    let launchStart = -Infinity;
+    let flightDirection = 1;
+    let flightFrameProgress = Math.random() * flightFrameIds.length;
+    const idleSeed = Math.random() * Math.PI * 2;
+    const frameImages = Array.from(root.querySelectorAll("[data-bird-frame]")).filter(
+      (frame) => frame instanceof HTMLImageElement,
+    );
+    const frameMap = new Map(frameImages.map((frame) => [frame.dataset.birdFrame ?? "", frame]));
+
+    const availableFrames = new Set();
+
+    const getPreferredFrame = () => {
+      if (phase === "launching") {
+        if (availableFrames.has("flight-1")) return "flight-1";
+        if (availableFrames.has("flight")) return "flight";
+      }
+
+      if (phase === "flying") {
+        const availableFlightFrames = flightFrameIds.filter((id) => availableFrames.has(id));
+        if (availableFlightFrames.length > 0) {
+          const step = Math.floor(flightFrameProgress) % availableFlightFrames.length;
+          return availableFlightFrames[step];
+        }
+
+        if (availableFrames.has("flight")) return "flight";
+      }
+
+      if (root.classList.contains("is-chirping") && availableFrames.has("chirp")) return "chirp";
+      if (root.classList.contains("is-looking") && availableFrames.has("look")) return "look";
+      if (availableFrames.has("idle")) return "idle";
+      return "fallback";
+    };
+
+    const applyFrameSelection = () => {
+      const activeFrame = getPreferredFrame();
+      root.classList.toggle("has-look-frame", availableFrames.has("look"));
+      root.classList.toggle("has-raster-assets", activeFrame !== "fallback");
+
+      frameMap.forEach((frame, id) => {
+        frame.classList.toggle("is-active", id === activeFrame);
+      });
+
+      root.classList.toggle("show-fallback", activeFrame === "fallback");
+    };
+
+    const updateRasterAvailability = () => {
+      availableFrames.clear();
+
+      frameImages.forEach((frame) => {
+        const frameId = frame.dataset.birdFrame;
+        if (frameId && frame.complete && frame.naturalWidth > 0 && frame.naturalHeight > 0) {
+          availableFrames.add(frameId);
+        }
+      });
+
+      applyFrameSelection();
+    };
+
+    frameImages.forEach((frame) => {
+      if (frame.complete) {
+        updateRasterAvailability();
+        return;
+      }
+
+      frame.addEventListener("load", updateRasterAvailability, { once: true });
+      frame.addEventListener("error", updateRasterAvailability, { once: true });
+    });
+
+    const clearLookPose = () => {
+      window.clearTimeout(lookStartTimeoutId);
+      window.clearTimeout(lookEndTimeoutId);
+      root.classList.remove("is-looking");
+      applyFrameSelection();
+    };
+
+    const scheduleLookPose = (delayRange = { min: 1000, max: 3200 }) => {
+      clearLookPose();
+
+      if (phase !== "landed" || !root.classList.contains("has-look-frame")) return;
+
+      lookStartTimeoutId = window.setTimeout(() => {
+        if (phase !== "landed" || root.classList.contains("is-chirping")) return;
+        root.classList.add("is-looking");
+        applyFrameSelection();
+
+        lookEndTimeoutId = window.setTimeout(() => {
+          if (phase !== "landed") return;
+          root.classList.remove("is-looking");
+          applyFrameSelection();
+          scheduleLookPose(
+            Math.random() < 0.22
+              ? { min: 420, max: 980 }
+              : { min: 1200, max: 3600 },
+          );
+        }, 520 + Math.random() * 980);
+      }, delayRange.min + Math.random() * (delayRange.max - delayRange.min));
+    };
+
+    const weightedChoice = (entries) => {
+      const total = entries.reduce((sum, entry) => sum + entry.weight, 0);
+      let threshold = Math.random() * total;
+
+      for (const entry of entries) {
+        threshold -= entry.weight;
+        if (threshold <= 0) return entry.key;
+      }
+
+      return entries[entries.length - 1]?.key ?? "intro";
+    };
+
+    const chooseNextPerch = () => {
+      const currentAnchor = perchAnchors[currentPerch] ?? perchAnchors.intro;
+      const options = perchKeys
+        .filter((key) => key !== currentPerch)
+        .map((key) => {
+          const anchor = perchAnchors[key];
+          const distance = Math.hypot(anchor.x - currentAnchor.x, anchor.y - currentAnchor.y);
+          let weight = 1 + distance * 4;
+
+          if (key === previousPerch) weight *= 0.45;
+          if (Math.abs(anchor.x - currentAnchor.x) < 0.12) weight *= 0.82;
+          if (Math.abs(anchor.y - currentAnchor.y) < 0.06) weight *= 0.92;
+
+          return { key, weight };
+        });
+
+      return weightedChoice(options);
+    };
+
+    const getPerchPoint = (key) => perchPoints[key] ?? perchPoints.intro;
+
+    const scheduleNextFlight = (minDelay, maxDelay) => {
+      window.clearTimeout(flightTimeoutId);
+      nextPerch = chooseNextPerch();
+      targetPoint = { ...getPerchPoint(nextPerch) };
+      const delay = minDelay + Math.random() * (maxDelay - minDelay);
+      flightTimeoutId = window.setTimeout(() => {
+        startFlight();
+      }, delay);
+    };
+
+    const getRestDirection = () => {
+      const currentX = perchAnchors[currentPerch]?.x ?? 0.5;
+      const nextX = perchAnchors[nextPerch]?.x ?? currentX;
+      if (phase === "launching") return nextX >= currentX ? 1 : -1;
+      if (phase === "resting") return nextX >= currentX ? 1 : -1;
+      if (Math.abs(currentX - 0.5) < 0.08) return nextX >= currentX ? 1 : -1;
+      return currentX < 0.5 ? 1 : -1;
+    };
+
+    const buildFlightPlan = (fromPoint, startTime) => {
+      const distanceX = targetPoint.x - fromPoint.x;
+      const distanceY = targetPoint.y - fromPoint.y;
+      const distance = Math.hypot(distanceX, distanceY);
+      const diagonal = Math.max(Math.hypot(stageSize.width, stageSize.height), 1);
+      const lift = clamp(
+        stageSize.height * (0.14 + distance / diagonal * 0.22),
+        stageSize.height * 0.12,
+        stageSize.height * 0.28,
+      );
+      const lateralDrift = clamp(
+        (Math.random() - 0.5) * stageSize.width * 0.08,
+        -stageSize.width * 0.06,
+        stageSize.width * 0.06,
+      );
+
+      return {
+        start: { ...fromPoint },
+        control: {
+          x: fromPoint.x + distanceX * (0.42 + Math.random() * 0.12) + lateralDrift,
+          y: Math.min(fromPoint.y, targetPoint.y) - lift - Math.abs(distanceY) * 0.1,
+        },
+        end: { ...targetPoint },
+        startedAt: startTime,
+        duration: clamp(980 + distance * 1.18, 1120, 2140),
+      };
+    };
+
+    const recalcPoints = (preservePosition = true) => {
+      const rect = stage.getBoundingClientRect();
+      const nextSize = { width: rect.width, height: rect.height };
+
+      if (preservePosition && stageSize.width > 0 && stageSize.height > 0) {
+        position = {
+          x: (position.x / stageSize.width) * nextSize.width,
+          y: (position.y / stageSize.height) * nextSize.height,
+        };
+      }
+
+      stageSize = nextSize;
+      perchPoints = Object.fromEntries(
+        Object.entries(perchAnchors).map(([key, anchor]) => [
+          key,
+          {
+            x: stageSize.width * anchor.x,
+            y: stageSize.height * anchor.y,
+          },
+        ]),
+      );
+
+      targetPoint = { ...getPerchPoint(nextPerch) };
+
+      if (phase === "resting") {
+        position = { ...getPerchPoint(currentPerch) };
+        target = { ...getPerchPoint(currentPerch) };
+      }
+
+      if (phase === "landed" || phase === "launching") {
+        position = { ...getPerchPoint(currentPerch) };
+        target = { ...getPerchPoint(currentPerch) };
+      }
+
+      if (phase === "flying" && !motionPreference.matches) {
+        target = { ...targetPoint };
+        flightPlan = buildFlightPlan(position, performance.now());
+      }
+    };
+
+    const updatePresentation = (time) => {
+      const idleBob = phase === "flying" ? Math.sin(time / 94 + idleSeed) * 2.4 : Math.sin(time / 620 + idleSeed) * 1.15;
+      const perchedSway = phase === "landed" ? Math.sin(time / 860 + idleSeed) * 0.8 : 0;
+      const chirpElapsed = time - chirpStart;
+      const landingElapsed = time - landingStart;
+      const launchElapsed = time - launchStart;
+      const chirpLift =
+        chirpElapsed >= 0 && chirpElapsed <= 320 ? -Math.sin((chirpElapsed / 320) * Math.PI) * 6 : 0;
+      const landingBounce =
+        landingElapsed >= 0 && landingElapsed <= 420
+          ? -Math.sin((landingElapsed / 420) * Math.PI) * 4 * (1 - landingElapsed / 420)
+          : 0;
+      const launchDip =
+        phase === "launching" && launchElapsed >= 0 && launchElapsed <= 240
+          ? Math.sin((launchElapsed / 240) * Math.PI) * 5.2
+          : 0;
+
+      const restingDirection = getRestDirection();
+      const movementDirection =
+        phase === "flying" || phase === "launching" ? flightDirection : restingDirection;
+      const usingRasterAssets = availableFrames.size > 0;
+      const direction = usingRasterAssets ? -movementDirection : movementDirection;
+      const tiltBase =
+        phase === "flying"
+          ? velocity.y * 0.038 + flightDirection * Math.min(Math.abs(velocity.x), 280) * 0.012
+          : 0;
+      const launchLean = phase === "launching" ? flightDirection * 8 : 0;
+      const tilt = clamp(tiltBase + launchLean, -12, 12);
+      const clampedY = clamp(position.y, 44, stageSize.height * 0.42);
+
+      root.style.setProperty("--bird-x", `${clamp(position.x, 40, stageSize.width - 40)}px`);
+      root.style.setProperty(
+        "--bird-y",
+        `${clampedY + idleBob + perchedSway + chirpLift + landingBounce + launchDip}px`,
+      );
+      root.style.setProperty("--bird-direction", `${direction}`);
+      root.style.setProperty("--bird-tilt", `${tilt}deg`);
+      root.style.setProperty(
+        "--bird-shadow-scale",
+        phase === "flying" ? "0.82" : phase === "launching" ? "0.9" : "1",
+      );
+      root.style.setProperty(
+        "--bird-shadow-opacity",
+        phase === "flying" ? "0.08" : phase === "launching" ? "0.14" : "0.2",
+      );
+    };
+
+    const animate = (time) => {
+      const dt = Math.min((time - lastTime) / 1000, 0.04);
+      lastTime = time;
+
+      if (phase === "flying" && flightPlan && !motionPreference.matches) {
+        const progress = clamp((time - flightPlan.startedAt) / flightPlan.duration, 0, 1);
+        const easedProgress = easeInOutCubic(progress);
+        const nextPosition = quadraticPoint(
+          flightPlan.start,
+          flightPlan.control,
+          flightPlan.end,
+          easedProgress,
+        );
+
+        velocity =
+          dt > 0
+            ? {
+                x: (nextPosition.x - position.x) / dt,
+                y: (nextPosition.y - position.y) / dt,
+              }
+            : velocity;
+
+        position = nextPosition;
+        const speed = Math.hypot(velocity.x, velocity.y);
+        const flapRate = clamp(speed / 540, 0.85, 2.2);
+        const availableFlightFrames = flightFrameIds.filter((id) => availableFrames.has(id));
+        if (availableFlightFrames.length > 0) {
+          flightFrameProgress += dt * flapRate * availableFlightFrames.length;
+        }
+
+        if (progress >= 1) {
+          position = { ...targetPoint };
+          velocity = { x: 0, y: 0 };
+          target = { ...targetPoint };
+          previousPerch = currentPerch;
+          currentPerch = nextPerch;
+          phase = "landed";
+          flightPlan = null;
+          landingStart = time;
+          root.classList.remove("is-flying");
+          root.classList.remove("is-launching");
+          root.classList.add("is-perched");
+          applyFrameSelection();
+          scheduleLookPose();
+          scheduleNextFlight(4200, 8400);
+        }
+      }
+
+      if (phase === "flying") {
+        applyFrameSelection();
+      }
+
+      updatePresentation(time);
+      frameId = window.requestAnimationFrame(animate);
+    };
+
+    const beginFlight = () => {
+      phase = "flying";
+      target = { ...targetPoint };
+      landingStart = -Infinity;
+      flightPlan = buildFlightPlan(position, performance.now());
+      flightFrameProgress = Math.random() * flightFrameIds.length;
+      root.classList.add("is-flying");
+      root.classList.remove("is-launching");
+      root.classList.remove("is-perched");
+      applyFrameSelection();
+    };
+
+    const startFlight = () => {
+      if (phase === "flying" || phase === "launching") return;
+      targetPoint = { ...getPerchPoint(nextPerch) };
+      clearLookPose();
+      flightDirection = targetPoint.x >= position.x ? 1 : -1;
+
+      if (motionPreference.matches) {
+        previousPerch = currentPerch;
+        currentPerch = nextPerch;
+        phase = "landed";
+        position = { ...targetPoint };
+        target = { ...targetPoint };
+        landingStart = performance.now();
+        root.classList.add("is-perched");
+        updatePresentation(performance.now());
+        applyFrameSelection();
+        scheduleLookPose();
+        scheduleNextFlight(4200, 8400);
+        return;
+      }
+
+      phase = "launching";
+      target = { ...position };
+      launchStart = performance.now();
+      landingStart = -Infinity;
+      velocity = { x: 0, y: 0 };
+      root.classList.add("is-launching");
+      applyFrameSelection();
+      updatePresentation(launchStart);
+      window.clearTimeout(takeoffTimeoutId);
+      takeoffTimeoutId = window.setTimeout(() => {
+        if (phase !== "launching") return;
+        beginFlight();
+      }, 170 + Math.random() * 120);
+    };
+
+    const chirp = async () => {
+      chirpStart = performance.now();
+      root.classList.add("is-chirping");
+      applyFrameSelection();
+      window.clearTimeout(chirpTimeoutId);
+      chirpTimeoutId = window.setTimeout(() => {
+        root.classList.remove("is-chirping");
+        applyFrameSelection();
+      }, 360);
+
+      try {
+        const Context = window.AudioContext || window.webkitAudioContext;
+        if (!Context) return;
+        audioContext ??= new Context();
+        await playSynthChirp(audioContext);
+      } catch (error) {
+        console.warn("Impossibile riprodurre il cinguettio.", error);
+      }
+    };
+
+    recalcPoints(false);
+    updateRasterAvailability();
+    updatePresentation(performance.now());
+
+    scheduleNextFlight(3000, 4600);
+    frameId = window.requestAnimationFrame(animate);
+
+    root.addEventListener("click", chirp);
+
+    const resizeObserver = new ResizeObserver(() => {
+      recalcPoints(true);
+      updatePresentation(performance.now());
+    });
+
+    resizeObserver.observe(stage);
+
+    window.addEventListener(
+      "pagehide",
+      () => {
+        window.cancelAnimationFrame(frameId);
+        window.clearTimeout(chirpTimeoutId);
+        window.clearTimeout(flightTimeoutId);
+        window.clearTimeout(takeoffTimeoutId);
+        window.clearTimeout(lookStartTimeoutId);
+        window.clearTimeout(lookEndTimeoutId);
+        resizeObserver.disconnect();
+      },
+      { once: true },
+    );
+  });
+</script>

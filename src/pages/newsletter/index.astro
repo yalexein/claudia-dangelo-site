@@ -1,0 +1,265 @@
+---
+import BioLayout from "../../layouts/BioLayout.astro";
+import StyleEditorPanel from "../../components/StyleEditorPanel.astro";
+import "../../styles/newsletter.css";
+
+const base = import.meta.env.BASE_URL;
+const overlayStorageKey = "claudia-editor-newsletter-overlay-settings";
+
+const newsletterPresets = {
+  background: "#cbc0e9",
+  background2: "#cec5eb",
+  background3: "#c4b8e5",
+  backgroundMode: "solid",
+  backgroundAngle: 90,
+  text: "#3d44f4",
+  text2: "#2f39f1",
+  text3: "#6070fb",
+  textMode: "solid",
+  textAngle: 90,
+  accent: "#3d44f4",
+  font: '"PT Mono Local", "IBM Plex Mono", "Courier New", monospace',
+  titleFont: '"PT Mono Local", "IBM Plex Mono", "Courier New", monospace',
+  fontSize: 15.2,
+  lineHeight: 1.56,
+  letterSpacing: 0.004,
+  wordSpacing: 0,
+  copyWidth: 64,
+  align: "left",
+  x: 0,
+  y: 0,
+};
+
+const newsletterPageDefaults = {
+  cardWidth: 620,
+  cardMinHeight: 430,
+  cardGap: 56,
+  cardPaddingX: 38,
+  cardPaddingY: 34,
+  cardBorderColor: "#3d44f4",
+  cardBorderWidth: 2,
+  echoBorderColor: "#3d44f4",
+  echoOffsetX: 6,
+  echoOffsetY: 6,
+  topbarBorderWidth: 2,
+  cardFillColor: "#c8bde6",
+  shellBorderRadius: 14,
+  shellPadding: 10,
+  dateSize: 11,
+  titleSize: 44,
+  excerptSize: 15.2,
+  tagsSize: 14,
+  footerTopSpacing: 92,
+  overlayVisible: false,
+  overlayOpacity: 0.42,
+  overlayScale: 1,
+  overlayX: 0,
+  overlayY: 0,
+};
+
+const newsletterPageControls = [
+  { key: "cardWidth", type: "range", label: "Larghezza box", default: 620, min: 420, max: 920, step: 1, unit: "px", cssVar: "--newsletter-card-width" },
+  { key: "cardMinHeight", type: "range", label: "Altezza min box", default: 430, min: 260, max: 720, step: 1, unit: "px", cssVar: "--newsletter-card-min-height" },
+  { key: "cardGap", type: "range", label: "Distanza box", default: 56, min: 12, max: 140, step: 1, unit: "px", cssVar: "--newsletter-card-gap" },
+  { key: "cardPaddingX", type: "range", label: "Padding X box", default: 38, min: 10, max: 90, step: 1, unit: "px", cssVar: "--newsletter-card-padding-x" },
+  { key: "cardPaddingY", type: "range", label: "Padding Y box", default: 34, min: 10, max: 90, step: 1, unit: "px", cssVar: "--newsletter-card-padding-y" },
+  { key: "cardBorderColor", type: "color", label: "Colore bordo box", default: "#3d44f4", cssVar: "--newsletter-card-border-color" },
+  { key: "cardBorderWidth", type: "range", label: "Spessore bordo box", default: 2, min: 1, max: 8, step: 1, unit: "px", cssVar: "--newsletter-card-border-width" },
+  { key: "echoBorderColor", type: "color", label: "Colore bordo eco", default: "#3d44f4", cssVar: "--newsletter-echo-border-color" },
+  { key: "echoOffsetX", type: "range", label: "Offset eco X", default: 6, min: -24, max: 24, step: 1, unit: "px", cssVar: "--newsletter-echo-offset-x" },
+  { key: "echoOffsetY", type: "range", label: "Offset eco Y", default: 6, min: -24, max: 24, step: 1, unit: "px", cssVar: "--newsletter-echo-offset-y" },
+  { key: "topbarBorderWidth", type: "range", label: "Spessore topbar", default: 2, min: 1, max: 8, step: 1, unit: "px", cssVar: "--newsletter-topbar-border-width" },
+  { key: "cardFillColor", type: "color", label: "Riempimento box", default: "#c8bde6", cssVar: "--newsletter-card-fill" },
+  { key: "shellBorderRadius", type: "range", label: "Raggio cornice", default: 14, min: 0, max: 30, step: 1, unit: "px", cssVar: "--newsletter-shell-radius" },
+  { key: "shellPadding", type: "range", label: "Padding cornice", default: 10, min: 4, max: 40, step: 1, unit: "px", cssVar: "--newsletter-shell-padding" },
+  { key: "dateSize", type: "range", label: "Size data", default: 11, min: 8, max: 24, step: 0.2, unit: "px", cssVar: "--newsletter-date-size" },
+  { key: "titleSize", type: "range", label: "Size titolo post", default: 44, min: 22, max: 66, step: 1, unit: "px", cssVar: "--newsletter-title-size" },
+  { key: "excerptSize", type: "range", label: "Size estratto", default: 15.2, min: 10, max: 24, step: 0.1, unit: "px", cssVar: "--newsletter-excerpt-size" },
+  { key: "tagsSize", type: "range", label: "Size tag", default: 14, min: 10, max: 24, step: 0.2, unit: "px", cssVar: "--newsletter-tags-size" },
+  { key: "footerTopSpacing", type: "range", label: "Spazio footer alto", default: 92, min: 30, max: 240, step: 1, unit: "px", cssVar: "--newsletter-footer-top-spacing" },
+  { key: "overlayVisible", type: "toggle", label: "Mostra riferimento", default: false, cssVar: "--newsletter-overlay-visible", storageKey: overlayStorageKey, wide: true },
+  { key: "overlayOpacity", type: "range", label: "Opacità riferimento", default: 0.42, min: 0, max: 1, step: 0.01, cssVar: "--newsletter-overlay-opacity", storageKey: overlayStorageKey },
+  { key: "overlayScale", type: "range", label: "Scala riferimento", default: 1, min: 0.4, max: 1.8, step: 0.005, cssVar: "--newsletter-overlay-scale", storageKey: overlayStorageKey },
+  { key: "overlayX", type: "range", label: "Riferimento X", default: 0, min: -800, max: 800, step: 1, unit: "px", cssVar: "--newsletter-overlay-x", storageKey: overlayStorageKey },
+  { key: "overlayY", type: "range", label: "Riferimento Y", default: 0, min: -1000, max: 1000, step: 1, unit: "px", cssVar: "--newsletter-overlay-y", storageKey: overlayStorageKey },
+];
+
+const newsletterContentSchema = [
+  {
+    id: "newsletter-brand",
+    label: "Header brand",
+    selector: '[data-content-block="newsletter-brand"]',
+    defaultText: "PIXL",
+    editable: true,
+    transform: "none",
+  },
+  {
+    id: "newsletter-nav-info",
+    label: "Header link Informazioni",
+    selector: '[data-content-block="newsletter-nav-info"]',
+    defaultText: "Informazioni",
+    editable: true,
+    transform: "none",
+  },
+  {
+    id: "newsletter-nav-blog",
+    label: "Header link Blog",
+    selector: '[data-content-block="newsletter-nav-blog"]',
+    defaultText: "Blog",
+    editable: true,
+    transform: "none",
+  },
+  {
+    id: "newsletter-date-1",
+    label: "Post 1 data",
+    selector: '[data-content-block="newsletter-date-1"]',
+    defaultText: "SETTEMBRE 27, 2022",
+    editable: true,
+    transform: "none",
+  },
+  {
+    id: "newsletter-title-1",
+    label: "Post 1 titolo",
+    selector: '[data-content-block="newsletter-title-1"]',
+    defaultText: "Mi mancano gli anni 90",
+    editable: true,
+    transform: "none",
+  },
+  {
+    id: "newsletter-excerpt-1",
+    label: "Post 1 estratto",
+    selector: '[data-content-block="newsletter-excerpt-1"]',
+    defaultText:
+      "\"Deve picchiare qualcosa\", penso Regina, e ricordo che lei stessa aveva voglia di tormentare qualcuno o qualcosa. Nei giorni di pioggia, frequenti e noiosi, diventava depressa, fino all'ipocondria. Un solo pensiero la confortava: quello del ritorno a casa. Contava i giorni e le ore. Strani ricordi infantili, fantasie lontane le attraversavano la mente come nuvole.",
+    editable: true,
+    transform: "none",
+  },
+  {
+    id: "newsletter-tags-1-main",
+    label: "Post 1 tag principale",
+    selector: '[data-content-block="newsletter-tags-1-main"]',
+    defaultText: "Nostalgia",
+    editable: true,
+    transform: "none",
+  },
+  {
+    id: "newsletter-tags-1-list",
+    label: "Post 1 lista tag",
+    selector: '[data-content-block="newsletter-tags-1-list"]',
+    defaultText: "90s, lo adoro, nostalgia",
+    editable: true,
+    transform: "none",
+  },
+  {
+    id: "newsletter-date-2",
+    label: "Post 2 data",
+    selector: '[data-content-block="newsletter-date-2"]',
+    defaultText: "SETTEMBRE 22, 2022",
+    editable: true,
+    transform: "none",
+  },
+  {
+    id: "newsletter-title-2",
+    label: "Post 2 titolo",
+    selector: '[data-content-block="newsletter-title-2"]',
+    defaultText: "Realizzando fatalmente che sono passati trent'anni dal 1992",
+    editable: true,
+    transform: "none",
+  },
+  {
+    id: "newsletter-excerpt-2",
+    label: "Post 2 estratto",
+    selector: '[data-content-block="newsletter-excerpt-2"]',
+    defaultText:
+      "\"Non posso credere che gli anni Novanta fossero trent'anni fa. Sembra ieri che guardavo Mamma ho perso l'aereo\". Con l'arrivo delle calde giornate, la nostalgia, il nervosismo e la malinconia di Regina aumentarono. Di notte si girava e si rigirava, e alle volte gemeva sommessamente. Alla fine confesso ad Antonio che il suo cuore la...",
+    editable: true,
+    transform: "none",
+  },
+  {
+    id: "newsletter-tags-2-main",
+    label: "Post 2 tag principale",
+    selector: '[data-content-block="newsletter-tags-2-main"]',
+    defaultText: "Nostalgia",
+    editable: true,
+    transform: "none",
+  },
+  {
+    id: "newsletter-tags-2-list",
+    label: "Post 2 lista tag",
+    selector: '[data-content-block="newsletter-tags-2-list"]',
+    defaultText: "90s, nostalgia",
+    editable: true,
+    transform: "none",
+  },
+  {
+    id: "newsletter-footer",
+    label: "Footer testo",
+    selector: '[data-content-block="newsletter-footer"]',
+    defaultText: "Crea un sito o un blog gratuito su WordPress.com.",
+    editable: true,
+    transform: "none",
+  },
+];
+---
+
+<BioLayout title="Newsletter">
+  <section class="newsletter-page">
+    <StyleEditorPanel
+      panelTitle="Newsletter editor"
+      storageNamespace="newsletter"
+      presets={newsletterPresets}
+      pageControls={newsletterPageControls}
+      pageDefaults={newsletterPageDefaults}
+      pageSectionTitle="Newsletter • fine tune"
+      contentSchema={newsletterContentSchema}
+      contentStorageNamespace="newsletter"
+    />
+
+    <div class="newsletter-shell">
+      <header class="newsletter-top editable-text">
+        <a href="#" aria-label="PIXL Home" data-content-block="newsletter-brand">PIXL</a>
+        <nav>
+          <a href="#" data-content-block="newsletter-nav-info">Informazioni</a>
+          <a href="#" data-content-block="newsletter-nav-blog">Blog</a>
+        </nav>
+      </header>
+
+      <main class="newsletter-main">
+        <article class="newsletter-post">
+          <p class="newsletter-date editable-text" data-content-block="newsletter-date-1">SETTEMBRE 27, 2022</p>
+          <h2 class="newsletter-title editable-text" data-content-block="newsletter-title-1">Mi mancano gli anni 90</h2>
+          <p class="newsletter-excerpt editable-text" data-content-block="newsletter-excerpt-1">
+            "Deve picchiare qualcosa", penso Regina, e ricordo che lei stessa aveva voglia di
+            tormentare qualcuno o qualcosa. Nei giorni di pioggia, frequenti e noiosi, diventava
+            depressa, fino all'ipocondria. Un solo pensiero la confortava: quello del ritorno a casa.
+            Contava i giorni e le ore. Strani ricordi infantili, fantasie lontane le attraversavano la
+            mente come nuvole.
+          </p>
+          <p class="newsletter-tags editable-text" data-content-block="newsletter-tags-1-main"><a href="#">Nostalgia</a></p>
+          <p class="newsletter-tags editable-text" data-content-block="newsletter-tags-1-list"><a href="#">90s</a>, <a href="#">lo adoro</a>, <a href="#">nostalgia</a></p>
+        </article>
+
+        <article class="newsletter-post">
+          <p class="newsletter-date editable-text" data-content-block="newsletter-date-2">SETTEMBRE 22, 2022</p>
+          <h2 class="newsletter-title editable-text" data-content-block="newsletter-title-2">Realizzando fatalmente che sono passati trent'anni dal 1992</h2>
+          <p class="newsletter-excerpt editable-text" data-content-block="newsletter-excerpt-2">
+            "Non posso credere che gli anni Novanta fossero trent'anni fa. Sembra ieri che guardavo
+            Mamma ho perso l'aereo". Con l'arrivo delle calde giornate, la nostalgia, il nervosismo e
+            la malinconia di Regina aumentarono. Di notte si girava e si rigirava, e alle volte gemeva
+            sommessamente. Alla fine confesso ad Antonio che il suo cuore la...
+          </p>
+          <p class="newsletter-tags editable-text" data-content-block="newsletter-tags-2-main"><a href="#">Nostalgia</a></p>
+          <p class="newsletter-tags editable-text" data-content-block="newsletter-tags-2-list"><a href="#">90s</a>, <a href="#">nostalgia</a></p>
+        </article>
+      </main>
+
+      <footer class="newsletter-footer editable-text">
+        <a href="#" data-content-block="newsletter-footer">Crea un sito o un blog gratuito su WordPress.com.</a>
+      </footer>
+    </div>
+
+    <div class="newsletter-reference-overlay" aria-hidden="true">
+      <img src={`${base}references/newsletter-reference.png`} alt="" />
+    </div>
+  </section>
+</BioLayout>

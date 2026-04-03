@@ -1,4 +1,13 @@
 ---
+const {
+  className = "",
+  size = "default",
+  variant = 0,
+  preset = "default",
+  stageSelector = "[data-bird-stage], .landing-scene",
+  ariaLabel = "Fai cinguettare l'uccellino",
+} = Astro.props;
+
 const base = import.meta.env.BASE_URL;
 
 const birdFrames = [
@@ -40,7 +49,16 @@ const birdFrames = [
 ];
 ---
 
-<button class="window-bird" type="button" aria-label="Fai cinguettare l'uccellino" data-window-bird>
+<button
+  class={`window-bird ${className}`.trim()}
+  type="button"
+  aria-label={ariaLabel}
+  data-window-bird
+  data-size={size}
+  data-variant={String(variant)}
+  data-preset={preset}
+  data-stage-selector={stageSelector}
+>
   <span class="window-bird__shadow" aria-hidden="true"></span>
 
   <span class="window-bird__sprite" aria-hidden="true">
@@ -165,17 +183,114 @@ const birdFrames = [
     if (!(root instanceof HTMLButtonElement) || root.dataset.windowBirdBound === "true") return;
     root.dataset.windowBirdBound = "true";
 
-    const stage = root.closest(".landing-scene");
+    const selector = root.dataset.stageSelector || ".landing-scene";
+    const stage = root.closest(selector);
     if (!(stage instanceof HTMLElement)) return;
 
-    const perchAnchors = {
-      intro: { x: 0.58, y: 0.27 },
-      upperLeft: { x: 0.18, y: 0.2 },
-      midLeft: { x: 0.28, y: 0.31 },
-      upperCenter: { x: 0.5, y: 0.18 },
-      upperRight: { x: 0.82, y: 0.2 },
-      midRight: { x: 0.72, y: 0.32 },
+    const defaultPerchAnchorSets = [
+      {
+        intro: { x: 0.12, y: 0.18 },
+        upperLeft: { x: 0.08, y: 0.12 },
+        midLeft: { x: 0.16, y: 0.22 },
+        upperCenter: { x: 0.22, y: 0.14 },
+        upperRight: { x: 0.28, y: 0.18 },
+        midRight: { x: 0.24, y: 0.28 },
+      },
+      {
+        intro: { x: 0.68, y: 0.14 },
+        upperLeft: { x: 0.6, y: 0.12 },
+        midLeft: { x: 0.64, y: 0.24 },
+        upperCenter: { x: 0.72, y: 0.1 },
+        upperRight: { x: 0.8, y: 0.14 },
+        midRight: { x: 0.76, y: 0.26 },
+      },
+      {
+        intro: { x: 0.34, y: 0.34 },
+        upperLeft: { x: 0.26, y: 0.26 },
+        midLeft: { x: 0.3, y: 0.38 },
+        upperCenter: { x: 0.38, y: 0.28 },
+        upperRight: { x: 0.46, y: 0.34 },
+        midRight: { x: 0.42, y: 0.42 },
+      },
+      {
+        intro: { x: 0.79, y: 0.42 },
+        upperLeft: { x: 0.71, y: 0.34 },
+        midLeft: { x: 0.74, y: 0.46 },
+        upperCenter: { x: 0.82, y: 0.36 },
+        upperRight: { x: 0.9, y: 0.42 },
+        midRight: { x: 0.86, y: 0.5 },
+      },
+      {
+        intro: { x: 0.18, y: 0.62 },
+        upperLeft: { x: 0.1, y: 0.54 },
+        midLeft: { x: 0.14, y: 0.68 },
+        upperCenter: { x: 0.22, y: 0.56 },
+        upperRight: { x: 0.3, y: 0.62 },
+        midRight: { x: 0.24, y: 0.72 },
+      },
+      {
+        intro: { x: 0.54, y: 0.72 },
+        upperLeft: { x: 0.46, y: 0.64 },
+        midLeft: { x: 0.5, y: 0.78 },
+        upperCenter: { x: 0.58, y: 0.66 },
+        upperRight: { x: 0.66, y: 0.72 },
+        midRight: { x: 0.62, y: 0.82 },
+      },
+      {
+        intro: { x: 0.58, y: 0.27 },
+        upperLeft: { x: 0.18, y: 0.2 },
+        midLeft: { x: 0.28, y: 0.31 },
+        upperCenter: { x: 0.5, y: 0.18 },
+        upperRight: { x: 0.82, y: 0.2 },
+        midRight: { x: 0.72, y: 0.32 },
+      },
+    ];
+    const presetConfigs = {
+      default: {
+        perchAnchorSets: defaultPerchAnchorSets,
+        initialFlightDelay: { min: 3000, max: 4600 },
+        flightDelay: { min: 4200, max: 8400 },
+        takeoffDelay: { min: 170, max: 290 },
+        lookDelay: { min: 1000, max: 3200 },
+        quickLookDelay: { min: 420, max: 980 },
+        followLookDelay: { min: 1200, max: 3600 },
+        lookDuration: { min: 520, max: 1500 },
+        flightDuration: { min: 1120, max: 2140, base: 980, factor: 1.18 },
+        lift: { base: 0.14, distanceFactor: 0.22, min: 0.12, max: 0.28 },
+        lateralDrift: 0.08,
+      },
+      solo: {
+        perchAnchorSets: [
+          {
+            intro: { x: 0.58, y: 0.2 },
+            upperLeft: { x: 0.28, y: 0.17 },
+            midLeft: { x: 0.22, y: 0.36 },
+            upperCenter: { x: 0.52, y: 0.11 },
+            upperRight: { x: 0.77, y: 0.2 },
+            midRight: { x: 0.82, y: 0.4 },
+          },
+        ],
+        initialFlightDelay: { min: 4200, max: 6200 },
+        flightDelay: { min: 6200, max: 11800 },
+        takeoffDelay: { min: 220, max: 360 },
+        lookDelay: { min: 1800, max: 4200 },
+        quickLookDelay: { min: 700, max: 1400 },
+        followLookDelay: { min: 2200, max: 5200 },
+        lookDuration: { min: 900, max: 2100 },
+        flightDuration: { min: 1480, max: 2860, base: 1320, factor: 1.36 },
+        lift: { base: 0.18, distanceFactor: 0.26, min: 0.14, max: 0.32 },
+        lateralDrift: 0.05,
+      },
     };
+    const presetKey = root.dataset.preset || "default";
+    const motion = presetConfigs[presetKey] ?? presetConfigs.default;
+    const variantIndex = Number.parseInt(root.dataset.variant || "0", 10);
+    const perchAnchors =
+      motion.perchAnchorSets[
+        ((Number.isNaN(variantIndex) ? 0 : variantIndex) % motion.perchAnchorSets.length +
+          motion.perchAnchorSets.length) %
+          motion.perchAnchorSets.length
+      ];
     const perchKeys = Object.keys(perchAnchors);
 
     let stageSize = { width: 0, height: 0 };
@@ -275,7 +390,7 @@ const birdFrames = [
       applyFrameSelection();
     };
 
-    const scheduleLookPose = (delayRange = { min: 1000, max: 3200 }) => {
+    const scheduleLookPose = (delayRange = motion.lookDelay) => {
       clearLookPose();
 
       if (phase !== "landed" || !root.classList.contains("has-look-frame")) return;
@@ -291,10 +406,10 @@ const birdFrames = [
           applyFrameSelection();
           scheduleLookPose(
             Math.random() < 0.22
-              ? { min: 420, max: 980 }
-              : { min: 1200, max: 3600 },
+              ? motion.quickLookDelay
+              : motion.followLookDelay,
           );
-        }, 520 + Math.random() * 980);
+        }, motion.lookDuration.min + Math.random() * (motion.lookDuration.max - motion.lookDuration.min));
       }, delayRange.min + Math.random() * (delayRange.max - delayRange.min));
     };
 
@@ -356,14 +471,14 @@ const birdFrames = [
       const distance = Math.hypot(distanceX, distanceY);
       const diagonal = Math.max(Math.hypot(stageSize.width, stageSize.height), 1);
       const lift = clamp(
-        stageSize.height * (0.14 + distance / diagonal * 0.22),
-        stageSize.height * 0.12,
-        stageSize.height * 0.28,
+        stageSize.height * (motion.lift.base + distance / diagonal * motion.lift.distanceFactor),
+        stageSize.height * motion.lift.min,
+        stageSize.height * motion.lift.max,
       );
       const lateralDrift = clamp(
-        (Math.random() - 0.5) * stageSize.width * 0.08,
-        -stageSize.width * 0.06,
-        stageSize.width * 0.06,
+        (Math.random() - 0.5) * stageSize.width * motion.lateralDrift,
+        -stageSize.width * (motion.lateralDrift * 0.75),
+        stageSize.width * (motion.lateralDrift * 0.75),
       );
 
       return {
@@ -374,7 +489,11 @@ const birdFrames = [
         },
         end: { ...targetPoint },
         startedAt: startTime,
-        duration: clamp(980 + distance * 1.18, 1120, 2140),
+        duration: clamp(
+          motion.flightDuration.base + distance * motion.flightDuration.factor,
+          motion.flightDuration.min,
+          motion.flightDuration.max,
+        ),
       };
     };
 
@@ -509,7 +628,7 @@ const birdFrames = [
           root.classList.add("is-perched");
           applyFrameSelection();
           scheduleLookPose();
-          scheduleNextFlight(4200, 8400);
+          scheduleNextFlight(motion.flightDelay.min, motion.flightDelay.max);
         }
       }
 
@@ -550,7 +669,7 @@ const birdFrames = [
         updatePresentation(performance.now());
         applyFrameSelection();
         scheduleLookPose();
-        scheduleNextFlight(4200, 8400);
+        scheduleNextFlight(motion.flightDelay.min, motion.flightDelay.max);
         return;
       }
 
@@ -566,7 +685,7 @@ const birdFrames = [
       takeoffTimeoutId = window.setTimeout(() => {
         if (phase !== "launching") return;
         beginFlight();
-      }, 170 + Math.random() * 120);
+      }, motion.takeoffDelay.min + Math.random() * (motion.takeoffDelay.max - motion.takeoffDelay.min));
     };
 
     const chirp = async () => {
@@ -593,7 +712,7 @@ const birdFrames = [
     updateRasterAvailability();
     updatePresentation(performance.now());
 
-    scheduleNextFlight(3000, 4600);
+    scheduleNextFlight(motion.initialFlightDelay.min, motion.initialFlightDelay.max);
     frameId = window.requestAnimationFrame(animate);
 
     root.addEventListener("click", chirp);

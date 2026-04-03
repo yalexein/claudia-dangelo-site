@@ -1,7 +1,23 @@
 ---
 import LandingLayout from "../layouts/LandingLayout.astro";
-import LandingScene from "../components/LandingScene.astro";
+import WindowBird from "../components/WindowBird.astro";
 ---
 <LandingLayout title="Claudia D'Angelo">
-  <LandingScene />
+  <section class="bird-field" aria-label="Uno sfondo bianco con un uccellino animato" data-bird-stage>
+    <div class="coming-soon-layer" aria-hidden="true">
+      <div class="coming-soon-panel">
+        <p class="coming-soon-eyebrow">personal website</p>
+        <h1 class="coming-soon-title">Coming Soon!</h1>
+      </div>
+    </div>
+
+    <WindowBird
+      className="bird-copy"
+      size="half"
+      variant={0}
+      preset="solo"
+      stageSelector="[data-bird-stage]"
+      ariaLabel="Fai cinguettare l'uccellino"
+    />
+  </section>
 </LandingLayout>

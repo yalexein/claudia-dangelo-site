@@ -1,0 +1,101 @@
+---
+const { namespace = "page" } = Astro.props;
+---
+
+<div class="style-editor-divider" aria-hidden="true"></div>
+<h3 class="style-editor-subtitle">Sfondo</h3>
+<div class="style-editor-grid">
+  <div class="style-editor-content-actions">
+    <button type="button" data-uccelli-bg-upload-btn>Carica immagine sfondo</button>
+    <button type="button" data-uccelli-bg-reset-btn>Rimuovi immagine caricata</button>
+  </div>
+</div>
+
+<div class="style-editor-divider" aria-hidden="true"></div>
+<h3 class="style-editor-subtitle">Immagini</h3>
+<div class="style-editor-grid">
+  <div class="style-editor-content-actions">
+    <button type="button" data-uccelli-image-upload-btn>Aggiungi immagine</button>
+    <button type="button" data-uccelli-image-clear-btn>Elimina immagine selezionata</button>
+  </div>
+
+  <div class="style-editor-field style-editor-field--wide">
+    <label for={`${namespace}-image-z`}>Livello immagine selezionata</label>
+    <input id={`${namespace}-image-z`} type="range" min="0" max="200" step="1" value="20" data-uccelli-image-z />
+    <span class="style-editor-range-value" data-uccelli-image-value="z">20</span>
+  </div>
+</div>
+
+<div class="style-editor-divider" aria-hidden="true"></div>
+<h3 class="style-editor-subtitle">Galleria foto</h3>
+<div class="style-editor-grid">
+  <div class="style-editor-field style-editor-field--wide">
+    <div class="style-editor-content-actions style-editor-content-actions--compact">
+      <button type="button" data-uccelli-gallery-upload-btn>Aggiungi galleria</button>
+      <button type="button" data-uccelli-gallery-clear-btn>Elimina galleria selezionata</button>
+    </div>
+  </div>
+
+  <div class="style-editor-field style-editor-field--wide">
+    <label for={`${namespace}-gallery-layout`}>Layout galleria</label>
+    <select id={`${namespace}-gallery-layout`} data-uccelli-gallery-layout>
+      <option value="grid">Griglia</option>
+      <option value="masonry">Masonry</option>
+      <option value="filmstrip">Filmstrip</option>
+      <option value="slideshow">Slideshow</option>
+    </select>
+  </div>
+
+  <div class="style-editor-field">
+    <label for={`${namespace}-gallery-columns`}>Colonne</label>
+    <input id={`${namespace}-gallery-columns`} type="range" min="1" max="6" step="1" value="3" data-uccelli-gallery-columns />
+    <span class="style-editor-range-value" data-uccelli-gallery-value="columns">3</span>
+  </div>
+
+  <div class="style-editor-field">
+    <label for={`${namespace}-gallery-gap`}>Spazio foto</label>
+    <input id={`${namespace}-gallery-gap`} type="range" min="0" max="44" step="1" value="10" data-uccelli-gallery-gap />
+    <span class="style-editor-range-value" data-uccelli-gallery-value="gap">10px</span>
+  </div>
+
+  <div class="style-editor-field style-editor-field--wide">
+    <label for={`${namespace}-gallery-fit`}>Adattamento foto</label>
+    <select id={`${namespace}-gallery-fit`} data-uccelli-gallery-fit>
+      <option value="cover">Riempi/crop</option>
+      <option value="contain">Contieni intera</option>
+    </select>
+  </div>
+
+  <div class="style-editor-field">
+    <label class="style-editor-toggle" for={`${namespace}-gallery-autoplay`}>
+      <input id={`${namespace}-gallery-autoplay`} type="checkbox" data-uccelli-gallery-autoplay />
+      <span>Slideshow automatico</span>
+    </label>
+  </div>
+
+  <div class="style-editor-field">
+    <label for={`${namespace}-gallery-interval`}>Tempo slide</label>
+    <input id={`${namespace}-gallery-interval`} type="range" min="1" max="12" step="0.5" value="4" data-uccelli-gallery-interval />
+    <span class="style-editor-range-value" data-uccelli-gallery-value="interval">4s</span>
+  </div>
+
+  <div class="style-editor-field style-editor-field--wide">
+    <label for={`${namespace}-gallery-click`}>Click su foto</label>
+    <select id={`${namespace}-gallery-click`} data-uccelli-gallery-click>
+      <option value="lightbox">Apri grande</option>
+      <option value="next">Prossima foto</option>
+      <option value="open">Apri file in nuova scheda</option>
+      <option value="none">Nessuna azione</option>
+    </select>
+  </div>
+
+  <div class="style-editor-field style-editor-field--wide">
+    <label for={`${namespace}-gallery-z`}>Livello galleria selezionata</label>
+    <input id={`${namespace}-gallery-z`} type="range" min="0" max="200" step="1" value="40" data-uccelli-gallery-z />
+    <span class="style-editor-range-value" data-uccelli-gallery-value="z">40</span>
+  </div>
+</div>
+
+<input type="file" accept="image/*,.heic,.heif" hidden data-uccelli-bg-upload-input />
+<input type="file" accept="image/*,.heic,.heif" hidden data-uccelli-image-upload-input />
+<input type="file" accept="image/*,.heic,.heif" multiple hidden data-uccelli-gallery-upload-input />

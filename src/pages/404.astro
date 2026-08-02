@@ -3,7 +3,14 @@ import LandingLayout from "../layouts/LandingLayout.astro";
 const base = import.meta.env.BASE_URL;
 ---
 <LandingLayout title="Pagina non trovata">
-  <h1>404</h1>
-  <p>La pagina non esiste.</p>
-  <p><a class="btn ghost" href={base}>Torna alla home</a></p>
+  <section data-locale-only="it">
+    <h1>404</h1>
+    <p>La pagina non esiste.</p>
+    <p><a class="btn ghost" href={base}>Torna alla home</a></p>
+  </section>
+  <section data-locale-only="en" hidden>
+    <h1>404</h1>
+    <p>This page does not exist.</p>
+    <p><a class="btn ghost" href={base}>Return home</a></p>
+  </section>
 </LandingLayout>

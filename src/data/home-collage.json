@@ -1,0 +1,338 @@
+[
+  {
+    "id": "image-1782474972202-6",
+    "src": "images/home-collage/layer-01.png",
+    "x": 442.73046875,
+    "y": 384.85546875,
+    "width": 376.5,
+    "rotation": -2,
+    "z": 200,
+    "opacity": 1,
+    "blendMode": "normal",
+    "hoverEffect": "glow",
+    "clickEffect": "pulse",
+    "linkUrl": "/collages/",
+    "trim": {
+      "naturalWidth": 633,
+      "naturalHeight": 758,
+      "x": 54,
+      "y": 137,
+      "width": 482,
+      "height": 498
+    },
+    "hidden": false,
+    "locked": true,
+    "motion": {
+      "preset": "none",
+      "speed": 1,
+      "distance": 40
+    },
+    "parallax": {
+      "enabled": false,
+      "depth": 1
+    },
+    "publicDrag": {
+      "enabled": false,
+      "inertia": 0.88
+    },
+    "pathMotion": {
+      "enabled": false,
+      "duration": 6,
+      "points": []
+    }
+  },
+  {
+    "id": "image-1782474978067-7",
+    "src": "images/home-collage/layer-02.png",
+    "x": 266.23040771484375,
+    "y": 96.7054443359375,
+    "width": 1035.5,
+    "rotation": 0,
+    "z": 176,
+    "opacity": 1,
+    "blendMode": "normal",
+    "hoverEffect": "glow",
+    "clickEffect": "pop",
+    "linkUrl": "/bio/",
+    "trim": {
+      "naturalWidth": 1578,
+      "naturalHeight": 989,
+      "x": 444,
+      "y": 229,
+      "width": 663,
+      "height": 537
+    },
+    "hidden": false,
+    "locked": true,
+    "motion": {
+      "preset": "none",
+      "speed": 1,
+      "distance": 40
+    },
+    "parallax": {
+      "enabled": false,
+      "depth": 1
+    },
+    "publicDrag": {
+      "enabled": false,
+      "inertia": 0.88
+    },
+    "pathMotion": {
+      "enabled": false,
+      "duration": 6,
+      "points": []
+    }
+  },
+  {
+    "id": "image-1782474981517-8",
+    "src": "images/home-collage/layer-03.png",
+    "x": 545.23046875,
+    "y": 157.85546875,
+    "width": 597,
+    "rotation": 0,
+    "z": 51,
+    "opacity": 1,
+    "blendMode": "normal",
+    "hoverEffect": "glow",
+    "clickEffect": "pulse",
+    "linkUrl": "/uccelli/",
+    "trim": {
+      "naturalWidth": 969,
+      "naturalHeight": 699,
+      "x": 420,
+      "y": 147,
+      "width": 450,
+      "height": 457
+    },
+    "hidden": false,
+    "locked": true,
+    "motion": {
+      "preset": "none",
+      "speed": 1,
+      "distance": 40
+    },
+    "parallax": {
+      "enabled": false,
+      "depth": 1
+    },
+    "publicDrag": {
+      "enabled": false,
+      "inertia": 0.88
+    },
+    "pathMotion": {
+      "enabled": false,
+      "duration": 6,
+      "points": []
+    }
+  },
+  {
+    "id": "image-1782474983705-9",
+    "src": "images/home-collage/layer-04.png",
+    "x": 350.93048095703125,
+    "y": 305.4054260253906,
+    "width": 417,
+    "rotation": 0,
+    "z": 165,
+    "opacity": 1,
+    "blendMode": "normal",
+    "hoverEffect": "glow",
+    "clickEffect": "pulse",
+    "linkUrl": "/contatti/",
+    "trim": {
+      "naturalWidth": 642,
+      "naturalHeight": 405,
+      "x": 185,
+      "y": 75,
+      "width": 251,
+      "height": 220
+    },
+    "hidden": false,
+    "locked": true,
+    "motion": {
+      "preset": "none",
+      "speed": 1,
+      "distance": 40
+    },
+    "parallax": {
+      "enabled": false,
+      "depth": 1
+    },
+    "publicDrag": {
+      "enabled": false,
+      "inertia": 0.88
+    },
+    "pathMotion": {
+      "enabled": false,
+      "duration": 6,
+      "points": []
+    }
+  },
+  {
+    "id": "image-1782474985788-10",
+    "src": "images/home-collage/layer-05.png",
+    "x": 618.3971557617188,
+    "y": 182.938720703125,
+    "width": 523.2333374023438,
+    "rotation": 1,
+    "z": 45,
+    "opacity": 1,
+    "blendMode": "normal",
+    "hoverEffect": "glow",
+    "clickEffect": "pulse",
+    "linkUrl": "/uccelli/",
+    "trim": {
+      "naturalWidth": 701,
+      "naturalHeight": 487,
+      "x": 333,
+      "y": 91,
+      "width": 175,
+      "height": 205
+    },
+    "hidden": false,
+    "locked": true,
+    "motion": {
+      "preset": "none",
+      "speed": 1,
+      "distance": 40
+    },
+    "parallax": {
+      "enabled": false,
+      "depth": 1
+    },
+    "publicDrag": {
+      "enabled": false,
+      "inertia": 0.88
+    },
+    "pathMotion": {
+      "enabled": false,
+      "duration": 6,
+      "points": []
+    }
+  },
+  {
+    "id": "image-1782474989202-11",
+    "src": "images/home-collage/layer-06.png",
+    "x": 562.73046875,
+    "y": 13.35546875,
+    "width": 423,
+    "rotation": 0,
+    "z": 40,
+    "opacity": 1,
+    "blendMode": "normal",
+    "hoverEffect": "glow",
+    "clickEffect": "pulse",
+    "linkUrl": "/scritture/",
+    "trim": {
+      "naturalWidth": 648,
+      "naturalHeight": 861,
+      "x": 0,
+      "y": 0,
+      "width": 648,
+      "height": 861
+    },
+    "hidden": false,
+    "locked": true,
+    "motion": {
+      "preset": "none",
+      "speed": 1,
+      "distance": 40
+    },
+    "parallax": {
+      "enabled": false,
+      "depth": 1
+    },
+    "publicDrag": {
+      "enabled": false,
+      "inertia": 0.88
+    },
+    "pathMotion": {
+      "enabled": false,
+      "duration": 6,
+      "points": []
+    }
+  },
+  {
+    "id": "image-1782474991477-12",
+    "src": "images/home-collage/layer-07.png",
+    "x": 728.0471801757812,
+    "y": 338.0054931640625,
+    "width": 407.99993896484375,
+    "rotation": 3,
+    "z": 37,
+    "opacity": 1,
+    "blendMode": "normal",
+    "hoverEffect": "glow",
+    "clickEffect": "pulse",
+    "linkUrl": "/miscellanea/",
+    "trim": {
+      "naturalWidth": 676,
+      "naturalHeight": 833,
+      "x": 0,
+      "y": 0,
+      "width": 639,
+      "height": 800
+    },
+    "hidden": false,
+    "locked": true,
+    "motion": {
+      "preset": "none",
+      "speed": 1,
+      "distance": 40
+    },
+    "parallax": {
+      "enabled": false,
+      "depth": 1
+    },
+    "publicDrag": {
+      "enabled": false,
+      "inertia": 0.88
+    },
+    "pathMotion": {
+      "enabled": false,
+      "duration": 6,
+      "points": []
+    }
+  },
+  {
+    "id": "image-1782474994604-13",
+    "src": "images/home-collage/layer-08.png",
+    "x": 559.73046875,
+    "y": 568.35546875,
+    "width": 429,
+    "rotation": 3,
+    "z": 0,
+    "opacity": 1,
+    "blendMode": "normal",
+    "hoverEffect": "glow",
+    "clickEffect": "pulse",
+    "linkUrl": "/cv/",
+    "trim": {
+      "naturalWidth": 620,
+      "naturalHeight": 479,
+      "x": 196,
+      "y": 0,
+      "width": 424,
+      "height": 420
+    },
+    "hidden": false,
+    "locked": true,
+    "motion": {
+      "preset": "none",
+      "speed": 1,
+      "distance": 40
+    },
+    "parallax": {
+      "enabled": false,
+      "depth": 1
+    },
+    "publicDrag": {
+      "enabled": false,
+      "inertia": 0.88
+    },
+    "pathMotion": {
+      "enabled": false,
+      "duration": 6,
+      "points": []
+    }
+  }
+]

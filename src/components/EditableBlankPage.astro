@@ -1,0 +1,96 @@
+---
+import BioLayout from "../layouts/BioLayout.astro";
+import StyleEditorPanel from "./StyleEditorPanel.astro";
+import SharedEditorExtraControls from "./SharedEditorExtraControls.astro";
+import SharedEditorLayers from "./SharedEditorLayers.astro";
+import { sharedEditorPageControls, sharedEditorPageDefaults, sharedPagesNav } from "../lib/sharedEditorConfig";
+import "../styles/bio.css";
+import "../styles/uccelli.css";
+import "../styles/blank-editor-page.css";
+
+type Props = {
+  title: string;
+  namespace: string;
+};
+
+const { title, namespace } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const bodyBlockId = `${namespace}-body`;
+
+const pagePresets = {
+  background: "#fffdfb",
+  background2: "#f7f2eb",
+  background3: "#ffe1e6",
+  backgroundMode: "solid",
+  backgroundAngle: 90,
+  text: "#1f1a17",
+  text2: "#65453d",
+  text3: "#ef4b5b",
+  textMode: "solid",
+  textAngle: 90,
+  accent: "#ef4b5b",
+  font:
+    '"Baskerville", "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Garamond, Georgia, serif',
+  titleFont: '"Didot", "Bodoni 72", "Bodoni MT", "Times New Roman", serif',
+  fontSize: 23,
+  lineHeight: 1.47,
+  letterSpacing: 0,
+  wordSpacing: 0,
+  copyWidth: 90,
+  align: "left",
+  x: 6,
+  y: 6,
+};
+
+const contentSchema = [
+  {
+    id: bodyBlockId,
+    label: "Pagina",
+    selector: `[data-content-block="${bodyBlockId}"]`,
+    defaultText: "<p><br></p>",
+    editable: true,
+    transform: "xy",
+    deletable: true,
+    resizable: true,
+    defaultWidth: 760,
+  },
+];
+---
+
+<BioLayout title={title}>
+  <section
+    class="bio-page uccelli-page blank-editor-page"
+    data-advanced-editor-root
+    data-advanced-editor-namespace={namespace}
+  >
+    <StyleEditorPanel
+      panelTitle={`${title} editor`}
+      storageNamespace={namespace}
+      pagesNav={sharedPagesNav}
+      presets={pagePresets}
+      pageControls={sharedEditorPageControls}
+      pageDefaults={sharedEditorPageDefaults}
+      pageSectionTitle="Sfondo e immagine"
+      contentSchema={contentSchema}
+      contentStorageNamespace={namespace}
+    >
+      <SharedEditorExtraControls slot="extra" namespace={namespace} />
+    </StyleEditorPanel>
+
+    <div class="bio-frame">
+      <div class="bio-canvas">
+        <article class="bio-copy blank-editor-page__copy">
+          <div
+            class="bio-body editable-text blank-editor-page__body"
+            data-content-block={bodyBlockId}
+            data-content-rich="html"
+          >
+            <p><br /></p>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <SharedEditorLayers base={base} label={title} />
+  </section>
+</BioLayout>

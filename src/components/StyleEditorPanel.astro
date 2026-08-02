@@ -6,6 +6,11 @@ type SelectOption = {
   value: string;
 };
 
+type PageNavItem = {
+  label: string;
+  path: string;
+};
+
 type PageControl = {
   key: string;
   type: "range" | "color" | "select" | "toggle";
@@ -28,6 +33,8 @@ type ContentBounds = {
   maxY?: number;
   minRotate?: number;
   maxRotate?: number;
+  minW?: number;
+  maxW?: number;
 };
 
 type ContentBlockStyle = {
@@ -52,10 +59,51 @@ type ContentBlockDefinition = {
   desktopOnlyTransform?: boolean;
   bounds?: ContentBounds;
   styleEditable?: boolean;
+  deletable?: boolean;
+  resizable?: boolean;
+  defaultWidth?: number;
+  defaultZ?: number;
   defaultStyle?: Partial<ContentBlockStyle>;
 };
 
 const fontOptions = [
+  {
+    label: "Proxima Nova / Avenir",
+    value:
+      '"Proxima Nova", "proxima-nova", "Avenir Next", Avenir, Montserrat, "Helvetica Neue", Arial, sans-serif',
+  },
+  {
+    label: "Inter",
+    value: 'Inter, "SF Pro Text", "Helvetica Neue", Arial, sans-serif',
+  },
+  {
+    label: "Montserrat",
+    value: 'Montserrat, "Proxima Nova", "Avenir Next", "Helvetica Neue", Arial, sans-serif',
+  },
+  {
+    label: "Libre Franklin",
+    value: '"Libre Franklin", "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif',
+  },
+  {
+    label: "Source Sans 3",
+    value: '"Source Sans 3", "Helvetica Neue", Arial, sans-serif',
+  },
+  {
+    label: "Avenir Next",
+    value: '"Avenir Next", Avenir, Montserrat, "Helvetica Neue", Arial, sans-serif',
+  },
+  {
+    label: "Futura",
+    value: 'Futura, "Trebuchet MS", Montserrat, Arial, sans-serif',
+  },
+  {
+    label: "Gill Sans",
+    value: '"Gill Sans", "Gill Sans MT", "Source Sans 3", Calibri, sans-serif',
+  },
+  {
+    label: "Optima",
+    value: 'Optima, Candara, "Noto Sans", sans-serif',
+  },
   {
     label: "Baskerville",
     value:
@@ -64,6 +112,10 @@ const fontOptions = [
   {
     label: "Didot",
     value: '"Didot", "Bodoni 72", "Bodoni MT", "Times New Roman", serif',
+  },
+  {
+    label: "Bodoni Moda",
+    value: '"Bodoni Moda", "Bodoni 72", Didot, "Times New Roman", serif',
   },
   {
     label: "Garamond",
@@ -78,6 +130,30 @@ const fontOptions = [
     value: '"Hoefler Text", "Iowan Old Style", Georgia, serif',
   },
   {
+    label: "Libre Baskerville",
+    value: '"Libre Baskerville", Baskerville, Georgia, serif',
+  },
+  {
+    label: "Lora",
+    value: 'Lora, Georgia, "Times New Roman", serif',
+  },
+  {
+    label: "Merriweather",
+    value: 'Merriweather, Georgia, "Times New Roman", serif',
+  },
+  {
+    label: "Playfair Display",
+    value: '"Playfair Display", Didot, "Bodoni 72", Georgia, serif',
+  },
+  {
+    label: "Spectral",
+    value: 'Spectral, Georgia, "Times New Roman", serif',
+  },
+  {
+    label: "Source Serif 4",
+    value: '"Source Serif 4", Georgia, "Times New Roman", serif',
+  },
+  {
     label: "Times New Roman",
     value: '"Times New Roman", Times, serif',
   },
@@ -88,6 +164,10 @@ const fontOptions = [
   {
     label: "Cormorant",
     value: '"Cormorant Infant", "Cormorant Garamond", Georgia, serif',
+  },
+  {
+    label: "Fira Mono",
+    value: '"Fira Mono", "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace',
   },
   {
     label: "IBM Plex Mono",
@@ -114,6 +194,11 @@ const fontOptions = [
     value: '"Patrick Hand", "Comic Sans MS", cursive',
   },
 ];
+
+const miniFontOptions = fontOptions.map((option) => ({
+  label: option.label,
+  value: option.value,
+}));
 
 const defaultPresets = {
   background: "#fffdfb",
@@ -150,6 +235,8 @@ const {
   contentSchema = [],
   contentStorageNamespace = storageNamespace,
   contentSectionTitle = "Contenuti",
+  pagesNav = [],
+  autoSave = true,
 } = Astro.props as {
   panelTitle?: string;
   storageNamespace?: string;
@@ -160,6 +247,8 @@ const {
   contentSchema?: ContentBlockDefinition[];
   contentStorageNamespace?: string;
   contentSectionTitle?: string;
+  pagesNav?: PageNavItem[];
+  autoSave?: boolean;
 };
 
 const mergedPresets = { ...defaultPresets, ...presets };
@@ -202,6 +291,11 @@ const normalizeContentStyle = (rawStyle?: Partial<ContentBlockStyle>) => {
   return normalized;
 };
 
+const toNumber = (value: unknown, fallback = 0) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
 const normalizedContentSchema = contentSchema.map((block) => ({
   id: block.id,
   label: block.label ?? block.id,
@@ -212,6 +306,9 @@ const normalizedContentSchema = contentSchema.map((block) => ({
   desktopOnlyTransform: Boolean(block.desktopOnlyTransform),
   bounds: block.bounds ?? {},
   styleEditable: block.styleEditable !== false,
+  deletable: Boolean(block.deletable),
+  resizable: Boolean(block.resizable),
+  defaultWidth: toNumber(block.defaultWidth, 0),
   defaultStyle: normalizeContentStyle(block.defaultStyle),
 }));
 
@@ -232,8 +329,20 @@ const formatControlValue = (control: PageControl) => {
 
 const storageKey = `claudia-editor-${storageNamespace}-settings`;
 const panelStateKey = `claudia-editor-${storageNamespace}-panel-open`;
+const panelPosKey = `claudia-editor-${storageNamespace}-panel-pos-v1`;
 const contentNamespace = contentStorageNamespace || storageNamespace;
 const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
+const base = import.meta.env.BASE_URL;
+
+const normalizedPagesNav = (Array.isArray(pagesNav) ? pagesNav : [])
+  .filter((item) => item && typeof item === "object")
+  .map((item) => ({
+    label: String(item.label || "").trim(),
+    path: String(item.path || "").trim(),
+  }))
+  .filter((item) => item.label && item.path);
+
+const buildHref = (path: string) => `${base}${path.replace(/^\//, "")}`;
 ---
 
 <aside
@@ -241,14 +350,34 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
   data-style-editor
   data-storage-key={storageKey}
   data-panel-key={panelStateKey}
+  data-panel-pos-key={panelPosKey}
   data-content-storage-key={contentStorageKey}
   data-content-namespace={contentNamespace}
 >
-  <div class="style-editor-panel__topbar">
+  <div class="style-editor-panel__topbar" data-style-drag-surface>
     <h2>{panelTitle}</h2>
-    <button class="style-editor-collapse" type="button" data-style-collapse aria-expanded="true">
-      Nascondi
-    </button>
+
+    <div class="style-editor-top-actions">
+      <button class="style-editor-drag" type="button" aria-label="Sposta pannello editor" data-style-drag title="Sposta">
+        ⇳
+      </button>
+      {normalizedPagesNav.length > 0 && (
+        <details class="style-editor-pages" data-style-pages>
+          <summary class="style-editor-pages__summary">Pagine</summary>
+          <nav class="style-editor-pages__menu" aria-label="Vai a pagina">
+            {normalizedPagesNav.map((item) => (
+              <a class="style-editor-pages__link" href={buildHref(item.path)}>
+                {item.label}
+              </a>
+            ))}
+          </nav>
+        </details>
+      )}
+
+      <button class="style-editor-collapse" type="button" data-style-collapse aria-expanded="true">
+        Nascondi
+      </button>
+    </div>
   </div>
 
   <div class="style-editor-panel__content">
@@ -261,6 +390,7 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
           <option value="linear-3" selected={mergedPresets.backgroundMode === "linear-3"}>Lineare 3</option>
           <option value="radial-2" selected={mergedPresets.backgroundMode === "radial-2"}>Radiale 2</option>
           <option value="radial-3" selected={mergedPresets.backgroundMode === "radial-3"}>Radiale 3</option>
+          <option value="grain" selected={mergedPresets.backgroundMode === "grain"}>Granulato</option>
         </select>
       </div>
 
@@ -276,7 +406,7 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
       </div>
 
       <div class="style-editor-field">
-        <label for={`editor-bg-1-${storageNamespace}`}>Sfondo 1</label>
+        <label for={`editor-bg-1-${storageNamespace}`}>Sfondo (primario)</label>
         <input
           id={`editor-bg-1-${storageNamespace}`}
           type="color"
@@ -286,7 +416,7 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
       </div>
 
       <div class="style-editor-field">
-        <label for={`editor-text-1-${storageNamespace}`}>Testo 1</label>
+        <label for={`editor-text-1-${storageNamespace}`}>Testo (primario)</label>
         <input
           id={`editor-text-1-${storageNamespace}`}
           type="color"
@@ -296,7 +426,7 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
       </div>
 
       <div class="style-editor-field">
-        <label for={`editor-bg-2-${storageNamespace}`}>Sfondo 2</label>
+        <label for={`editor-bg-2-${storageNamespace}`}>Sfondo (secondario)</label>
         <input
           id={`editor-bg-2-${storageNamespace}`}
           type="color"
@@ -306,12 +436,12 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
       </div>
 
       <div class="style-editor-field">
-        <label for={`editor-text-2-${storageNamespace}`}>Testo 2</label>
+        <label for={`editor-text-2-${storageNamespace}`}>Testo (secondario)</label>
         <input id={`editor-text-2-${storageNamespace}`} type="color" value={mergedPresets.text2} data-style-control="text2" />
       </div>
 
       <div class="style-editor-field">
-        <label for={`editor-bg-3-${storageNamespace}`}>Sfondo 3</label>
+        <label for={`editor-bg-3-${storageNamespace}`}>Sfondo (terziario)</label>
         <input
           id={`editor-bg-3-${storageNamespace}`}
           type="color"
@@ -321,7 +451,7 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
       </div>
 
       <div class="style-editor-field">
-        <label for={`editor-text-3-${storageNamespace}`}>Testo 3</label>
+        <label for={`editor-text-3-${storageNamespace}`}>Testo (terziario)</label>
         <input id={`editor-text-3-${storageNamespace}`} type="color" value={mergedPresets.text3} data-style-control="text3" />
       </div>
 
@@ -554,6 +684,26 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
           ))}
         </>
       )}
+
+      <div class="style-editor-divider" aria-hidden="true"></div>
+      <h3 class="style-editor-subtitle">Presets</h3>
+
+      <div class="style-editor-field style-editor-field--wide">
+        <label for={`editor-preset-slot-${storageNamespace}`}>Slot preset</label>
+        <select id={`editor-preset-slot-${storageNamespace}`} data-style-preset-slot>
+          {Array.from({ length: 10 }, (_, index) => (
+            <option value={`${index + 1}`}>Slot {index + 1}</option>
+          ))}
+        </select>
+      </div>
+
+      <div class="style-editor-field style-editor-field--wide">
+        <div class="style-editor-content-actions style-editor-content-actions--compact">
+          <button type="button" data-style-preset-save>Salva preset</button>
+          <button type="button" data-style-preset-load>Carica preset</button>
+          <button type="button" data-style-randomize>Randomizza</button>
+        </div>
+      </div>
     </div>
 
     <div class="style-editor-actions">
@@ -561,6 +711,8 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
       <button class="style-editor-reset" type="button" data-style-reset>Reset</button>
     </div>
     <p class="style-editor-status" data-style-status aria-live="polite"></p>
+
+    <slot name="extra" />
 
     {normalizedContentSchema.length > 0 && (
       <div class="style-editor-content">
@@ -574,6 +726,42 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
               <span>Edit mode</span>
             </label>
           </div>
+
+          <details class="style-editor-advanced style-editor-field--wide style-editor-snap-settings" open>
+            <summary>Snap e griglia</summary>
+            <div class="style-editor-grid style-editor-grid--snap">
+              <div class="style-editor-field">
+                <label class="style-editor-toggle" for={`editor-snap-enabled-${storageNamespace}`}>
+                  <input id={`editor-snap-enabled-${storageNamespace}`} type="checkbox" data-editor-snap-enabled />
+                  <span>Snap attivo</span>
+                </label>
+              </div>
+
+              <div class="style-editor-field">
+                <label class="style-editor-toggle" for={`editor-snap-grid-${storageNamespace}`}>
+                  <input id={`editor-snap-grid-${storageNamespace}`} type="checkbox" data-editor-snap-grid />
+                  <span>Mostra griglia</span>
+                </label>
+              </div>
+
+              <div class="style-editor-field style-editor-field--wide">
+                <label for={`editor-snap-size-${storageNamespace}`}>Passo griglia</label>
+                <input
+                  id={`editor-snap-size-${storageNamespace}`}
+                  type="range"
+                  min="4"
+                  max="160"
+                  step="1"
+                  data-editor-snap-size
+                />
+                <span class="style-editor-range-value" data-editor-snap-value>20px</span>
+              </div>
+
+              <p class="style-editor-context-note style-editor-field--wide">
+                Tieni premuto Alt mentre trascini per ignorare lo snap al volo.
+              </p>
+            </div>
+          </details>
 
           <div class="style-editor-field style-editor-field--wide">
             <label for={`editor-content-block-${storageNamespace}`}>Blocco testo</label>
@@ -673,6 +861,19 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
               </div>
 
               <div class="style-editor-field">
+                <label for={`editor-content-style-z-${storageNamespace}`}>Livello</label>
+                <input
+                  id={`editor-content-style-z-${storageNamespace}`}
+                  type="range"
+                  min="0"
+                  max="200"
+                  step="1"
+                  data-content-style-z
+                />
+                <span class="style-editor-range-value" data-content-style-value="z">30</span>
+              </div>
+
+              <div class="style-editor-field">
                 <label class="style-editor-toggle" for={`editor-content-style-bold-${storageNamespace}`}>
                   <input id={`editor-content-style-bold-${storageNamespace}`} type="checkbox" data-content-style-bold />
                   <span>Grassetto</span>
@@ -688,30 +889,38 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
             </div>
           </details>
 
-          <div class="style-editor-transform-grid" data-content-transform-controls>
-            <div class="style-editor-field">
-              <label for={`editor-content-x-${storageNamespace}`}>Posizione X</label>
-              <input id={`editor-content-x-${storageNamespace}`} type="range" data-content-x />
-              <span class="style-editor-range-value" data-content-value="x">0px</span>
-            </div>
+        <div class="style-editor-transform-grid" data-content-transform-controls>
+          <div class="style-editor-field">
+            <label for={`editor-content-x-${storageNamespace}`}>Posizione X</label>
+            <input id={`editor-content-x-${storageNamespace}`} type="range" data-content-x />
+            <span class="style-editor-range-value" data-content-value="x">0px</span>
+          </div>
 
-            <div class="style-editor-field">
-              <label for={`editor-content-y-${storageNamespace}`}>Posizione Y</label>
-              <input id={`editor-content-y-${storageNamespace}`} type="range" data-content-y />
-              <span class="style-editor-range-value" data-content-value="y">0px</span>
-            </div>
+          <div class="style-editor-field">
+            <label for={`editor-content-y-${storageNamespace}`}>Posizione Y</label>
+            <input id={`editor-content-y-${storageNamespace}`} type="range" data-content-y />
+            <span class="style-editor-range-value" data-content-value="y">0px</span>
+          </div>
 
-            <div class="style-editor-field">
-              <label for={`editor-content-rotate-${storageNamespace}`}>Rotazione</label>
-              <input id={`editor-content-rotate-${storageNamespace}`} type="range" data-content-rotate />
-              <span class="style-editor-range-value" data-content-value="rotate">0°</span>
-            </div>
+          <div class="style-editor-field">
+            <label for={`editor-content-rotate-${storageNamespace}`}>Rotazione</label>
+            <input id={`editor-content-rotate-${storageNamespace}`} type="range" data-content-rotate />
+            <span class="style-editor-range-value" data-content-value="rotate">0°</span>
+          </div>
+
+          <div class="style-editor-field">
+            <label for={`editor-content-width-${storageNamespace}`}>Larghezza (px)</label>
+            <input id={`editor-content-width-${storageNamespace}`} type="range" min="180" max="1200" value="0" data-content-width />
+            <span class="style-editor-range-value" data-content-value="w">0px</span>
           </div>
         </div>
+      </div>
 
         <div class="style-editor-content-actions">
+          <button type="button" data-content-add-rich>Aggiungi rich text box</button>
           <button type="button" data-content-save>Salva contenuti</button>
           <button type="button" data-content-reset>Reset contenuti</button>
+          <button type="button" data-content-show-all>Ripristina blocchi</button>
           <button type="button" data-content-reset-style-block>Reset stile blocco</button>
           <button type="button" data-content-reset-style-all>Reset tutti stili</button>
           <button type="button" data-content-export>Export JSON</button>
@@ -724,7 +933,7 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
   </div>
 </aside>
 
-<script define:vars={{ mergedPresets, mergedDefaults, pageControlMeta }}>
+<script define:vars={{ mergedPresets, mergedDefaults, pageControlMeta, autoSave }}>
   const globalNumericKeys = new Set([
     "fontSize",
     "lineHeight",
@@ -750,11 +959,50 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
     if (mode === "linear-3") return `linear-gradient(${angle}deg, ${color1}, ${color2}, ${color3})`;
     if (mode === "radial-2") return `radial-gradient(circle at center, ${color1}, ${color2})`;
     if (mode === "radial-3") return `radial-gradient(circle at center, ${color1}, ${color2}, ${color3})`;
+    if (mode === "grain") {
+      return [
+        `radial-gradient(circle at 18% 24%, color-mix(in srgb, ${color2} 52%, transparent) 0 1px, transparent 1.7px)`,
+        `radial-gradient(circle at 72% 36%, color-mix(in srgb, ${color3} 38%, transparent) 0 1px, transparent 1.9px)`,
+        `radial-gradient(circle at 42% 78%, color-mix(in srgb, #000000 10%, transparent) 0 0.8px, transparent 1.6px)`,
+        `linear-gradient(${color1}, ${color1})`,
+      ].join(", ");
+    }
     return color1;
   };
 
-  const toBoolean = (value) =>
-    value === true || value === 1 || value === "1" || value === "true" || value === "on";
+    const toBoolean = (value) =>
+      value === true || value === 1 || value === "1" || value === "true" || value === "on";
+
+  const randomBetween = (min, max, precision = 0) => {
+    const value = min + Math.random() * (max - min);
+    return precision > 0 ? Number(value.toFixed(precision)) : Math.round(value);
+  };
+
+  const randomChoice = (items) => items[Math.floor(Math.random() * items.length)];
+
+  const hueToHex = (hue, saturation = 48, lightness = 72) => {
+    const normalizedHue = ((hue % 360) + 360) % 360;
+    const s = saturation / 100;
+    const l = lightness / 100;
+    const chroma = (1 - Math.abs(2 * l - 1)) * s;
+    const x = chroma * (1 - Math.abs(((normalizedHue / 60) % 2) - 1));
+    const m = l - chroma / 2;
+    const [r1, g1, b1] =
+      normalizedHue < 60
+        ? [chroma, x, 0]
+        : normalizedHue < 120
+          ? [x, chroma, 0]
+          : normalizedHue < 180
+            ? [0, chroma, x]
+            : normalizedHue < 240
+              ? [0, x, chroma]
+              : normalizedHue < 300
+                ? [x, 0, chroma]
+                : [chroma, 0, x];
+    return [r1, g1, b1]
+      .map((channel) => Math.round((channel + m) * 255).toString(16).padStart(2, "0"))
+      .join("");
+  };
 
   const initContentEditors = () => {
     document.querySelectorAll("[data-style-editor]").forEach((panel) => {
@@ -763,16 +1011,41 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
 
     const storageKey = panel.dataset.storageKey ?? "";
     const panelKey = panel.dataset.panelKey ?? "";
+    const panelPosKey = panel.dataset.panelPosKey ?? "";
     const controls = panel.querySelectorAll("[data-style-control]");
     const valueNodes = panel.querySelectorAll("[data-style-value]");
     const resetButton = panel.querySelector("[data-style-reset]");
     const saveButton = panel.querySelector("[data-style-save]");
     const collapseButton = panel.querySelector("[data-style-collapse]");
+    const dragButton = panel.querySelector("[data-style-drag]");
+    const dragSurface = panel.querySelector("[data-style-drag-surface]");
     const statusNode = panel.querySelector("[data-style-status]");
+    const presetSelect = panel.querySelector("[data-style-preset-slot]");
+    const presetSaveButton = panel.querySelector("[data-style-preset-save]");
+    const presetLoadButton = panel.querySelector("[data-style-preset-load]");
+    const randomizeButton = panel.querySelector("[data-style-randomize]");
     const root = document.documentElement;
+    const presetStorageKey = `${storageKey}-presets-v1`;
     let statusTimerId = 0;
 
     const state = { ...mergedDefaults };
+    const autoSaveEnabled = Boolean(autoSave);
+    let autoSaveTimerId = 0;
+
+    const scheduleAutoSave = () => {
+      if (!autoSaveEnabled) return;
+      window.clearTimeout(autoSaveTimerId);
+      autoSaveTimerId = window.setTimeout(() => {
+        try {
+          persistState(false);
+          window.dispatchEvent(
+            new CustomEvent("style-editor:save-all", {
+              detail: { storageKey },
+            }),
+          );
+        } catch {}
+      }, 700);
+    };
 
     const setStatus = (message) => {
       if (!(statusNode instanceof HTMLElement)) return;
@@ -796,6 +1069,10 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
       } catch (error) {
         console.warn("Impossibile salvare lo stato del pannello.", error);
       }
+
+      window.requestAnimationFrame(() => {
+        clampCurrentPanelPos(true);
+      });
     };
 
     const applyStateToCss = () => {
@@ -818,6 +1095,7 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
       root.style.setProperty("--editor-bg-1", state.background);
       root.style.setProperty("--editor-bg-2", state.background2);
       root.style.setProperty("--editor-bg-3", state.background3);
+      root.style.setProperty("--editor-bg-color", state.background);
       root.style.setProperty("--editor-bg-fill", backgroundFill);
       root.style.setProperty("--editor-fg", state.text);
       root.style.setProperty("--editor-text-fill", textFill);
@@ -957,6 +1235,144 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
       updateValueLabel(key, state[key]);
     };
 
+    const readPanelPos = () => {
+      try {
+        if (!panelPosKey) return null;
+        const raw = window.localStorage.getItem(panelPosKey);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== "object") return null;
+        const x = Number(parsed.x);
+        const y = Number(parsed.y);
+        return {
+          x: Number.isFinite(x) ? x : 0,
+          y: Number.isFinite(y) ? y : 0,
+        };
+      } catch {
+        return null;
+      }
+    };
+
+    const readCurrentPanelPos = () => ({
+      x: parsePanelNumber(getComputedStyle(panel).getPropertyValue("--editor-panel-x"), 0),
+      y: parsePanelNumber(getComputedStyle(panel).getPropertyValue("--editor-panel-y"), 0),
+    });
+
+    const parsePanelNumber = (value, fallback = 0) => {
+      if (typeof value === "string") {
+        const match = value.trim().match(/-?\d+(\.\d+)?/);
+        if (match) {
+          const parsed = Number(match[0]);
+          return Number.isFinite(parsed) ? parsed : fallback;
+        }
+        return fallback;
+      }
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : fallback;
+    };
+
+    const clampPanelPos = (pos) => {
+      const margin = 8;
+      const style = getComputedStyle(panel);
+      const top = parsePanelNumber(style.top, 20);
+      const right = parsePanelNumber(style.right, 20);
+      const width = Math.max(panel.offsetWidth, 1);
+      const height = Math.max(panel.offsetHeight, 1);
+      const viewportWidth = Math.max(window.innerWidth || 0, width + margin * 2);
+      const viewportHeight = Math.max(window.innerHeight || 0, height + margin * 2);
+      const baseLeft = viewportWidth - right - width;
+      const baseTop = top;
+      const desiredLeft = baseLeft + parsePanelNumber(pos?.x, 0);
+      const desiredTop = baseTop + parsePanelNumber(pos?.y, 0);
+      const maxLeft = Math.max(margin, viewportWidth - width - margin);
+      const maxTop = Math.max(margin, viewportHeight - height - margin);
+      const left = Math.min(Math.max(desiredLeft, margin), maxLeft);
+      const nextTop = Math.min(Math.max(desiredTop, margin), maxTop);
+
+      return {
+        x: Math.round(left - baseLeft),
+        y: Math.round(nextTop - baseTop),
+      };
+    };
+
+    const applyPanelPos = (pos) => {
+      if (!pos || typeof pos !== "object") return;
+      const next = clampPanelPos(pos);
+      panel.style.setProperty("--editor-panel-x", `${next.x}px`);
+      panel.style.setProperty("--editor-panel-y", `${next.y}px`);
+    };
+
+    const persistPanelPos = () => {
+      try {
+        if (!panelPosKey) return;
+        const next = clampPanelPos(readCurrentPanelPos());
+        window.localStorage.setItem(panelPosKey, JSON.stringify(next));
+      } catch {}
+    };
+
+    const clampCurrentPanelPos = (persist = false) => {
+      applyPanelPos(readCurrentPanelPos());
+      if (persist) persistPanelPos();
+    };
+
+    applyPanelPos(readPanelPos() ?? { x: 0, y: 0 });
+
+    if (dragButton instanceof HTMLButtonElement && dragSurface instanceof HTMLElement) {
+      let moving = null;
+
+      const end = () => {
+        if (!moving) return;
+        moving = null;
+        persistPanelPos();
+      };
+
+      const start = (event) => {
+        if (!(event instanceof PointerEvent)) return;
+        const target = event.target;
+        if (
+          target instanceof HTMLElement &&
+          target.closest("a, button:not([data-style-drag]), details, input, select, textarea, summary")
+        ) {
+          return;
+        }
+
+        moving = {
+          startX: event.clientX,
+          startY: event.clientY,
+          baseX: parsePanelNumber(getComputedStyle(panel).getPropertyValue("--editor-panel-x"), 0),
+          baseY: parsePanelNumber(getComputedStyle(panel).getPropertyValue("--editor-panel-y"), 0),
+          pid: event.pointerId,
+        };
+        dragSurface.setPointerCapture(event.pointerId);
+        panel.classList.add("is-dragging");
+        event.preventDefault();
+      };
+
+      const move = (event) => {
+        if (!moving || !(event instanceof PointerEvent)) return;
+        if (event.pointerId !== moving.pid) return;
+        const nextX = Math.round(moving.baseX + (event.clientX - moving.startX));
+        const nextY = Math.round(moving.baseY + (event.clientY - moving.startY));
+        applyPanelPos({ x: nextX, y: nextY });
+      };
+
+      const finish = () => {
+        end();
+        panel.classList.remove("is-dragging");
+      };
+
+      dragSurface.addEventListener("pointerdown", start);
+      dragSurface.addEventListener("pointermove", move);
+      dragSurface.addEventListener("pointerup", finish);
+      dragSurface.addEventListener("pointercancel", finish);
+    }
+
+    window.addEventListener("resize", () => {
+      window.requestAnimationFrame(() => {
+        clampCurrentPanelPos(true);
+      });
+    });
+
     controls.forEach((control) => {
       if (!(control instanceof HTMLInputElement || control instanceof HTMLSelectElement)) return;
       const key = control.dataset.styleControl ?? "";
@@ -970,10 +1386,138 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
 
       const handler = () => {
         applySetting(key, getControlValue(control));
+        scheduleAutoSave();
       };
 
       control.addEventListener("input", handler);
       control.addEventListener("change", handler);
+    });
+
+    const controlByKey = new Map();
+    controls.forEach((control) => {
+      if (!(control instanceof HTMLInputElement || control instanceof HTMLSelectElement)) return;
+      const key = control.dataset.styleControl ?? "";
+      if (key && !controlByKey.has(key)) controlByKey.set(key, control);
+    });
+
+    const captureSnapshot = () => {
+      const snapshot = {};
+      controls.forEach((control) => {
+        if (!(control instanceof HTMLInputElement || control instanceof HTMLSelectElement)) return;
+        const key = control.dataset.styleControl ?? "";
+        if (!key) return;
+        const fallbackValue = mergedDefaults[key] ?? mergedPresets[key] ?? getControlValue(control);
+        snapshot[key] = castValue(key, getControlValue(control), fallbackValue);
+      });
+      return snapshot;
+    };
+
+    const readPresetStorage = () => {
+      try {
+        const raw = window.localStorage.getItem(presetStorageKey);
+        if (!raw) return { version: 1, slots: {} };
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== "object") return { version: 1, slots: {} };
+        return {
+          version: 1,
+          slots: parsed.slots && typeof parsed.slots === "object" ? parsed.slots : {},
+        };
+      } catch {
+        return { version: 1, slots: {} };
+      }
+    };
+
+    const writePresetStorage = (payload) => {
+      try {
+        window.localStorage.setItem(presetStorageKey, JSON.stringify(payload));
+      } catch {}
+    };
+
+    const getSelectedPresetSlot = () =>
+      presetSelect instanceof HTMLSelectElement ? presetSelect.value || "1" : "1";
+
+    const applySnapshot = (snapshot, saveAfterApply = true) => {
+      if (!snapshot || typeof snapshot !== "object") return false;
+      Object.entries(snapshot).forEach(([key, value]) => {
+        const control = controlByKey.get(key);
+        if (!(control instanceof HTMLInputElement || control instanceof HTMLSelectElement)) return;
+        setControlValue(control, value);
+        applySetting(key, getControlValue(control));
+      });
+      if (saveAfterApply) {
+        persistState(false);
+        try {
+          window.dispatchEvent(
+            new CustomEvent("style-editor:save-all", {
+              detail: { storageKey },
+            }),
+          );
+        } catch {}
+      }
+      return true;
+    };
+
+    const generateRandomSnapshot = () => {
+      const hue = randomBetween(0, 359);
+      const accentHue = hue + randomChoice([28, 44, 128, 180, 212]);
+      const textHue = hue + randomChoice([160, 185, 205, 230]);
+      const availableFonts = Array.from(controlByKey.get("font")?.options ?? [])
+        .map((option) => option.value)
+        .filter(Boolean);
+      const availableTitleFonts = Array.from(controlByKey.get("titleFont")?.options ?? [])
+        .map((option) => option.value)
+        .filter(Boolean);
+
+      return {
+        ...captureSnapshot(),
+        background: `#${hueToHex(hue, randomBetween(18, 42), randomBetween(72, 92))}`,
+        background2: `#${hueToHex(hue + randomBetween(-18, 18), randomBetween(22, 46), randomBetween(58, 82))}`,
+        background3: `#${hueToHex(hue + randomBetween(16, 42), randomBetween(18, 42), randomBetween(76, 94))}`,
+        backgroundMode: randomChoice(["solid", "linear-2", "linear-3", "radial-2", "radial-3", "grain"]),
+        backgroundAngle: randomBetween(0, 360),
+        text: `#${hueToHex(textHue, randomBetween(28, 58), randomBetween(12, 30))}`,
+        text2: `#${hueToHex(textHue + randomBetween(-20, 24), randomBetween(24, 52), randomBetween(24, 42))}`,
+        text3: `#${hueToHex(accentHue, randomBetween(44, 76), randomBetween(38, 58))}`,
+        textMode: randomChoice(["solid", "solid", "linear-2", "linear-3"]),
+        textAngle: randomBetween(0, 360),
+        accent: `#${hueToHex(accentHue, randomBetween(44, 78), randomBetween(34, 58))}`,
+        align: randomChoice(["left", "center", "right", "justify"]),
+        font: availableFonts.length ? randomChoice(availableFonts) : state.font,
+        titleFont: availableTitleFonts.length ? randomChoice(availableTitleFonts) : state.titleFont,
+        fontSize: randomBetween(14, 42),
+        lineHeight: randomBetween(1, 2.15, 2),
+        letterSpacing: randomBetween(0, 0.045, 3),
+        wordSpacing: randomBetween(0, 0.16, 3),
+        copyWidth: randomBetween(42, 128),
+      };
+    };
+
+    presetSaveButton?.addEventListener("click", () => {
+      const slot = getSelectedPresetSlot();
+      const presets = readPresetStorage();
+      presets.slots[slot] = {
+        name: `Slot ${slot}`,
+        savedAt: new Date().toISOString(),
+        snapshot: captureSnapshot(),
+      };
+      writePresetStorage(presets);
+      setStatus(`Preset salvato nello slot ${slot}`);
+    });
+
+    presetLoadButton?.addEventListener("click", () => {
+      const slot = getSelectedPresetSlot();
+      const presets = readPresetStorage();
+      const snapshot = presets.slots?.[slot]?.snapshot;
+      if (!applySnapshot(snapshot, true)) {
+        setStatus(`Slot ${slot} vuoto`);
+        return;
+      }
+      setStatus(`Preset ${slot} caricato`);
+    });
+
+    randomizeButton?.addEventListener("click", () => {
+      applySnapshot(generateRandomSnapshot(), true);
+      setStatus("Preset random applicato");
     });
 
     const persistState = (showFeedback = false) => {
@@ -1032,7 +1576,26 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
 
     saveButton?.addEventListener("click", () => {
       persistState(true);
+      try {
+        window.dispatchEvent(
+          new CustomEvent("style-editor:save-all", {
+            detail: { storageKey },
+          }),
+        );
+      } catch {}
     });
+
+    // Autosave every minute: persist editor state + notify page-level buckets (textboxes, guestbook, etc.)
+    window.setInterval(() => {
+      try {
+        persistState(false);
+        window.dispatchEvent(
+          new CustomEvent("style-editor:save-all", {
+            detail: { storageKey },
+          }),
+        );
+      } catch {}
+    }, 60000);
 
     collapseButton?.addEventListener("click", () => {
       setPanelOpen(panel.classList.contains("is-collapsed"));
@@ -1054,9 +1617,9 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
   }
 </script>
 
-<script define:vars={{ normalizedContentSchema, contentStorageKey, contentNamespace }}>
-  const contentVersion = 2;
-  const supportedContentVersions = new Set([1, 2]);
+<script define:vars={{ normalizedContentSchema, contentStorageKey, contentNamespace, autoSave, miniFontOptions }}>
+  const contentVersion = 3;
+  const supportedContentVersions = new Set([1, 2, 3]);
   const defaultBounds = {
     minX: -700,
     maxX: 700,
@@ -1064,21 +1627,61 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
     maxY: 450,
     minRotate: -180,
     maxRotate: 180,
+    minW: 180,
+    maxW: 1200,
   };
   const styleRanges = {
     fontSize: { min: 10, max: 96 },
     lineHeight: { min: 0.8, max: 3 },
     letterSpacing: { min: -0.1, max: 0.3 },
     wordSpacing: { min: -0.2, max: 1 },
+    z: { min: 0, max: 200 },
   };
   const alignOptions = new Set(["left", "center", "right", "justify"]);
   const fallbackColor = "#1f1a17";
+  const autoSaveEnabled = Boolean(autoSave);
+  const snapSettingsKey = "claudia-editor-snap-settings-v1";
+  const defaultSnapSettings = {
+    enabled: true,
+    showGrid: true,
+    size: 20,
+  };
 
   const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
   const toNumber = (value, fallback = 0) => {
     const parsed = Number(value);
     return Number.isFinite(parsed) ? parsed : fallback;
   };
+  const normalizeSnapSettings = (value) => ({
+    enabled: value?.enabled !== false,
+    showGrid: value?.showGrid !== false,
+    size: clamp(Math.round(toNumber(value?.size, defaultSnapSettings.size)), 4, 160),
+  });
+  const readSnapSettings = () => {
+    try {
+      return normalizeSnapSettings(JSON.parse(window.localStorage.getItem(snapSettingsKey) ?? "null"));
+    } catch {
+      return normalizeSnapSettings(defaultSnapSettings);
+    }
+  };
+  const writeSnapSettings = (settings) => {
+    try {
+      window.localStorage.setItem(snapSettingsKey, JSON.stringify(normalizeSnapSettings(settings)));
+    } catch {}
+  };
+  const applySnapGridVisual = (settings = readSnapSettings()) => {
+    const nextSettings = normalizeSnapSettings(settings);
+    document.documentElement.style.setProperty("--editor-snap-size", `${nextSettings.size}px`);
+    document.body.classList.toggle("editor-snap-enabled", nextSettings.enabled);
+    document.body.classList.toggle("editor-snap-grid-visible", nextSettings.enabled && nextSettings.showGrid);
+  };
+  const snapNumber = (value, settings = readSnapSettings(), event = null) => {
+    const nextSettings = normalizeSnapSettings(settings);
+    if (!nextSettings.enabled || event?.altKey) return value;
+    return Math.round(value / nextSettings.size) * nextSettings.size;
+  };
+  const snapClamped = (value, min, max, settings = readSnapSettings(), event = null) =>
+    clamp(snapNumber(value, settings, event), min, max);
   const normalizeText = (value) => `${value ?? ""}`.replace(/\s+/g, " ").trim();
   const isDesktop = () => window.matchMedia("(min-width: 981px)").matches;
   const escapeHtml = (value) =>
@@ -1111,6 +1714,76 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
       .map((channel) => channel.toString(16).padStart(2, "0"))
       .join("");
     return `#${hex}`;
+  };
+
+  const splitFontFamilyList = (value) => {
+    if (typeof value !== "string") return [];
+    const families = [];
+    let current = "";
+    let quote = "";
+
+    for (const char of value) {
+      if ((char === '"' || char === "'") && !quote) {
+        quote = char;
+        current += char;
+        continue;
+      }
+
+      if (quote && char === quote) {
+        quote = "";
+        current += char;
+        continue;
+      }
+
+      if (char === "," && !quote) {
+        families.push(current);
+        current = "";
+        continue;
+      }
+
+      current += char;
+    }
+
+    if (current) families.push(current);
+    return families;
+  };
+
+  const normalizeFontFamilyName = (value) =>
+    `${value ?? ""}`
+      .trim()
+      .replace(/^["']|["']$/g, "")
+      .replace(/\\"/g, '"')
+      .replace(/\\'/g, "'")
+      .replace(/\s+/g, " ")
+      .toLowerCase();
+
+  const normalizeFontFamilyList = (value) =>
+    splitFontFamilyList(value)
+      .map(normalizeFontFamilyName)
+      .filter(Boolean);
+
+  const findMatchingFontValue = (select, fontFamily) => {
+    if (!(select instanceof HTMLSelectElement)) return "";
+    const targetFamilies = normalizeFontFamilyList(fontFamily);
+    if (!targetFamilies.length) return "";
+
+    const exactMatch = Array.from(select.options).find(
+      (option) => normalizeFontFamilyList(option.value).join("|") === targetFamilies.join("|"),
+    );
+    if (exactMatch) return exactMatch.value;
+
+    const firstTarget = targetFamilies[0];
+    const firstFamilyMatch = Array.from(select.options).find((option) => {
+      const optionFamilies = normalizeFontFamilyList(option.value);
+      return optionFamilies[0] === firstTarget;
+    });
+    if (firstFamilyMatch) return firstFamilyMatch.value;
+
+    const overlappingMatch = Array.from(select.options).find((option) => {
+      const optionFamilies = normalizeFontFamilyList(option.value);
+      return optionFamilies.some((family) => targetFamilies.includes(family));
+    });
+    return overlappingMatch?.value ?? "";
   };
 
   const sanitizeBlockStyle = (rawStyle) => {
@@ -1195,6 +1868,8 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
       const xRange = panel.querySelector("[data-content-x]");
       const yRange = panel.querySelector("[data-content-y]");
       const rotateRange = panel.querySelector("[data-content-rotate]");
+      const widthRange = panel.querySelector("[data-content-width]");
+      const addRichBoxButton = panel.querySelector("[data-content-add-rich]");
       const saveButton = panel.querySelector("[data-content-save]");
       const resetButton = panel.querySelector("[data-content-reset]");
       const resetStyleBlockButton = panel.querySelector("[data-content-reset-style-block]");
@@ -1202,12 +1877,14 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
       const exportButton = panel.querySelector("[data-content-export]");
       const importButton = panel.querySelector("[data-content-import]");
       const importInput = panel.querySelector("[data-content-import-file]");
+      const showAllButton = panel.querySelector("[data-content-show-all]");
       const statusNode = panel.querySelector("[data-content-status]");
       const activeLabelNode = panel.querySelector("[data-content-active-label]");
       const styleScopeNode = panel.querySelector("[data-content-style-scope]");
       const valueX = panel.querySelector('[data-content-value="x"]');
       const valueY = panel.querySelector('[data-content-value="y"]');
       const valueRotate = panel.querySelector('[data-content-value="rotate"]');
+      const valueWidth = panel.querySelector('[data-content-value="w"]');
       const styleAdvanced = panel.querySelector("[data-content-style-advanced]");
 
       const styleFont = panel.querySelector("[data-content-style-font]");
@@ -1217,12 +1894,18 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
       const styleWordSpacing = panel.querySelector("[data-content-style-word-spacing]");
       const styleAlign = panel.querySelector("[data-content-style-align]");
       const styleColor = panel.querySelector("[data-content-style-color]");
+      const styleZ = panel.querySelector("[data-content-style-z]");
       const styleBold = panel.querySelector("[data-content-style-bold]");
       const styleItalic = panel.querySelector("[data-content-style-italic]");
       const styleFontSizeValue = panel.querySelector('[data-content-style-value="fontSize"]');
       const styleLineHeightValue = panel.querySelector('[data-content-style-value="lineHeight"]');
       const styleLetterSpacingValue = panel.querySelector('[data-content-style-value="letterSpacing"]');
       const styleWordSpacingValue = panel.querySelector('[data-content-style-value="wordSpacing"]');
+      const styleZValue = panel.querySelector('[data-content-style-value="z"]');
+      const snapEnabledInput = panel.querySelector("[data-editor-snap-enabled]");
+      const snapGridInput = panel.querySelector("[data-editor-snap-grid]");
+      const snapSizeInput = panel.querySelector("[data-editor-snap-size]");
+      const snapSizeValue = panel.querySelector("[data-editor-snap-value]");
 
       if (
         !(editModeToggle instanceof HTMLInputElement) ||
@@ -1231,7 +1914,8 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
         !(transformControls instanceof HTMLElement) ||
         !(xRange instanceof HTMLInputElement) ||
         !(yRange instanceof HTMLInputElement) ||
-        !(rotateRange instanceof HTMLInputElement)
+        !(rotateRange instanceof HTMLInputElement) ||
+        !(widthRange instanceof HTMLInputElement)
       ) {
         return;
       }
@@ -1244,6 +1928,7 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
         !(styleWordSpacing instanceof HTMLInputElement) ||
         !(styleAlign instanceof HTMLSelectElement) ||
         !(styleColor instanceof HTMLInputElement) ||
+        !(styleZ instanceof HTMLInputElement) ||
         !(styleBold instanceof HTMLInputElement) ||
         !(styleItalic instanceof HTMLInputElement)
       ) {
@@ -1258,6 +1943,7 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
         styleWordSpacing,
         styleAlign,
         styleColor,
+        styleZ,
         styleBold,
         styleItalic,
       ];
@@ -1274,9 +1960,15 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
                   .map((paragraph) => `${paragraph.innerText ?? paragraph.textContent ?? ""}`.trim())
                   .filter(Boolean)
                   .join("\n\n")
+              : richMode === "html"
+                ? element.innerHTML
               : normalizeText(element.textContent ?? "");
           const schemaDefaultText =
-            typeof schemaBlock.defaultText === "string" ? normalizeText(schemaBlock.defaultText) : "";
+            typeof schemaBlock.defaultText === "string"
+              ? richMode === "html"
+                ? schemaBlock.defaultText
+                : normalizeText(schemaBlock.defaultText)
+              : "";
           const defaultText = domDefaultText || schemaDefaultText;
 
           element.dataset.contentBlockId = schemaBlock.id;
@@ -1307,10 +1999,143 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
             x: 0,
             y: 0,
             rotate: 0,
+            hidden: false,
+            w: block.resizable ? toNumber(block.defaultWidth, 340) : 0,
+            z: toNumber(block.defaultZ, 30),
             style: { ...block.defaultStyle },
           },
         ]),
       );
+      let dynamicBlockCounter = blockEntries.length;
+
+      const getDynamicLayer = () => {
+        const selector = `[data-content-dynamic-layer="${CSS.escape(namespace)}"]`;
+        const existing = document.querySelector(selector);
+        if (existing instanceof HTMLElement) return existing;
+
+        const layer = document.createElement("div");
+        layer.className = "content-editor-dynamic-layer";
+        layer.dataset.contentDynamicLayer = namespace;
+        layer.setAttribute("aria-label", "Rich text box aggiunti");
+        document.body.appendChild(layer);
+        return layer;
+      };
+
+      const makeDynamicBlockId = () => {
+        dynamicBlockCounter += 1;
+        return `${namespace}-rich-text-${Date.now()}-${dynamicBlockCounter}`;
+      };
+
+      const addBlockOption = (block) => {
+        if (blockSelect.querySelector(`option[value="${CSS.escape(block.id)}"]`)) return;
+        const option = document.createElement("option");
+        option.value = block.id;
+        option.textContent = block.label ?? block.id;
+        blockSelect.appendChild(option);
+      };
+
+      const removeDynamicBlock = (blockId, selectFallback = true) => {
+        const block = blockById.get(blockId);
+        if (!block || !block.dynamic) return false;
+        block.element.remove();
+        blockById.delete(blockId);
+        stateById.delete(blockId);
+        const index = blockEntries.findIndex((entry) => entry.id === blockId);
+        if (index >= 0) blockEntries.splice(index, 1);
+        blockSelect.querySelector(`option[value="${CSS.escape(blockId)}"]`)?.remove();
+
+        if (activeBlockId === blockId && selectFallback) {
+          activeBlockId = blockEntries[0]?.id ?? "";
+          if (activeBlockId) setActiveBlock(activeBlockId);
+        }
+        return true;
+      };
+
+      const createDynamicRichBlock = (entry = {}, activate = false) => {
+        const incomingId = typeof entry.id === "string" && entry.id.trim() ? entry.id.trim() : "";
+        const id = incomingId && !blockById.has(incomingId) ? incomingId : makeDynamicBlockId();
+        const shouldSnapInitialPlacement = !incomingId;
+        const count = blockEntries.filter((block) => block.dynamic).length + 1;
+        const label =
+          typeof entry.label === "string" && entry.label.trim()
+            ? entry.label.trim()
+            : `Rich text box ${count}`;
+        const defaultHtml = "<p>Nuovo rich text box</p>";
+        const text = typeof entry.text === "string" && entry.text.trim() ? entry.text : defaultHtml;
+        const element = document.createElement("div");
+
+        element.className = "content-editor-block content-editor-dynamic-block editable-text";
+        element.dataset.contentBlockId = id;
+        element.dataset.contentEditable = "true";
+        element.dataset.contentTransform = "xy";
+        element.dataset.contentRich = "html";
+        element.dataset.contentDynamic = "true";
+        element.innerHTML = text;
+        getDynamicLayer().appendChild(element);
+
+        const block = {
+          id,
+          label,
+          selector: `[data-content-block-id="${id}"]`,
+          defaultText: defaultHtml,
+          defaultHtml,
+          defaultStyle: sanitizeBlockStyle(entry.style),
+          styleEditable: true,
+          editable: true,
+          transform: "xy",
+          bounds: {
+            minX: -200,
+            maxX: Math.max(1600, document.documentElement.scrollWidth + 600),
+            minY: -200,
+            maxY: Math.max(1600, document.documentElement.scrollHeight + 800),
+            minW: 120,
+            maxW: 1200,
+          },
+          deletable: true,
+          resizable: true,
+          defaultWidth: 340,
+          richMode: "html",
+          dynamic: true,
+          element,
+        };
+        const bounds = getBounds(block);
+        const state = {
+          text,
+          x: shouldSnapInitialPlacement
+            ? snapClamped(toNumber(entry.x, 72), bounds.minX, bounds.maxX)
+            : clamp(toNumber(entry.x, 72), bounds.minX, bounds.maxX),
+          y: shouldSnapInitialPlacement
+            ? snapClamped(toNumber(entry.y, window.scrollY + 180), bounds.minY, bounds.maxY)
+            : clamp(toNumber(entry.y, window.scrollY + 180), bounds.minY, bounds.maxY),
+          rotate: clamp(toNumber(entry.rotate, 0), bounds.minRotate, bounds.maxRotate),
+          hidden: Boolean(entry.hidden),
+          w: shouldSnapInitialPlacement
+            ? snapClamped(toNumber(entry.w, 340), bounds.minW, bounds.maxW)
+            : clamp(toNumber(entry.w, 340), bounds.minW, bounds.maxW),
+          z: clamp(toNumber(entry.z, 30), styleRanges.z.min, styleRanges.z.max),
+          style: sanitizeBlockStyle(entry.style),
+        };
+
+        blockEntries.push(block);
+        blockById.set(id, block);
+        stateById.set(id, state);
+        addBlockOption(block);
+        bindBlockEvents(block);
+        applyBlockState(block);
+        if (editMode && block.editable) {
+          block.element.setAttribute("contenteditable", "true");
+          block.element.classList.add("content-editor-editable");
+        }
+        if (activate) {
+          if (!editMode) setEditMode(true);
+          setActiveBlock(id);
+          window.setTimeout(() => {
+            block.element.focus();
+            updateHandlePosition();
+          }, 0);
+        }
+        return block;
+      };
 
       const getGlobalStyleDefaults = () => {
         const root = getComputedStyle(document.documentElement);
@@ -1349,6 +2174,31 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
       dragHandle.title = "Trascina blocco";
       document.body.appendChild(dragHandle);
 
+      const deleteHandle = document.createElement("button");
+      deleteHandle.type = "button";
+      deleteHandle.className = "content-editor-delete-handle";
+      deleteHandle.textContent = "×";
+      deleteHandle.title = "Nascondi blocco";
+      document.body.appendChild(deleteHandle);
+
+      const resizeHandle = document.createElement("button");
+      resizeHandle.type = "button";
+      resizeHandle.className = "content-editor-resize-handle";
+      resizeHandle.textContent = "↘";
+      resizeHandle.title = "Ridimensiona blocco";
+      document.body.appendChild(resizeHandle);
+
+      const rotateHandle = document.createElement("button");
+      rotateHandle.type = "button";
+      rotateHandle.className = "content-editor-rotate-handle";
+      rotateHandle.textContent = "⟳";
+      rotateHandle.title = "Ruota blocco";
+      document.body.appendChild(rotateHandle);
+
+      const setRichTextToolbarEnabled = (enabled) => {
+        document.body.classList.toggle("content-rich-toolbar-enabled", enabled);
+      };
+
       const setStatus = (message) => {
         if (!(statusNode instanceof HTMLElement)) return;
         statusNode.textContent = message;
@@ -1359,38 +2209,117 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
         }, 2400);
       };
 
+      const syncSnapControls = (settings = readSnapSettings()) => {
+        const nextSettings = normalizeSnapSettings(settings);
+        if (snapEnabledInput instanceof HTMLInputElement) snapEnabledInput.checked = nextSettings.enabled;
+        if (snapGridInput instanceof HTMLInputElement) snapGridInput.checked = nextSettings.showGrid;
+        if (snapSizeInput instanceof HTMLInputElement) snapSizeInput.value = `${nextSettings.size}`;
+        if (snapSizeValue instanceof HTMLElement) snapSizeValue.textContent = `${nextSettings.size}px`;
+        applySnapGridVisual(nextSettings);
+      };
+
+      const persistSnapControls = (showFeedback = false) => {
+        const nextSettings = normalizeSnapSettings({
+          enabled: snapEnabledInput instanceof HTMLInputElement ? snapEnabledInput.checked : defaultSnapSettings.enabled,
+          showGrid: snapGridInput instanceof HTMLInputElement ? snapGridInput.checked : defaultSnapSettings.showGrid,
+          size: snapSizeInput instanceof HTMLInputElement ? snapSizeInput.value : defaultSnapSettings.size,
+        });
+        writeSnapSettings(nextSettings);
+        syncSnapControls(nextSettings);
+        try {
+          window.dispatchEvent(new CustomEvent("claudia-editor:snap-settings", { detail: nextSettings }));
+        } catch {}
+        updateTransformControls();
+        updateHandlePosition();
+        if (showFeedback) setStatus(`Snap ${nextSettings.enabled ? "attivo" : "spento"} · ${nextSettings.size}px`);
+      };
+
+      [snapEnabledInput, snapGridInput, snapSizeInput].forEach((control) => {
+        if (!(control instanceof HTMLInputElement)) return;
+        control.addEventListener("input", () => persistSnapControls(false));
+        control.addEventListener("change", () => persistSnapControls(true));
+      });
+
+      window.addEventListener("storage", (event) => {
+        if (event.key !== snapSettingsKey) return;
+        syncSnapControls(readSnapSettings());
+        updateTransformControls();
+        updateHandlePosition();
+      });
+
+      window.addEventListener("claudia-editor:snap-settings", (event) => {
+        syncSnapControls(event.detail);
+        updateTransformControls();
+        updateHandlePosition();
+      });
+
+      const getViewportBounds = () => {
+        const pageHeight = Math.max(
+          document.documentElement.scrollHeight || 0,
+          document.body.scrollHeight || 0,
+          window.innerHeight || 0,
+        );
+        const padX = Math.max(1200, (window.innerWidth || 1200) * 2);
+        const padY = Math.max(1200, pageHeight + 800, (window.innerHeight || 900) * 2);
+        return {
+          minX: -padX,
+          maxX: padX,
+          minY: -padY,
+          maxY: padY,
+        };
+      };
+
       const getBounds = (block) => ({
         ...defaultBounds,
-        ...(block.bounds ?? {}),
+        ...getViewportBounds(),
+        ...(block?.bounds ?? {}),
       });
+
+      const getPointerAngle = (event, rect) =>
+        (Math.atan2(event.clientY - (rect.top + rect.height / 2), event.clientX - (rect.left + rect.width / 2)) *
+          180) /
+        Math.PI;
 
       const applyTransform = (block) => {
         const state = stateById.get(block.id);
         if (!state) return;
+        const canResize = Boolean(block.resizable);
 
         if (block.transform === "none") {
           block.element.style.transform = "";
           block.element.style.removeProperty("--content-editor-x");
           block.element.style.removeProperty("--content-editor-y");
           block.element.style.removeProperty("--content-editor-rotate");
+          block.element.style.zIndex = `${clamp(toNumber(state.z, 30), styleRanges.z.min, styleRanges.z.max)}`;
+          if (canResize && state.w) {
+            block.element.style.setProperty("width", `${toNumber(state.w, 0)}px`);
+          } else {
+            block.element.style.removeProperty("width");
+          }
           return;
         }
 
         const x = toNumber(state.x, 0);
         const y = toNumber(state.y, 0);
-        const rotate = block.transform === "xy-rotate" ? toNumber(state.rotate, 0) : 0;
+        const rotate = block.transform !== "none" ? toNumber(state.rotate, 0) : 0;
 
         block.element.style.setProperty("--content-editor-x", `${x}px`);
         block.element.style.setProperty("--content-editor-y", `${y}px`);
         block.element.style.setProperty("--content-editor-rotate", `${rotate}deg`);
-        block.element.style.transform =
-          block.transform === "xy-rotate"
-            ? `translate(${x}px, ${y}px) rotate(${rotate}deg)`
-            : `translate(${x}px, ${y}px)`;
+        block.element.style.transform = `translate(${x}px, ${y}px) rotate(${rotate}deg)`;
         block.element.style.transformOrigin = "center center";
+        block.element.style.zIndex = `${clamp(toNumber(state.z, 30), styleRanges.z.min, styleRanges.z.max)}`;
+        if (block.resizable && state.w) {
+          block.element.style.setProperty("width", `${toNumber(state.w, 0)}px`);
+        } else {
+          block.element.style.removeProperty("width");
+        }
       };
 
       const extractBlockText = (block) => {
+        if (block.richMode === "html") {
+          return `${block.element.innerHTML ?? ""}`;
+        }
         if (block.richMode === "paragraphs") {
           const paragraphs = Array.from(block.element.querySelectorAll("p"));
           if (!paragraphs.length) return normalizeText(block.element.textContent ?? "");
@@ -1403,6 +2332,10 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
       };
 
       const writeBlockText = (block, text) => {
+        if (block.richMode === "html") {
+          block.element.innerHTML = `${text ?? ""}`;
+          return;
+        }
         if (block.richMode === "paragraphs") {
           const paragraphChunks = `${text ?? ""}`
             .split(/\n{2,}/)
@@ -1423,11 +2356,537 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
         block.element.textContent = `${text ?? ""}`;
       };
 
+      const richTextToolbar = document.createElement("div");
+      richTextToolbar.className = "content-rich-toolbar";
+      richTextToolbar.hidden = true;
+      richTextToolbar.setAttribute("role", "toolbar");
+      richTextToolbar.setAttribute("aria-label", "Editor testo selezionato");
+
+      const richFontSelect = document.createElement("select");
+      richFontSelect.title = "Font";
+      richFontSelect.setAttribute("aria-label", "Font");
+      (Array.isArray(miniFontOptions) ? miniFontOptions : []).forEach((option) => {
+        if (!option || typeof option !== "object") return;
+        const item = document.createElement("option");
+        item.value = `${option.value ?? ""}`;
+        item.textContent = `${option.label ?? option.value ?? ""}`;
+        richFontSelect.appendChild(item);
+      });
+
+      const richSizeInput = document.createElement("input");
+      richSizeInput.type = "number";
+      richSizeInput.min = "8";
+      richSizeInput.max = "140";
+      richSizeInput.step = "1";
+      richSizeInput.title = "Dimensione";
+      richSizeInput.setAttribute("aria-label", "Dimensione");
+
+      const richLineHeightInput = document.createElement("input");
+      richLineHeightInput.type = "number";
+      richLineHeightInput.min = "0.8";
+      richLineHeightInput.max = "3";
+      richLineHeightInput.step = "0.05";
+      richLineHeightInput.title = "Interlinea box";
+      richLineHeightInput.setAttribute("aria-label", "Interlinea box");
+      richLineHeightInput.dataset.richLineHeight = "true";
+
+      const richColorInput = document.createElement("input");
+      richColorInput.type = "color";
+      richColorInput.title = "Colore";
+      richColorInput.setAttribute("aria-label", "Colore");
+
+      const richShadowColorInput = document.createElement("input");
+      richShadowColorInput.type = "color";
+      richShadowColorInput.value = "#000000";
+      richShadowColorInput.title = "Colore ombra";
+      richShadowColorInput.setAttribute("aria-label", "Colore ombra");
+      richShadowColorInput.dataset.richShadowControl = "color";
+      richShadowColorInput.dataset.richShadowColor = "true";
+
+      const richShadowThicknessInput = document.createElement("input");
+      richShadowThicknessInput.type = "number";
+      richShadowThicknessInput.min = "0";
+      richShadowThicknessInput.max = "80";
+      richShadowThicknessInput.step = "1";
+      richShadowThicknessInput.value = "6";
+      richShadowThicknessInput.title = "Spessore ombra";
+      richShadowThicknessInput.setAttribute("aria-label", "Spessore ombra");
+      richShadowThicknessInput.dataset.richShadowControl = "thickness";
+
+      const richShadowLengthInput = document.createElement("input");
+      richShadowLengthInput.type = "number";
+      richShadowLengthInput.min = "0";
+      richShadowLengthInput.max = "140";
+      richShadowLengthInput.step = "1";
+      richShadowLengthInput.value = "4";
+      richShadowLengthInput.title = "Lunghezza ombra";
+      richShadowLengthInput.setAttribute("aria-label", "Lunghezza ombra");
+      richShadowLengthInput.dataset.richShadowControl = "length";
+
+      const makeRichButton = (label, title) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = label;
+        button.title = title;
+        button.setAttribute("aria-label", title);
+        return button;
+      };
+
+      const richBoldButton = makeRichButton("B", "Grassetto");
+      const richItalicButton = makeRichButton("I", "Corsivo");
+      const richUnderlineButton = makeRichButton("U", "Sottolineato");
+      const richLinkButton = makeRichButton("LINK", "Aggiungi o modifica link");
+      richLinkButton.dataset.richLink = "true";
+      const richShadowButton = makeRichButton("OMBRA", "Aggiungi o rimuovi ombra testo");
+      richShadowButton.dataset.richShadow = "true";
+      const richClearButton = makeRichButton("×", "Rimuovi stile selezione");
+
+      richTextToolbar.append(
+        richFontSelect,
+        richSizeInput,
+        richLineHeightInput,
+        richColorInput,
+        richBoldButton,
+        richItalicButton,
+        richUnderlineButton,
+        richLinkButton,
+        richShadowButton,
+        richShadowColorInput,
+        richShadowThicknessInput,
+        richShadowLengthInput,
+        richClearButton,
+      );
+      document.body.appendChild(richTextToolbar);
+
+      let savedRichRange = null;
+      let savedRichBlockId = "";
+      let richToolbarPointerActive = false;
+      let richToolbarPointerTimer = 0;
+
+      const keepRichToolbarOpenDuringPointer = (duration = 650) => {
+        richToolbarPointerActive = true;
+        window.clearTimeout(richToolbarPointerTimer);
+        richToolbarPointerTimer = window.setTimeout(() => {
+          richToolbarPointerActive = false;
+        }, duration);
+      };
+
+      const shouldAllowNativeRichControlClick = (target) =>
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLSelectElement ||
+        target instanceof HTMLOptionElement ||
+        (target instanceof HTMLElement && Boolean(target.closest("select, input")));
+
+      richTextToolbar.addEventListener("pointerdown", (event) => {
+        keepRichToolbarOpenDuringPointer();
+        if (shouldAllowNativeRichControlClick(event.target)) return;
+        event.preventDefault();
+      });
+
+      richTextToolbar.addEventListener("mousedown", (event) => {
+        keepRichToolbarOpenDuringPointer();
+        if (shouldAllowNativeRichControlClick(event.target)) return;
+        event.preventDefault();
+      });
+
+      richTextToolbar.addEventListener("focusin", keepRichToolbarOpenDuringPointer);
+
+      const bindRichColorPicker = (input) => {
+        if (!(input instanceof HTMLInputElement)) return;
+        input.addEventListener("pointerdown", (event) => {
+          keepRichToolbarOpenDuringPointer(8000);
+          event.stopPropagation();
+        });
+        input.addEventListener("mousedown", (event) => {
+          keepRichToolbarOpenDuringPointer(8000);
+          event.stopPropagation();
+        });
+        input.addEventListener("click", (event) => {
+          keepRichToolbarOpenDuringPointer(8000);
+          event.stopPropagation();
+          if (typeof input.showPicker === "function") {
+            try {
+              input.showPicker();
+            } catch {}
+          }
+        });
+        input.addEventListener("focus", () => keepRichToolbarOpenDuringPointer(8000));
+        input.addEventListener("blur", () => keepRichToolbarOpenDuringPointer(900));
+      };
+
+      bindRichColorPicker(richColorInput);
+      bindRichColorPicker(richShadowColorInput);
+
+      const getElementFromNode = (node) => {
+        if (node instanceof HTMLElement) return node;
+        if (node instanceof Element) return node;
+        return node?.parentElement ?? null;
+      };
+
+      const getFirstElementFromNode = (node) => {
+        if (node instanceof HTMLElement) return node;
+        if (!(node instanceof Node)) return null;
+        if (node.nodeType === Node.TEXT_NODE) return node.parentElement;
+        if (!(node instanceof Element)) return null;
+        if (node instanceof HTMLElement) return node;
+        return node.querySelector("*");
+      };
+
+      const getRichPointElement = (block, range) => {
+        if (range.startContainer instanceof Text) {
+          return getElementFromNode(range.startContainer) ?? block.element;
+        }
+
+        if (range.startContainer instanceof Element) {
+          const childAtStart = range.startContainer.childNodes[range.startOffset] ?? null;
+          const childBeforeStart = range.startOffset > 0 ? range.startContainer.childNodes[range.startOffset - 1] : null;
+          const fromStart = getFirstElementFromNode(childAtStart);
+          const fromBefore = getFirstElementFromNode(childBeforeStart);
+          const candidate = fromStart ?? fromBefore ?? getElementFromNode(range.startContainer);
+          return candidate instanceof HTMLElement && block.element.contains(candidate) ? candidate : block.element;
+        }
+
+        return getElementFromNode(range.startContainer) ?? block.element;
+      };
+
+      const getVisibleTextColor = (computed) => {
+        const textFill = computed.webkitTextFillColor;
+        if (textFill && textFill !== "currentcolor" && textFill !== "transparent") {
+          return normalizeColor(textFill, normalizeColor(computed.color, fallbackColor));
+        }
+        return normalizeColor(computed.color, fallbackColor);
+      };
+
+      const getRichBlockLineHeight = (block) => {
+        const state = stateById.get(block.id);
+        const style = sanitizeBlockStyle(state?.style);
+        if (style.lineHeight !== undefined) return style.lineHeight;
+        return parseCssNumber(getComputedStyle(document.documentElement).getPropertyValue("--editor-line-height"), 1.47);
+      };
+
+      const getRichSelection = () => {
+        const selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return null;
+        const range = selection.getRangeAt(0);
+        const startElement = getElementFromNode(range.startContainer);
+        const endElement = getElementFromNode(range.endContainer);
+        const blockElement = startElement?.closest(".content-editor-block");
+        if (!(blockElement instanceof HTMLElement) || !blockElement.contains(endElement)) return null;
+        const blockId = blockElement.dataset.contentBlockId ?? "";
+        const block = blockById.get(blockId);
+        if (!block || !block.editable || block.richMode !== "html" || block.element.hidden) return null;
+        return { block, range };
+      };
+
+      const positionRichToolbar = (range) => {
+        const rect = range.getBoundingClientRect();
+        if (!rect.width && !rect.height) return;
+        const toolbarRect = richTextToolbar.getBoundingClientRect();
+        const margin = 8;
+        const left = clamp(
+          rect.left + rect.width / 2 - toolbarRect.width / 2,
+          margin,
+          Math.max(margin, window.innerWidth - toolbarRect.width - margin),
+        );
+        const top = clamp(
+          rect.top - toolbarRect.height - 10,
+          margin,
+          Math.max(margin, window.innerHeight - toolbarRect.height - margin),
+        );
+        richTextToolbar.style.left = `${Math.round(left)}px`;
+        richTextToolbar.style.top = `${Math.round(top)}px`;
+      };
+
+      const hideRichToolbar = () => {
+        richTextToolbar.hidden = true;
+      };
+
+      const syncRichToolbarControls = (block, range) => {
+        const element = getRichPointElement(block, range);
+        const computed = getComputedStyle(element);
+        const fontValue = computed.fontFamily;
+        const matchingFontValue = findMatchingFontValue(richFontSelect, fontValue);
+        if (matchingFontValue) richFontSelect.value = matchingFontValue;
+        richSizeInput.value = `${Math.round(parseCssNumber(computed.fontSize, 16))}`;
+        richLineHeightInput.value = `${getRichBlockLineHeight(block).toFixed(2)}`;
+        richColorInput.value = getVisibleTextColor(computed);
+        const shadow = parseRichTextShadow(computed.textShadow);
+        richShadowColorInput.value = shadow.color;
+        richShadowThicknessInput.value = `${shadow.thickness}`;
+        richShadowLengthInput.value = `${shadow.length}`;
+        richBoldButton.classList.toggle("is-active", isBoldValue(computed.fontWeight));
+        richItalicButton.classList.toggle("is-active", isItalicValue(computed.fontStyle));
+        richUnderlineButton.classList.toggle("is-active", computed.textDecorationLine.includes("underline"));
+        richLinkButton.classList.toggle("is-active", Boolean(closestRichLink(range)));
+        richShadowButton.classList.toggle("is-active", shadow.enabled);
+      };
+
+      const showRichToolbarForSelection = () => {
+        if (!editMode) {
+          hideRichToolbar();
+          return;
+        }
+        const selectionData = getRichSelection();
+        if (!selectionData) {
+          if (!richTextToolbar.contains(document.activeElement)) hideRichToolbar();
+          return;
+        }
+        savedRichRange = selectionData.range.cloneRange();
+        savedRichBlockId = selectionData.block.id;
+        setActiveBlock(selectionData.block.id);
+        richTextToolbar.hidden = false;
+        syncRichToolbarControls(selectionData.block, selectionData.range);
+        positionRichToolbar(selectionData.range);
+      };
+
+      const restoreRichSelection = () => {
+        const block = blockById.get(savedRichBlockId);
+        if (!block || !savedRichRange) return null;
+        const selection = window.getSelection();
+        if (!selection) return null;
+        selection.removeAllRanges();
+        selection.addRange(savedRichRange);
+        return { block, selection, range: savedRichRange };
+      };
+
+      const normalizeLinkHref = (value) => {
+        const raw = `${value ?? ""}`.trim();
+        if (!raw) return "";
+        if (/^(javascript|data|vbscript):/i.test(raw)) return "";
+        if (/^(https?:|mailto:|tel:)/i.test(raw) || raw.startsWith("/") || raw.startsWith("#")) return raw;
+        if (/^[a-z][a-z0-9+.-]*:/i.test(raw)) return "";
+        return `https://${raw}`;
+      };
+
+      const closestRichLink = (range) => {
+        const element = getElementFromNode(range.startContainer);
+        const link = element?.closest("a");
+        return link instanceof HTMLAnchorElement ? link : null;
+      };
+
+      const parseRichTextShadow = (value) => {
+        const raw = `${value ?? ""}`.trim();
+        const fallback = { enabled: false, color: "#000000", thickness: 6, length: 4 };
+        if (!raw || raw === "none") return fallback;
+
+        const colorMatch = raw.match(/rgba?\([^)]+\)|#[0-9a-f]{3,8}\b|hsla?\([^)]+\)|\b[a-z]+\b/i);
+        const withoutColor = colorMatch ? raw.replace(colorMatch[0], "") : raw;
+        const numbers = Array.from(withoutColor.matchAll(/-?\d+(\.\d+)?px/g)).map((match) =>
+          Number.parseFloat(match[0]),
+        );
+        const offsetX = Number.isFinite(numbers[0]) ? numbers[0] : fallback.length;
+        const offsetY = Number.isFinite(numbers[1]) ? numbers[1] : offsetX;
+        const blur = Number.isFinite(numbers[2]) ? numbers[2] : fallback.thickness;
+
+        return {
+          enabled: true,
+          color: normalizeColor(colorMatch?.[0] ?? fallback.color, fallback.color),
+          thickness: clamp(Math.round(Math.abs(blur)), 0, 80),
+          length: clamp(Math.round(Math.max(Math.abs(offsetX), Math.abs(offsetY))), 0, 140),
+        };
+      };
+
+      const getRichShadowSettings = () => ({
+        color: richShadowColorInput.value || "#000000",
+        thickness: clamp(toNumber(richShadowThicknessInput.value, 6), 0, 80),
+        length: clamp(toNumber(richShadowLengthInput.value, 4), 0, 140),
+      });
+
+      const buildRichTextShadow = () => {
+        const shadow = getRichShadowSettings();
+        richShadowThicknessInput.value = `${shadow.thickness}`;
+        richShadowLengthInput.value = `${shadow.length}`;
+        return `${shadow.length}px ${shadow.length}px ${shadow.thickness}px ${shadow.color}`;
+      };
+
+      const applyLinkToSelection = () => {
+        const restoredBeforePrompt = restoreRichSelection();
+        if (!restoredBeforePrompt || restoredBeforePrompt.selection.isCollapsed) return;
+
+        const currentHref = closestRichLink(restoredBeforePrompt.range)?.getAttribute("href") ?? "";
+        const input = window.prompt("Incolla il link web", currentHref);
+        if (input === null) {
+          showRichToolbarForSelection();
+          return;
+        }
+
+        const restored = restoreRichSelection();
+        if (!restored || restored.selection.isCollapsed) return;
+
+        const existingLink = closestRichLink(restored.range);
+        const href = normalizeLinkHref(input);
+        if (!href) {
+          if (`${input ?? ""}`.trim() === "") {
+            document.execCommand("unlink", false);
+            syncRichBlockAfterChange(restored.block);
+            setStatus("Link rimosso");
+          } else {
+            setStatus("Link non valido");
+          }
+          showRichToolbarForSelection();
+          return;
+        }
+
+        const shouldUpdateExisting = existingLink && restored.block.element.contains(existingLink);
+        const link = shouldUpdateExisting ? existingLink : document.createElement("a");
+        link.href = href;
+        link.target = "_blank";
+        link.rel = "noreferrer";
+
+        if (!shouldUpdateExisting) {
+          try {
+            restored.range.surroundContents(link);
+          } catch {
+            const fragment = restored.range.extractContents();
+            link.appendChild(fragment);
+            restored.range.insertNode(link);
+          }
+        }
+
+        const nextRange = document.createRange();
+        nextRange.selectNodeContents(link);
+        restored.selection.removeAllRanges();
+        restored.selection.addRange(nextRange);
+        savedRichRange = nextRange.cloneRange();
+        savedRichBlockId = restored.block.id;
+        syncRichBlockAfterChange(restored.block);
+        setStatus("Link aggiunto");
+        showRichToolbarForSelection();
+      };
+
+      const syncRichBlockAfterChange = (block) => {
+        const state = stateById.get(block.id);
+        if (!state) return;
+        state.text = extractBlockText(block);
+        if (activeBlockId === block.id) textArea.value = state.text;
+        scheduleContentSave();
+      };
+
+      const wrapRichSelection = (styles) => {
+        const restored = restoreRichSelection();
+        if (!restored || restored.selection.isCollapsed) return;
+        const span = document.createElement("span");
+        const resetDescendantStyles = (root, styleKeys) => {
+          root.querySelectorAll("*").forEach((node) => {
+            if (!(node instanceof HTMLElement)) return;
+            styleKeys.forEach((key) => {
+              if (key === "WebkitTextFillColor") {
+                node.style.removeProperty("-webkit-text-fill-color");
+                return;
+              }
+              node.style[key] = "";
+            });
+
+            if (!node.getAttribute("style")?.trim()) node.removeAttribute("style");
+          });
+        };
+        const styleKeys = Object.keys(styles).filter((key) => styles[key] !== null);
+
+        Object.entries(styles).forEach(([key, value]) => {
+          if (value === null) return;
+          span.style[key] = `${value}`;
+        });
+
+        try {
+          restored.range.surroundContents(span);
+        } catch {
+          const fragment = restored.range.extractContents();
+          span.appendChild(fragment);
+          restored.range.insertNode(span);
+        }
+
+        resetDescendantStyles(span, styleKeys);
+        const nextRange = document.createRange();
+        nextRange.selectNodeContents(span);
+        restored.selection.removeAllRanges();
+        restored.selection.addRange(nextRange);
+        savedRichRange = nextRange.cloneRange();
+        savedRichBlockId = restored.block.id;
+        syncRichBlockAfterChange(restored.block);
+        showRichToolbarForSelection();
+      };
+
+      const unwrapRichSelection = () => {
+        const restored = restoreRichSelection();
+        if (!restored || restored.selection.isCollapsed) return;
+        document.execCommand("removeFormat", false);
+        syncRichBlockAfterChange(restored.block);
+        showRichToolbarForSelection();
+      };
+
+      richFontSelect.addEventListener("change", () => {
+        if (!richFontSelect.value) return;
+        wrapRichSelection({ fontFamily: richFontSelect.value });
+      });
+
+      richSizeInput.addEventListener("change", () => {
+        const nextSize = clamp(toNumber(richSizeInput.value, 16), 8, 140);
+        richSizeInput.value = `${nextSize}`;
+        wrapRichSelection({ fontSize: `${nextSize}px` });
+      });
+
+      richLineHeightInput.addEventListener("change", () => {
+        const block = blockById.get(activeBlockId);
+        if (!block || block.richMode !== "html") return;
+        const nextLineHeight = clamp(toNumber(richLineHeightInput.value, 1.47), styleRanges.lineHeight.min, styleRanges.lineHeight.max);
+        richLineHeightInput.value = `${nextLineHeight.toFixed(2)}`;
+        updateActiveStyle({ lineHeight: nextLineHeight });
+        showRichToolbarForSelection();
+      });
+
+      richColorInput.addEventListener("input", () => {
+        wrapRichSelection({ color: richColorInput.value, WebkitTextFillColor: richColorInput.value });
+      });
+
+      const applyRichShadowFromControls = () => {
+        wrapRichSelection({ textShadow: buildRichTextShadow() });
+      };
+
+      richShadowButton.addEventListener("click", () => {
+        const restored = restoreRichSelection();
+        if (!restored) return;
+        wrapRichSelection({ textShadow: buildRichTextShadow() });
+      });
+
+      richShadowColorInput.addEventListener("input", applyRichShadowFromControls);
+      richShadowColorInput.addEventListener("change", applyRichShadowFromControls);
+      richShadowThicknessInput.addEventListener("change", applyRichShadowFromControls);
+      richShadowLengthInput.addEventListener("change", applyRichShadowFromControls);
+
+      richBoldButton.addEventListener("click", () => {
+        const restored = restoreRichSelection();
+        if (!restored) return;
+        const element = getElementFromNode(restored.range.startContainer) ?? restored.block.element;
+        const isActive = isBoldValue(getComputedStyle(element).fontWeight);
+        wrapRichSelection({ fontWeight: isActive ? "400" : "700" });
+      });
+
+      richItalicButton.addEventListener("click", () => {
+        const restored = restoreRichSelection();
+        if (!restored) return;
+        const element = getElementFromNode(restored.range.startContainer) ?? restored.block.element;
+        const isActive = isItalicValue(getComputedStyle(element).fontStyle);
+        wrapRichSelection({ fontStyle: isActive ? "normal" : "italic" });
+      });
+
+      richUnderlineButton.addEventListener("click", () => {
+        const restored = restoreRichSelection();
+        if (!restored) return;
+        const element = getElementFromNode(restored.range.startContainer) ?? restored.block.element;
+        const isActive = getComputedStyle(element).textDecorationLine.includes("underline");
+        wrapRichSelection({ textDecoration: isActive ? "none" : "underline" });
+      });
+
+      richLinkButton.addEventListener("click", applyLinkToSelection);
+
+      richClearButton.addEventListener("click", unwrapRichSelection);
+
       const applyBlockStyle = (block) => {
         const state = stateById.get(block.id);
         if (!state) return;
         const style = sanitizeBlockStyle(state.style);
         state.style = style;
+        block.element.classList.toggle("content-editor-block--custom-style", Object.keys(style).length > 0);
 
         if (style.fontFamily) block.element.style.fontFamily = style.fontFamily;
         else block.element.style.removeProperty("font-family");
@@ -1435,8 +2894,11 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
         if (style.fontSize !== undefined) block.element.style.fontSize = `${style.fontSize}px`;
         else block.element.style.removeProperty("font-size");
 
-        if (style.lineHeight !== undefined) block.element.style.lineHeight = `${style.lineHeight}`;
-        else block.element.style.removeProperty("line-height");
+        if (style.lineHeight !== undefined) {
+          block.element.style.lineHeight = `${style.lineHeight}`;
+        } else {
+          block.element.style.removeProperty("line-height");
+        }
 
         if (style.letterSpacing !== undefined) block.element.style.letterSpacing = `${style.letterSpacing}em`;
         else block.element.style.removeProperty("letter-spacing");
@@ -1471,6 +2933,7 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
       const applyBlockState = (block) => {
         const state = stateById.get(block.id);
         if (!state) return;
+        block.element.hidden = Boolean(state.hidden);
         block.element.dataset.contentEditable = block.editable ? "true" : "false";
         block.element.dataset.contentTransform = block.transform;
         if (extractBlockText(block) !== state.text) {
@@ -1512,6 +2975,10 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
         if (styleWordSpacingValue instanceof HTMLElement) {
           styleWordSpacingValue.textContent = `${toNumber(effectiveStyle.wordSpacing, 0).toFixed(3)}em`;
         }
+        const state = stateById.get(activeBlockId);
+        if (styleZValue instanceof HTMLElement) {
+          styleZValue.textContent = `${clamp(toNumber(state?.z, 30), styleRanges.z.min, styleRanges.z.max)}`;
+        }
       };
 
       const setStyleControlsEnabled = (enabled) => {
@@ -1530,13 +2997,14 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
         if (!canEditStyle) return;
         const effectiveStyle = getEffectiveStyle(block);
 
-        styleFont.value = effectiveStyle.fontFamily;
+        styleFont.value = findMatchingFontValue(styleFont, effectiveStyle.fontFamily) || effectiveStyle.fontFamily;
         styleSize.value = `${toNumber(effectiveStyle.fontSize, 23)}`;
         styleLineHeight.value = `${toNumber(effectiveStyle.lineHeight, 1.47)}`;
         styleLetterSpacing.value = `${toNumber(effectiveStyle.letterSpacing, 0)}`;
         styleWordSpacing.value = `${toNumber(effectiveStyle.wordSpacing, 0)}`;
         styleAlign.value = alignOptions.has(effectiveStyle.textAlign) ? effectiveStyle.textAlign : "left";
         styleColor.value = normalizeColor(effectiveStyle.color, fallbackColor);
+        styleZ.value = `${clamp(toNumber(stateById.get(activeBlockId)?.z, 30), styleRanges.z.min, styleRanges.z.max)}`;
         styleBold.checked = isBoldValue(effectiveStyle.fontWeight);
         styleItalic.checked = isItalicValue(effectiveStyle.fontStyle);
         updateStyleValueLabels(effectiveStyle);
@@ -1552,27 +3020,62 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
             x: 0,
             y: 0,
             rotate: 0,
+            hidden: false,
+            w: block.resizable ? toNumber(block.defaultWidth, 340) : 0,
+            z: 30,
             style: {},
           };
           return {
             id: block.id,
+            ...(block.dynamic ? { dynamic: true, type: "rich-text", label: block.label ?? block.id } : {}),
             text: `${state.text ?? ""}`,
             x: toNumber(state.x, 0),
             y: toNumber(state.y, 0),
             rotate: toNumber(state.rotate, 0),
+            hidden: Boolean(state.hidden),
+            w: block.resizable ? clamp(toNumber(state.w, toNumber(block.defaultWidth, 340)), getBounds(block).minW, getBounds(block).maxW) : 0,
+            z: clamp(toNumber(state.z, 30), styleRanges.z.min, styleRanges.z.max),
             style: sanitizeBlockStyle(state.style),
           };
         }),
       });
 
+      const contentFingerprint = (payload) => {
+        const stablePayload = { ...payload, updatedAt: "" };
+        return JSON.stringify(stablePayload);
+      };
+
+      let lastContentFingerprint = "";
+
       const savePayload = (showFeedback = false) => {
         try {
-          window.localStorage.setItem(storageKey, JSON.stringify(serializePayload()));
+          const payload = serializePayload();
+          const nextFingerprint = contentFingerprint(payload);
+          if (nextFingerprint === lastContentFingerprint) {
+            if (showFeedback) setStatus("Contenuti salvati");
+            return;
+          }
+          lastContentFingerprint = nextFingerprint;
+          window.localStorage.setItem(storageKey, JSON.stringify(payload));
           if (showFeedback) setStatus("Contenuti salvati");
         } catch (error) {
           if (showFeedback) setStatus("Salvataggio contenuti non riuscito");
         }
       };
+
+      let autoSaveContentTimerId = 0;
+      const scheduleContentSave = () => {
+        if (!autoSaveEnabled) return;
+        window.clearTimeout(autoSaveContentTimerId);
+        autoSaveContentTimerId = window.setTimeout(() => savePayload(false), 700);
+      };
+
+      window.addEventListener("style-editor:save-all", (event) => {
+        const detail = event?.detail;
+        if (!detail || typeof detail !== "object") return;
+        if (detail.storageKey !== panel.dataset.storageKey) return;
+        savePayload(true);
+      });
 
       const isSupportedVersion = (value) => {
         if (value === undefined || value === null) return true;
@@ -1590,6 +3093,13 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
           if (!isSupportedVersion(parsed.version)) return false;
           if (parsed.page && parsed.page !== namespace) return false;
           if (!Array.isArray(parsed.blocks)) return false;
+
+          parsed.blocks.forEach((entry) => {
+            if (!entry || typeof entry !== "object") return;
+            if (entry.dynamic !== true && entry.type !== "rich-text") return;
+            if (typeof entry.id === "string" && blockById.has(entry.id)) return;
+            createDynamicRichBlock(entry, false);
+          });
 
           parsed.blocks.forEach((entry) => {
             if (!entry || typeof entry !== "object") return;
@@ -1616,6 +3126,12 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
             state.x = toNumber(entry.x, 0);
             state.y = toNumber(entry.y, 0);
             state.rotate = toNumber(entry.rotate, 0);
+            state.hidden = Boolean(entry.hidden);
+            if (block.resizable) {
+              const bounds = getBounds(block);
+              state.w = clamp(toNumber(entry.w, toNumber(block.defaultWidth, 340)), bounds.minW, bounds.maxW);
+            }
+            state.z = clamp(toNumber(entry.z, state.z ?? 30), styleRanges.z.min, styleRanges.z.max);
             if (entry.style && typeof entry.style === "object") {
               state.style = {
                 ...state.style,
@@ -1634,25 +3150,71 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
         const block = blockById.get(activeBlockId);
         if (!block) {
           dragHandle.classList.remove("is-visible");
+          deleteHandle.classList.remove("is-visible");
+          resizeHandle.classList.remove("is-visible");
+          rotateHandle.classList.remove("is-visible");
+          return;
+        }
+        const state = stateById.get(activeBlockId);
+        if (state?.hidden) {
+          dragHandle.classList.remove("is-visible");
+          deleteHandle.classList.remove("is-visible");
+          resizeHandle.classList.remove("is-visible");
+          rotateHandle.classList.remove("is-visible");
           return;
         }
 
         const canDrag = editMode && block.transform !== "none" && (!block.desktopOnlyTransform || isDesktop());
+        const canDelete = editMode && Boolean(block.deletable);
+        const canResize = editMode && Boolean(block.resizable);
+        const canRotate = editMode && block.transform !== "none" && (!block.desktopOnlyTransform || isDesktop());
 
         if (!canDrag) {
           dragHandle.classList.remove("is-visible");
-          return;
         }
+        if (!canDelete) {
+          deleteHandle.classList.remove("is-visible");
+        }
+        if (!canResize) {
+          resizeHandle.classList.remove("is-visible");
+        }
+        if (!canRotate) {
+          rotateHandle.classList.remove("is-visible");
+        }
+        if (!canDrag && !canDelete && !canResize && !canRotate) return;
 
         const rect = block.element.getBoundingClientRect();
         if (rect.width <= 0 || rect.height <= 0) {
           dragHandle.classList.remove("is-visible");
+          deleteHandle.classList.remove("is-visible");
+          resizeHandle.classList.remove("is-visible");
+          rotateHandle.classList.remove("is-visible");
           return;
         }
 
-        dragHandle.classList.add("is-visible");
-        dragHandle.style.left = `${Math.max(6, rect.left - 14)}px`;
-        dragHandle.style.top = `${Math.max(6, rect.top + 8)}px`;
+        if (canDrag) {
+          dragHandle.classList.add("is-visible");
+          dragHandle.style.left = `${Math.max(6, rect.left - 14)}px`;
+          dragHandle.style.top = `${Math.max(6, rect.top + 8)}px`;
+        }
+
+        if (canDelete) {
+          deleteHandle.classList.add("is-visible");
+          deleteHandle.style.left = `${Math.max(6, rect.right - 14)}px`;
+          deleteHandle.style.top = `${Math.max(6, rect.top + 8)}px`;
+        }
+
+        if (canResize) {
+          resizeHandle.classList.add("is-visible");
+          resizeHandle.style.left = `${clamp(Math.round(rect.right - 18), 10, Math.max(10, window.innerWidth - 34))}px`;
+          resizeHandle.style.top = `${clamp(Math.round(rect.bottom - 18), 10, Math.max(10, window.innerHeight - 34))}px`;
+        }
+
+        if (canRotate) {
+          rotateHandle.classList.add("is-visible");
+          rotateHandle.style.left = `${clamp(Math.round(rect.left + rect.width / 2 - 14), 10, Math.max(10, window.innerWidth - 34))}px`;
+          rotateHandle.style.top = `${Math.max(6, rect.top - 18)}px`;
+        }
       };
 
       const updateTransformControls = () => {
@@ -1661,7 +3223,7 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
         const state = stateById.get(block.id);
         if (!state) return;
 
-        const showTransform = block.transform !== "none";
+        const showTransform = block.transform !== "none" || Boolean(block.resizable);
         transformControls.classList.toggle("is-hidden", !showTransform);
         if (!showTransform) return;
 
@@ -1669,25 +3231,39 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
         xRange.min = `${bounds.minX}`;
         xRange.max = `${bounds.maxX}`;
         xRange.step = "1";
+        xRange.disabled = block.transform === "none";
 
         yRange.min = `${bounds.minY}`;
         yRange.max = `${bounds.maxY}`;
         yRange.step = "1";
+        yRange.disabled = block.transform === "none";
 
         rotateRange.min = `${bounds.minRotate}`;
         rotateRange.max = `${bounds.maxRotate}`;
         rotateRange.step = "1";
-        rotateRange.disabled = block.transform !== "xy-rotate";
+        rotateRange.disabled = block.transform === "none";
+        widthRange.min = `${bounds.minW}`;
+        widthRange.max = `${bounds.maxW}`;
+        const snapSettings = readSnapSettings();
+        const snapStep = snapSettings.enabled ? `${snapSettings.size}` : "1";
+        xRange.step = snapStep;
+        yRange.step = snapStep;
+        widthRange.step = snapStep;
+        widthRange.disabled = !Boolean(block.resizable);
 
         xRange.value = `${toNumber(state.x, 0)}`;
         yRange.value = `${toNumber(state.y, 0)}`;
         rotateRange.value = `${toNumber(state.rotate, 0)}`;
+        widthRange.value = `${toNumber(block.resizable ? state.w : bounds.minW, bounds.minW)}`;
 
         if (valueX instanceof HTMLElement) valueX.textContent = `${toNumber(state.x, 0)}px`;
         if (valueY instanceof HTMLElement) valueY.textContent = `${toNumber(state.y, 0)}px`;
         if (valueRotate instanceof HTMLElement) {
           valueRotate.textContent =
-            block.transform === "xy-rotate" ? `${toNumber(state.rotate, 0)}°` : "N/A";
+            block.transform !== "none" ? `${toNumber(state.rotate, 0)}°` : "N/A";
+        }
+        if (valueWidth instanceof HTMLElement) {
+          valueWidth.textContent = block.resizable ? `${toNumber(state.w, bounds.minW)}px` : "N/A";
         }
       };
 
@@ -1715,6 +3291,65 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
         updateHandlePosition();
       };
 
+      const deleteActiveBlock = () => {
+        const block = blockById.get(activeBlockId);
+        if (!block || !block.deletable) return false;
+        if (block.dynamic) {
+          const state = stateById.get(activeBlockId);
+          if (!state) return false;
+          state.hidden = true;
+          applyBlockState(block);
+          hideRichToolbar();
+          scheduleContentSave();
+          try {
+            window.dispatchEvent(
+              new CustomEvent("content-editor:delete", {
+                detail: { blockId: activeBlockId, selector: block.selector },
+              }),
+            );
+          } catch {}
+          setStatus("Rich text box nascosto");
+          return true;
+        }
+        const state = stateById.get(activeBlockId);
+        if (!state) return false;
+        state.hidden = true;
+        applyBlockState(block);
+        scheduleContentSave();
+        try {
+          window.dispatchEvent(
+            new CustomEvent("content-editor:delete", {
+              detail: { blockId: activeBlockId, selector: block.selector },
+            }),
+          );
+        } catch {}
+        setStatus("Blocco nascosto");
+        return true;
+      };
+
+      deleteHandle.addEventListener("click", deleteActiveBlock);
+
+      document.addEventListener("keydown", (event) => {
+        if (!editMode || event.key !== "Delete") return;
+        const active = document.activeElement;
+        const target = event.target;
+        const isRichTextEditing =
+          (active instanceof HTMLElement && Boolean(active.closest("[contenteditable='true']"))) ||
+          (target instanceof HTMLElement && Boolean(target.closest("[contenteditable='true']")));
+        if (
+          active instanceof HTMLInputElement ||
+          active instanceof HTMLTextAreaElement ||
+          active instanceof HTMLSelectElement ||
+          isRichTextEditing ||
+          richTextToolbar.contains(active)
+        ) {
+          return;
+        }
+        if (!blockById.get(activeBlockId)?.deletable) return;
+        event.preventDefault();
+        deleteActiveBlock();
+      });
+
       const setEditMode = (enabled) => {
         editMode = enabled;
         editModeToggle.checked = enabled;
@@ -1731,11 +3366,13 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
         });
 
         if (!enabled) {
+          hideRichToolbar();
           blockEntries.forEach((block) => block.element.classList.remove("content-editor-block--active"));
         } else {
           setActiveBlock(activeBlockId);
         }
 
+        setRichTextToolbarEnabled(enabled);
         updateHandlePosition();
 
         try {
@@ -1745,25 +3382,34 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
       };
 
       const resetContent = () => {
+        hideRichToolbar();
         blockEntries.forEach((block) => {
+          if (block.dynamic) {
+            const state = stateById.get(block.id);
+            if (!state) return;
+            state.hidden = true;
+            applyBlockState(block);
+            return;
+          }
+
           block.element.innerHTML = block.defaultHtml;
           stateById.set(block.id, {
             text: extractBlockText(block) || block.defaultText,
             x: 0,
             y: 0,
             rotate: 0,
+            hidden: false,
+            w: block.resizable ? toNumber(block.defaultWidth, 340) : 0,
+            z: toNumber(block.defaultZ, 30),
             style: { ...block.defaultStyle },
           });
           applyTransform(block);
           applyBlockStyle(block);
+          block.element.hidden = false;
         });
 
-        try {
-          window.localStorage.removeItem(storageKey);
-        } catch (error) {
-        }
-
         setActiveBlock(activeBlockId);
+        savePayload(false);
         setStatus("Contenuti resettati");
       };
 
@@ -1775,6 +3421,7 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
         state.style = { ...block.defaultStyle };
         applyBlockStyle(block);
         syncStyleControls();
+        scheduleContentSave();
         setStatus("Stile blocco resettato");
       };
 
@@ -1786,6 +3433,7 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
           applyBlockStyle(block);
         });
         syncStyleControls();
+        scheduleContentSave();
         setStatus("Stili contenuti resettati");
       };
 
@@ -1806,18 +3454,32 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
 
         payload.blocks.forEach((entry) => {
           if (!entry || typeof entry !== "object") return;
+          if (entry.dynamic !== true && entry.type !== "rich-text") return;
+          if (typeof entry.id === "string" && blockById.has(entry.id)) return;
+          createDynamicRichBlock(entry, false);
+        });
+
+        payload.blocks.forEach((entry) => {
+          if (!entry || typeof entry !== "object") return;
           if (typeof entry.id !== "string") return;
           const block = blockById.get(entry.id);
           if (!block) return;
           const state = stateById.get(entry.id);
           if (!state) return;
 
-          if (typeof entry.text === "string") state.text = entry.text;
+          if (typeof entry.text === "string") {
+            state.text = entry.text;
+          }
 
           const bounds = getBounds(block);
           state.x = clamp(toNumber(entry.x, 0), bounds.minX, bounds.maxX);
           state.y = clamp(toNumber(entry.y, 0), bounds.minY, bounds.maxY);
           state.rotate = clamp(toNumber(entry.rotate, 0), bounds.minRotate, bounds.maxRotate);
+          state.hidden = Boolean(entry.hidden);
+          if (block.resizable) {
+            state.w = clamp(toNumber(entry.w, toNumber(block.defaultWidth, 340)), bounds.minW, bounds.maxW);
+          }
+          state.z = clamp(toNumber(entry.z, state.z ?? 30), styleRanges.z.min, styleRanges.z.max);
           if (entry.style && typeof entry.style === "object") {
             state.style = {
               ...state.style,
@@ -1841,17 +3503,31 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
         state.style = sanitizeBlockStyle({ ...state.style, ...partialStyle });
         applyBlockStyle(block);
         syncStyleControls();
+        scheduleContentSave();
       };
 
-      blockEntries.forEach((block) => {
+      const updateActiveLayer = () => {
+        const block = blockById.get(activeBlockId);
+        const state = stateById.get(activeBlockId);
+        if (!block || !state) return;
+        state.z = clamp(toNumber(styleZ.value, 30), styleRanges.z.min, styleRanges.z.max);
+        applyTransform(block);
+        syncStyleControls();
+        scheduleContentSave();
+      };
+
+      function bindBlockEvents(block) {
+        if (!block || block.eventsBound) return;
+        block.eventsBound = true;
+
         block.element.addEventListener("click", (event) => {
-          if (block.element instanceof HTMLAnchorElement) event.preventDefault();
+          if (editMode && event.target instanceof Element && event.target.closest("a")) event.preventDefault();
           setActiveBlock(block.id);
         });
 
         block.element.addEventListener("dblclick", (event) => {
           if (!block.editable) return;
-          if (block.element instanceof HTMLAnchorElement) event.preventDefault();
+          if (editMode && event.target instanceof Element && event.target.closest("a")) event.preventDefault();
           if (!editMode) setEditMode(true);
           setActiveBlock(block.id);
         });
@@ -1863,14 +3539,31 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
           if (!state) return;
           state.text = text;
           if (activeBlockId === block.id) textArea.value = text;
+          scheduleContentSave();
+        });
+
+        block.element.addEventListener("mouseup", () => {
+          window.setTimeout(showRichToolbarForSelection, 0);
+        });
+
+        block.element.addEventListener("keyup", () => {
+          showRichToolbarForSelection();
         });
 
         block.element.addEventListener("paste", (event) => {
           if (!editMode || !block.editable) return;
+          if (block.richMode === "html") return;
           event.preventDefault();
           const clipboard = event.clipboardData?.getData("text/plain") ?? "";
           document.execCommand("insertText", false, clipboard);
         });
+      }
+
+      blockEntries.forEach((block) => bindBlockEvents(block));
+
+      document.addEventListener("selectionchange", () => {
+        if (richToolbarPointerActive || richTextToolbar.contains(document.activeElement)) return;
+        window.setTimeout(showRichToolbarForSelection, 0);
       });
 
       textArea.addEventListener("input", () => {
@@ -1880,31 +3573,46 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
         if (!state) return;
         state.text = textArea.value;
         writeBlockText(block, textArea.value);
+        hideRichToolbar();
+        scheduleContentSave();
       });
 
       const applyTransformFromControls = () => {
         const block = blockById.get(activeBlockId);
-        if (!block || block.transform === "none") return;
+        if (!block) return;
         const state = stateById.get(block.id);
         if (!state) return;
 
         const bounds = getBounds(block);
-        state.x = clamp(toNumber(xRange.value, 0), bounds.minX, bounds.maxX);
-        state.y = clamp(toNumber(yRange.value, 0), bounds.minY, bounds.maxY);
-        if (block.transform === "xy-rotate") {
+        const snapSettings = readSnapSettings();
+        if (block.transform !== "none") {
+          state.x = snapClamped(toNumber(xRange.value, 0), bounds.minX, bounds.maxX, snapSettings);
+          state.y = snapClamped(toNumber(yRange.value, 0), bounds.minY, bounds.maxY, snapSettings);
+        } else {
+          state.x = 0;
+          state.y = 0;
+        }
+        if (block.transform !== "none") {
           state.rotate = clamp(toNumber(rotateRange.value, 0), bounds.minRotate, bounds.maxRotate);
         } else {
           state.rotate = 0;
+        }
+        if (block.resizable) {
+          state.w = snapClamped(toNumber(widthRange.value, toNumber(block.defaultWidth, 340)), bounds.minW, bounds.maxW, snapSettings);
+        } else {
+          state.w = 0;
         }
 
         applyTransform(block);
         updateTransformControls();
         updateHandlePosition();
+        scheduleContentSave();
       };
 
       xRange.addEventListener("input", applyTransformFromControls);
       yRange.addEventListener("input", applyTransformFromControls);
       rotateRange.addEventListener("input", applyTransformFromControls);
+      widthRange.addEventListener("input", applyTransformFromControls);
 
       styleFont.addEventListener("change", () => updateActiveStyle({ fontFamily: styleFont.value }));
       styleSize.addEventListener("input", () =>
@@ -1953,6 +3661,7 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
           color: normalizeColor(styleColor.value, fallbackColor),
         }),
       );
+      styleZ.addEventListener("input", updateActiveLayer);
       styleBold.addEventListener("change", () =>
         updateActiveStyle({
           fontWeight: styleBold.checked ? "700" : "400",
@@ -1972,10 +3681,42 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
         setEditMode(editModeToggle.checked);
       });
 
+      addRichBoxButton?.addEventListener("click", () => {
+        const bounds = {
+          minX: -200,
+          maxX: Math.max(1600, document.documentElement.scrollWidth + 600),
+          minY: -200,
+          maxY: Math.max(1600, document.documentElement.scrollHeight + 800),
+        };
+        const block = createDynamicRichBlock(
+          {
+            x: snapClamped(72 + blockEntries.filter((entry) => entry.dynamic).length * 18, bounds.minX, bounds.maxX),
+            y: snapClamped(window.scrollY + 180 + blockEntries.filter((entry) => entry.dynamic).length * 18, bounds.minY, bounds.maxY),
+            text: "<p>Nuovo rich text box</p>",
+          },
+          true,
+        );
+        if (block) {
+          scheduleContentSave();
+          setStatus("Rich text box aggiunto");
+        }
+      });
+
       saveButton?.addEventListener("click", () => savePayload(true));
       resetButton?.addEventListener("click", resetContent);
       resetStyleBlockButton?.addEventListener("click", resetActiveBlockStyle);
       resetStyleAllButton?.addEventListener("click", resetAllBlockStyles);
+      showAllButton?.addEventListener("click", () => {
+        blockEntries.forEach((block) => {
+          const state = stateById.get(block.id);
+          if (!state) return;
+          state.hidden = false;
+          applyBlockState(block);
+        });
+        scheduleContentSave();
+        setStatus("Blocchi ripristinati");
+        setActiveBlock(activeBlockId);
+      });
 
       exportButton?.addEventListener("click", () => {
         try {
@@ -2036,8 +3777,46 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
         const onMove = (moveEvent) => {
           const deltaX = moveEvent.clientX - startPointerX;
           const deltaY = moveEvent.clientY - startPointerY;
-          state.x = clamp(startX + deltaX, bounds.minX, bounds.maxX);
-          state.y = clamp(startY + deltaY, bounds.minY, bounds.maxY);
+          const snapSettings = readSnapSettings();
+          state.x = snapClamped(startX + deltaX, bounds.minX, bounds.maxX, snapSettings, moveEvent);
+          state.y = snapClamped(startY + deltaY, bounds.minY, bounds.maxY, snapSettings, moveEvent);
+          applyTransform(block);
+          try {
+            window.dispatchEvent(
+              new CustomEvent("content-editor:transform", {
+                detail: { namespace, blockId: block.id, element: block.element, clientY: moveEvent.clientY },
+              }),
+            );
+          } catch {}
+          updateTransformControls();
+          updateHandlePosition();
+        };
+
+        const onUp = () => {
+          window.removeEventListener("pointermove", onMove);
+          window.removeEventListener("pointerup", onUp);
+          savePayload(false);
+        };
+
+        window.addEventListener("pointermove", onMove);
+        window.addEventListener("pointerup", onUp);
+      });
+
+      resizeHandle.addEventListener("pointerdown", (event) => {
+        const block = blockById.get(activeBlockId);
+        if (!block || !editMode || !block.resizable) return;
+
+        event.preventDefault();
+
+        const state = stateById.get(block.id);
+        if (!state) return;
+        const bounds = getBounds(block);
+        const startPointerX = event.clientX;
+        const startWidth = toNumber(state.w, toNumber(block.defaultWidth, 340));
+
+        const onMove = (moveEvent) => {
+          const delta = moveEvent.clientX - startPointerX;
+          state.w = snapClamped(startWidth + delta, bounds.minW, bounds.maxW, readSnapSettings(), moveEvent);
           applyTransform(block);
           updateTransformControls();
           updateHandlePosition();
@@ -2046,10 +3825,47 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
         const onUp = () => {
           window.removeEventListener("pointermove", onMove);
           window.removeEventListener("pointerup", onUp);
+          window.removeEventListener("pointercancel", onUp);
+          savePayload(false);
         };
 
         window.addEventListener("pointermove", onMove);
         window.addEventListener("pointerup", onUp);
+        window.addEventListener("pointercancel", onUp);
+      });
+
+      rotateHandle.addEventListener("pointerdown", (event) => {
+        const block = blockById.get(activeBlockId);
+        if (!block || !editMode || block.transform === "none") return;
+        if (block.desktopOnlyTransform && !isDesktop()) return;
+
+        event.preventDefault();
+
+        const state = stateById.get(block.id);
+        if (!state) return;
+        const bounds = getBounds(block);
+        const rect = block.element.getBoundingClientRect();
+        const startAngle = getPointerAngle(event, rect);
+        const startRotate = toNumber(state.rotate, 0);
+
+        const onMove = (moveEvent) => {
+          const nextAngle = getPointerAngle(moveEvent, rect);
+          state.rotate = clamp(Math.round(startRotate + nextAngle - startAngle), bounds.minRotate, bounds.maxRotate);
+          applyTransform(block);
+          updateTransformControls();
+          updateHandlePosition();
+        };
+
+        const onUp = () => {
+          window.removeEventListener("pointermove", onMove);
+          window.removeEventListener("pointerup", onUp);
+          window.removeEventListener("pointercancel", onUp);
+          savePayload(false);
+        };
+
+        window.addEventListener("pointermove", onMove);
+        window.addEventListener("pointerup", onUp);
+        window.addEventListener("pointercancel", onUp);
       });
 
       window.addEventListener("resize", updateHandlePosition);
@@ -2063,6 +3879,7 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
       }
 
       const hasStoredContent = loadPayload();
+      syncSnapControls(readSnapSettings());
       blockEntries.forEach((block) => {
         if (hasStoredContent) {
           applyBlockState(block);
@@ -2075,7 +3892,12 @@ const contentStorageKey = `claudia-content-${contentNamespace}-v1`;
       setActiveBlock(activeBlockId);
       setEditMode(editMode);
       if (styleAdvanced instanceof HTMLDetailsElement) styleAdvanced.open = false;
+      lastContentFingerprint = contentFingerprint(serializePayload());
     });
+
+    try {
+      window.dispatchEvent(new CustomEvent("content-editor:ready"));
+    } catch {}
   };
 
   if (document.readyState === "loading") {

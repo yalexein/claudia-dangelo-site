@@ -5,6 +5,9 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "editor:build": "astro build",
+    "editor:server": "node scripts/editor-server.mjs",
+    "editor": "npm run editor:build && npm run editor:server",
     "preview": "astro preview",
     "astro": "astro"
   },
@@ -12,4 +15,3 @@
     "astro": "^5.0.0"
   }
 }
-

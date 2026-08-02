@@ -1,0 +1,29 @@
+---
+const { base = import.meta.env.BASE_URL, label = "pagina" } = Astro.props;
+---
+
+<div class="uccelli-bg-layer" aria-hidden="true">
+  <img
+    class="uccelli-bg-layer__img"
+    alt={`Sfondo ${label}`}
+    data-uccelli-bg-img
+    draggable="false"
+    hidden
+  />
+</div>
+
+<div class="uccelli-image-layer" data-uccelli-image-layer aria-label={`Immagini libere ${label}`}></div>
+<div class="uccelli-gallery-layer" data-uccelli-gallery-layer aria-label={`Gallerie foto ${label}`}></div>
+
+<aside class="uccelli-layers-panel" data-uccelli-layers-panel aria-label={`Livelli e box ${label}`}>
+  <div class="uccelli-layers-panel__bar" data-uccelli-layers-drag>
+    <h2>Livelli</h2>
+    <button type="button" data-uccelli-layers-toggle>Nascondi</button>
+  </div>
+  <div class="uccelli-layers-panel__body">
+    <p>Box esistenti, ordinati dal livello più alto al più basso.</p>
+    <div class="uccelli-layers-list" data-uccelli-layers-list></div>
+  </div>
+</aside>
+
+<script src={`${base}shared-advanced-editor.js?v=3`}></script>

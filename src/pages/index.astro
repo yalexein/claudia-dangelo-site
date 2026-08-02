@@ -1,23 +1,146 @@
 ---
-import LandingLayout from "../layouts/LandingLayout.astro";
-import WindowBird from "../components/WindowBird.astro";
----
-<LandingLayout title="Claudia D'Angelo">
-  <section class="bird-field" aria-label="Uno sfondo bianco con un uccellino animato" data-bird-stage>
-    <div class="coming-soon-layer" aria-hidden="true">
-      <div class="coming-soon-panel">
-        <p class="coming-soon-eyebrow">personal website</p>
-        <h1 class="coming-soon-title">Coming Soon!</h1>
-      </div>
-    </div>
+import collageItems from "../data/home-collage.json";
+import "../styles/home-collage.css";
 
-    <WindowBird
-      className="bird-copy"
-      size="half"
-      variant={0}
-      preset="solo"
-      stageSelector="[data-bird-stage]"
-      ariaLabel="Fai cinguettare l'uccellino"
+const base = import.meta.env.BASE_URL;
+const labels = new Map([
+  ["/collages/", { it: "Vai ai collage", en: "Go to Collages" }],
+  ["/bio/", { it: "Vai alla biografia", en: "Go to Biography" }],
+  ["/uccelli/", { it: "Vai alla pagina Uccelli", en: "Go to Birds" }],
+  ["/contatti/", { it: "Vai ai contatti", en: "Go to Contact" }],
+  ["/scritture/", { it: "Vai alle scritture", en: "Go to Writings" }],
+  ["/miscellanea/", { it: "Vai a Miscellanea", en: "Go to Miscellanea" }],
+  ["/cv/", { it: "Vai al curriculum", en: "Go to Résumé" }],
+]);
+const pageNames = new Map([
+  ["/collages/", { it: "Collages", en: "Collages" }],
+  ["/bio/", { it: "Bio", en: "Biography" }],
+  ["/uccelli/", { it: "Uccelli", en: "Birds" }],
+  ["/contatti/", { it: "Contatti", en: "Contact" }],
+  ["/scritture/", { it: "Scritture", en: "Writings" }],
+  ["/miscellanea/", { it: "Miscellanea", en: "Miscellanea" }],
+  ["/cv/", { it: "Curriculum", en: "Résumé" }],
+]);
+const tooltipAnchors = new Map([
+  ["/scritture/", { x: 0.5, y: 0.32 }],
+]);
+
+const withBase = (value = "") => {
+  const source = String(value);
+  if (!source || /^(?:data:|https?:|blob:)/i.test(source)) return source;
+  return `${base}${source.replace(/^\/+/, "")}`;
+};
+
+const publicItems = collageItems.map((item) => ({
+  ...item,
+  src: withBase(item.src.replace(/\.png$/i, ".webp")),
+  fallbackSrc: withBase(item.src),
+  labels: labels.get(item.linkUrl) ?? { it: "Apri la sezione", en: "Open section" },
+  pageNames: pageNames.get(item.linkUrl) ?? { it: "Pagina", en: "Page" },
+  tooltipAnchor: tooltipAnchors.get(item.linkUrl) ?? { x: 0.5, y: 0.86 },
+  sprite: item.sprite
+    ? {
+        ...item.sprite,
+        frames: Array.isArray(item.sprite.frames)
+          ? item.sprite.frames.map((frame) => ({ ...frame, src: withBase(frame.src) }))
+          : [],
+      }
+    : item.sprite,
+}));
+---
+<!doctype html>
+<html lang="it" data-visit-theme="day" data-locale="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta
+      name="description"
+      content="Claudia D'Angelo — collage interattivo e indice visivo del sito."
     />
-  </section>
-</LandingLayout>
+    <meta name="theme-color" content="#ffffff" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Claudia D'Angelo" />
+    <meta property="og:description" content="Collage interattivo e indice visivo del sito di Claudia D'Angelo." />
+    <meta property="og:url" content="https://claudia-dangelo.com/" />
+    <meta property="og:image" content="https://claudia-dangelo.com/images/home-collage/social-preview.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="it_IT" />
+    <meta property="og:locale:alternate" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="canonical" href="https://claudia-dangelo.com/" />
+    <link rel="alternate" hreflang="it" href="https://claudia-dangelo.com/?lang=it" />
+    <link rel="alternate" hreflang="en" href="https://claudia-dangelo.com/?lang=en" />
+    <link rel="alternate" hreflang="x-default" href="https://claudia-dangelo.com/" />
+    <title>Claudia D'Angelo</title>
+    <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+    <script is:inline src={`${base}site-locale.js?v=1`}></script>
+    <script is:inline>
+      (() => {
+        const locale = window.ClaudiaLocale?.locale || "it";
+        const description = document.querySelector('meta[name="description"]');
+        if (description) {
+          description.content = locale === "en"
+            ? "Claudia D'Angelo — interactive collage and visual index of the website."
+            : "Claudia D'Angelo — collage interattivo e indice visivo del sito.";
+        }
+
+        window.addEventListener("DOMContentLoaded", () => {
+          const stage = document.querySelector(".public-stage");
+          const help = document.getElementById("collage-help");
+          if (stage) stage.setAttribute("aria-label", locale === "en"
+            ? "Claudia D'Angelo's navigation collage"
+            : "Collage di navigazione di Claudia D'Angelo");
+          if (help) help.textContent = locale === "en"
+            ? "The collage contains links to the website sections. Use Tab to move between images."
+            : "Il collage contiene collegamenti alle sezioni del sito. Usa Tab per spostarti tra le immagini.";
+        }, { once: true });
+      })();
+    </script>
+    <script is:inline>
+      (() => {
+        const applyVisitTheme = () => {
+          const requestedTheme = new URLSearchParams(window.location.search).get("theme");
+          if (requestedTheme === "day" || requestedTheme === "night") {
+            document.documentElement.dataset.visitTheme = requestedTheme;
+            document.querySelector('meta[name="theme-color"]')?.setAttribute("content", requestedTheme === "night" ? "#000000" : "#ffffff");
+            return;
+          }
+          const hour = new Date().getHours();
+          const theme = hour >= 20 || hour < 7 ? "night" : "day";
+          document.documentElement.dataset.visitTheme = theme;
+          document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "night" ? "#000000" : "#ffffff");
+        };
+        applyVisitTheme();
+        window.setInterval(applyVisitTheme, 60_000);
+      })();
+    </script>
+  </head>
+  <body>
+    <main class="public-stage" aria-label="Collage di navigazione di Claudia D'Angelo">
+      <div class="public-canvas" data-public-canvas></div>
+      <div class="collage-tooltip" data-collage-tooltip aria-hidden="true" hidden></div>
+      <nav class="language-switcher" aria-label="Lingua">
+        <a href="?lang=it" hreflang="it" data-locale-option="it">IT</a>
+        <a href="?lang=en" hreflang="en" data-locale-option="en">EN</a>
+      </nav>
+      <p class="sr-only" id="collage-help">
+        Il collage contiene collegamenti alle sezioni del sito. Usa Tab per spostarti tra le immagini.
+      </p>
+      <noscript>
+        <nav class="collage-fallback" aria-label="Sezioni del sito / Website sections">
+          <p>Per vedere il collage interattivo abilita JavaScript. / Enable JavaScript to view the interactive collage.</p>
+          <a href={`${base}collages/`}>Collages</a>
+          <a href={`${base}bio/`}>Bio / Biography</a>
+          <a href={`${base}uccelli/`}>Uccelli / Birds</a>
+          <a href={`${base}contatti/`}>Contatti / Contact</a>
+          <a href={`${base}scritture/`}>Scritture / Writings</a>
+          <a href={`${base}miscellanea/`}>Miscellanea</a>
+          <a href={`${base}cv/`}>Curriculum / Résumé</a>
+        </nav>
+      </noscript>
+    </main>
+    <script type="application/json" id="canvas-data" set:html={JSON.stringify(publicItems)}></script>
+    <script src={`${base}home-collage-runtime.js?v=2`}></script>
+  </body>
+</html>

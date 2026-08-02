@@ -1,0 +1,929 @@
+---
+import BioLayout from "../../layouts/BioLayout.astro";
+import "../../styles/uccelli.css";
+import "../../styles/image-board.css";
+
+const base = import.meta.env.BASE_URL;
+const namespace = "immagini";
+---
+
+<BioLayout title="Immagini">
+  <main
+    class="image-board-page uccelli-page"
+    data-advanced-editor-root
+    data-advanced-editor-namespace={namespace}
+  >
+    <header class="image-board-toolbar" aria-label="Editor immagini">
+      <a class="image-board-toolbar__brand" href={base} aria-label="Torna alla home">Claudia D'Angelo</a>
+
+      <nav class="image-board-menubar" aria-label="Menu editor immagini">
+        <details class="image-board-menu" data-image-board-menu>
+          <summary class="image-board-menu__summary">File</summary>
+          <div class="image-board-menu__panel image-board-toolbar__group" role="menu" aria-label="File">
+            <button class="image-board-button image-board-button--primary" type="button" data-uccelli-image-upload-btn>
+              Importa PNG/JPG
+            </button>
+            <button class="image-board-button image-board-button--primary" type="button" data-uccelli-sprite-upload-btn>
+              Importa Sprite
+            </button>
+            <button class="image-board-button image-board-button--secondary" type="button" data-uccelli-demo-seed-btn>
+              Demo
+            </button>
+            <button class="image-board-button image-board-button--secondary" type="button" data-uccelli-image-export-data-btn>
+              Esporta pacchetto
+            </button>
+            <button class="image-board-button image-board-button--secondary" type="button" data-uccelli-image-import-data-btn>
+              Importa pacchetto/JSON
+            </button>
+            <button class="image-board-button image-board-button--secondary" type="button" data-uccelli-image-export-page-btn>
+              Esporta HTML pubblico
+            </button>
+          </div>
+        </details>
+
+        <details class="image-board-menu" data-image-board-menu>
+          <summary class="image-board-menu__summary">Modifica</summary>
+          <div class="image-board-menu__panel image-board-toolbar__group" role="menu" aria-label="Modifica">
+            <button class="image-board-button image-board-button--secondary" type="button" data-uccelli-image-select-all-btn>
+              Seleziona tutto
+            </button>
+            <button class="image-board-button image-board-button--secondary" type="button" data-uccelli-image-center-all-btn>
+              Centra tutto
+            </button>
+            <button class="image-board-button image-board-button--secondary" type="button" data-uccelli-panels-close-btn>
+              Chiudi pannelli
+            </button>
+            <button class="image-board-button image-board-button--secondary" type="button" data-uccelli-panels-reset-btn>
+              Reset UI
+            </button>
+            <button class="image-board-button image-board-button--secondary image-board-menu__danger" type="button" data-uccelli-image-clear-btn>
+              Elimina selezione
+            </button>
+          </div>
+        </details>
+
+        <details class="image-board-menu" data-image-board-menu>
+          <summary class="image-board-menu__summary">Vista</summary>
+          <div class="image-board-menu__panel image-board-toolbar__group" role="menu" aria-label="Vista">
+            <button class="image-board-button image-board-button--secondary" type="button" data-image-board-public-mode-btn>
+              Vista pubblica
+            </button>
+            <button class="image-board-button image-board-button--secondary" type="button" data-uccelli-layers-menu-toggle>
+              Mostra/Nascondi livelli
+            </button>
+            <button class="image-board-button image-board-button--secondary" type="button" aria-pressed="false" data-image-board-inspector-dock-toggle>
+              Inspector: Flottante
+            </button>
+          </div>
+        </details>
+
+        <details class="image-board-menu image-board-menu--wide" data-image-board-menu>
+          <summary class="image-board-menu__summary">Layer</summary>
+          <div class="image-board-menu__panel image-board-toolbar__group image-board-toolbar__group--layers" role="menu" aria-label="Livelli immagine">
+            <div class="image-board-menu__row" aria-label="Ordine layer">
+              <button class="image-board-icon-button" type="button" title="Porta in fondo" aria-label="Porta in fondo" data-uccelli-image-layer-bottom-btn>
+                ⇣
+              </button>
+              <button class="image-board-icon-button" type="button" title="Manda indietro" aria-label="Manda indietro" data-uccelli-image-layer-down-btn>
+                ↓
+              </button>
+              <button class="image-board-icon-button" type="button" title="Porta avanti" aria-label="Porta avanti" data-uccelli-image-layer-up-btn>
+                ↑
+              </button>
+              <button class="image-board-icon-button" type="button" title="Porta in cima" aria-label="Porta in cima" data-uccelli-image-layer-top-btn>
+                ⇡
+              </button>
+            </div>
+            <label class="image-board-layer-control" for={`${namespace}-image-z`}>
+              <span>Layer</span>
+              <input id={`${namespace}-image-z`} type="range" min="0" max="200" step="1" value="20" data-uccelli-image-z />
+              <output data-uccelli-image-value="z">20</output>
+            </label>
+            <label class="image-board-layer-control image-board-layer-control--opacity" for={`${namespace}-image-opacity`}>
+              <span>Opacità</span>
+              <input id={`${namespace}-image-opacity`} type="range" min="0" max="100" step="1" value="100" data-uccelli-image-opacity />
+              <output data-uccelli-image-value="opacity">100%</output>
+            </label>
+            <label class="image-board-effect-control image-board-blend-control" for={`${namespace}-image-blend`}>
+              <span>Fusione</span>
+              <select id={`${namespace}-image-blend`} data-uccelli-image-blend>
+                <option value="normal">Normale</option>
+                <option value="multiply">Moltiplica</option>
+                <option value="screen">Scolora</option>
+                <option value="overlay">Sovrapponi</option>
+                <option value="darken">Scurisci</option>
+                <option value="lighten">Schiarisci</option>
+                <option value="color-burn">Brucia</option>
+                <option value="color-dodge">Scherma</option>
+                <option value="difference">Differenza</option>
+                <option value="luminosity">Luminosità</option>
+              </select>
+            </label>
+            <div class="image-board-menu__row">
+              <button class="image-board-button image-board-button--secondary image-board-layer-toggle" type="button" title="Mostra o nasconde questo livello" data-uccelli-image-visibility-btn>
+                Nascondi
+              </button>
+              <button class="image-board-button image-board-button--secondary image-board-layer-toggle" type="button" title="Blocca spostamento, scala e rotazione" data-uccelli-image-lock-btn>
+                Blocca
+              </button>
+            </div>
+          </div>
+        </details>
+
+        <details class="image-board-menu image-board-menu--wide" data-image-board-menu>
+          <summary class="image-board-menu__summary">Effetti</summary>
+          <div class="image-board-menu__panel image-board-toolbar__group image-board-toolbar__group--effects" role="menu" aria-label="Effetti e link immagine">
+            <label class="image-board-effect-control" for={`${namespace}-hover-effect`}>
+              <span>Mouse sopra</span>
+              <select id={`${namespace}-hover-effect`} data-uccelli-image-hover-effect>
+                <option value="none">Nessuno</option>
+                <option value="lift">Solleva</option>
+                <option value="zoom">Zoom</option>
+                <option value="tilt">Tilt</option>
+                <option value="glow">Glow</option>
+                <option value="gray-color">B/N → colore</option>
+                <option value="opacity">Trasparenza</option>
+                <option value="paper">Carta viva</option>
+              </select>
+            </label>
+
+            <label class="image-board-effect-control" for={`${namespace}-click-effect`}>
+              <span>Click</span>
+              <select id={`${namespace}-click-effect`} data-uccelli-image-click-effect>
+                <option value="none">Nessuno</option>
+                <option value="pulse">Pulse</option>
+                <option value="pop">Pop</option>
+                <option value="flash">Flash</option>
+                <option value="spin">Giro</option>
+                <option value="open-link">Apri link</option>
+                <option value="lock-toggle">Blocca/sblocca</option>
+                <option value="bring-front">Porta davanti</option>
+              </select>
+            </label>
+
+            <label class="image-board-link-control" for={`${namespace}-image-link`}>
+              <span>Link</span>
+              <input
+                id={`${namespace}-image-link`}
+                type="text"
+                list={`${namespace}-site-links`}
+                placeholder="/bio/"
+                data-uccelli-image-link
+              />
+            </label>
+            <label class="image-board-effect-control image-board-link-preset-control" for={`${namespace}-image-link-preset`}>
+              <span>Pagine</span>
+              <select id={`${namespace}-image-link-preset`} data-uccelli-image-link-preset>
+                <option value="">Scegli...</option>
+                <option value="/">Home</option>
+                <option value="/bio/">Bio</option>
+                <option value="/scritture/">Scritture</option>
+                <option value="/collages/">Collages</option>
+                <option value="/sketches/">Sketches</option>
+                <option value="/il-vizio-della-scrittura/">Il vizio</option>
+                <option value="/ispirazioni/">Ispirazioni</option>
+                <option value="/ricerche/">Ricerche</option>
+                <option value="/blog/">Blog</option>
+                <option value="/eventi/">Eventi</option>
+                <option value="/contatti/">Contatti</option>
+              </select>
+            </label>
+            <datalist id={`${namespace}-site-links`}>
+              <option value="/" label="Home"></option>
+              <option value="/bio/" label="Bio"></option>
+              <option value="/scritture/" label="Scritture"></option>
+              <option value="/collages/" label="Collages"></option>
+              <option value="/sketches/" label="Sketches"></option>
+              <option value="/il-vizio-della-scrittura/" label="Il vizio"></option>
+              <option value="/ispirazioni/" label="Ispirazioni"></option>
+              <option value="/ricerche/" label="Ricerche"></option>
+              <option value="/blog/" label="Blog"></option>
+              <option value="/eventi/" label="Eventi"></option>
+              <option value="/contatti/" label="Contatti"></option>
+            </datalist>
+          </div>
+        </details>
+
+        <details class="image-board-menu image-board-menu--wide image-board-menu--advanced" data-image-board-menu>
+          <summary class="image-board-menu__summary">Animazione</summary>
+          <div class="image-board-menu__panel image-board-toolbar__group image-board-toolbar__group--advanced" role="menu" aria-label="Animazione e movimento">
+            <section class="image-board-menu__section" aria-label="Preset movimento">
+              <h3>Movimento layer</h3>
+              <div class="image-board-menu__row">
+                <button class="image-board-button image-board-button--secondary" type="button" data-image-board-menu-action="motion-none" data-requires-image>Fermo</button>
+                <button class="image-board-button image-board-button--secondary" type="button" data-image-board-menu-action="motion-float" data-requires-image>Fluttua</button>
+                <button class="image-board-button image-board-button--secondary" type="button" data-image-board-menu-action="motion-orbit" data-requires-image>Orbita</button>
+                <button class="image-board-button image-board-button--secondary" type="button" data-image-board-menu-action="motion-scroll-left" data-requires-image>Scorre</button>
+              </div>
+            </section>
+            <section class="image-board-menu__section" aria-label="Percorso e trigger">
+              <h3>Percorso</h3>
+              <div class="image-board-menu__row">
+                <button class="image-board-button image-board-button--secondary" type="button" data-image-board-menu-action="path-toggle" data-requires-image>Play/Pausa percorso</button>
+                <button class="image-board-button image-board-button--secondary" type="button" data-image-board-menu-action="path-point" data-requires-image>Punto da canvas</button>
+                <button class="image-board-button image-board-button--secondary" type="button" data-image-board-menu-action="path-clear" data-requires-image>Pulisci percorso</button>
+              </div>
+            </section>
+            <section class="image-board-menu__section" aria-label="Inspector movimento">
+              <button class="image-board-button image-board-button--primary" type="button" aria-controls={`${namespace}-motion-panel`} aria-expanded="false" data-uccelli-motion-panel-toggle>
+                Inspector movimento
+              </button>
+            </section>
+          </div>
+        </details>
+
+        <details class="image-board-menu image-board-menu--wide image-board-menu--advanced" data-image-board-menu data-image-board-context-menu="sprite">
+          <summary class="image-board-menu__summary">
+            <span data-image-board-context-label="sprite">Sprite</span>
+            <span class="image-board-menu__badge" data-image-board-context-badge="sprite" hidden></span>
+          </summary>
+          <div class="image-board-menu__panel image-board-toolbar__group image-board-toolbar__group--advanced" role="menu" aria-label="Sprite animati">
+            <section class="image-board-menu__section" aria-label="Sprite selezionato" data-context-section="sprite-active">
+              <h3 data-image-board-context-title="sprite">Sprite selezionato</h3>
+              <div class="image-board-menu__row">
+                <button class="image-board-button image-board-button--primary" type="button" data-image-board-menu-action="sprite-play" data-requires-sprite>Play/Pausa</button>
+                <button class="image-board-button image-board-button--secondary" type="button" data-image-board-menu-action="sprite-prev" data-requires-sprite>Frame -</button>
+                <button class="image-board-button image-board-button--secondary" type="button" data-image-board-menu-action="sprite-next" data-requires-sprite>Frame +</button>
+                <button class="image-board-button image-board-button--secondary" type="button" aria-controls={`${namespace}-sprite-panel`} aria-expanded="false" data-uccelli-sprite-panel-toggle>
+                  Inspector sprite
+                </button>
+              </div>
+            </section>
+            <section class="image-board-menu__section" aria-label="Import sprite" data-context-section="sprite-empty">
+              <h3>Nessuno sprite selezionato</h3>
+              <div class="image-board-menu__row">
+                <button class="image-board-button image-board-button--primary" type="button" data-image-board-menu-action="sprite-import">Importa sprite</button>
+                <button class="image-board-button image-board-button--secondary" type="button" aria-controls={`${namespace}-sprite-panel`} aria-expanded="false" data-uccelli-sprite-panel-toggle>
+                  Inspector sprite
+                </button>
+              </div>
+            </section>
+            <section class="image-board-menu__section" aria-label="Sprite direzionale" data-context-section="sprite-tools">
+              <h3>Direzioni</h3>
+              <div class="image-board-menu__row">
+                <button class="image-board-button image-board-button--secondary" type="button" data-image-board-menu-action="sprite-directional" data-requires-sprite>Direzionale</button>
+                <button class="image-board-button image-board-button--secondary" type="button" data-image-board-menu-action="sprite-sync" data-requires-sprite>Sync movimento</button>
+                <button class="image-board-button image-board-button--secondary" type="button" data-image-board-menu-action="sprite-fit" data-requires-sprite>Uniforma frame</button>
+              </div>
+            </section>
+          </div>
+        </details>
+
+        <details class="image-board-menu image-board-menu--wide image-board-menu--advanced" data-image-board-menu>
+          <summary class="image-board-menu__summary">Scontorna</summary>
+          <div class="image-board-menu__panel image-board-toolbar__group image-board-toolbar__group--advanced" role="menu" aria-label="Scontorno immagine">
+            <section class="image-board-menu__section" aria-label="Azioni scontorno">
+              <h3>Maschera</h3>
+              <div class="image-board-menu__row">
+                <button class="image-board-button image-board-button--primary" type="button" data-image-board-menu-action="cutout-apply" data-requires-image>Applica scontorno</button>
+                <button class="image-board-button image-board-button--secondary" type="button" data-image-board-menu-action="cutout-reset" data-requires-image>Ripristina</button>
+              </div>
+            </section>
+            <section class="image-board-menu__section" aria-label="Inspector scontorno">
+              <button class="image-board-button image-board-button--secondary" type="button" aria-controls={`${namespace}-cutout-panel`} aria-expanded="false" data-uccelli-cutout-panel-toggle>
+                Inspector scontorno
+              </button>
+            </section>
+          </div>
+        </details>
+
+        <details class="image-board-menu image-board-menu--wide image-board-menu--advanced" data-image-board-menu>
+          <summary class="image-board-menu__summary">Sfondo</summary>
+          <div class="image-board-menu__panel image-board-toolbar__group image-board-toolbar__group--advanced" role="menu" aria-label="Sfondo canvas">
+            <section class="image-board-menu__section" aria-label="Preset sfondo">
+              <h3>Canvas</h3>
+              <div class="image-board-menu__row">
+                <button class="image-board-button image-board-button--secondary" type="button" data-image-board-menu-action="background-gradient">Gradiente on/off</button>
+                <button class="image-board-button image-board-button--secondary" type="button" data-image-board-menu-action="background-paper">Carta on/off</button>
+                <button class="image-board-button image-board-button--secondary" type="button" data-image-board-menu-action="background-grid">Griglia editor</button>
+                <button class="image-board-button image-board-button--secondary" type="button" data-image-board-menu-action="background-reset">Reset sfondo</button>
+              </div>
+            </section>
+            <section class="image-board-menu__section" aria-label="Inspector sfondo">
+              <button class="image-board-button image-board-button--primary" type="button" aria-controls={`${namespace}-background-panel`} aria-expanded="false" data-uccelli-background-panel-toggle>
+                Inspector sfondo
+              </button>
+            </section>
+          </div>
+        </details>
+
+        <details class="image-board-menu image-board-menu--wide image-board-menu--advanced" data-image-board-menu data-image-board-context-menu="game">
+          <summary class="image-board-menu__summary">
+            <span data-image-board-context-label="game">Gioco 2D</span>
+            <span class="image-board-menu__badge" data-image-board-context-badge="game" hidden></span>
+          </summary>
+          <div class="image-board-menu__panel image-board-toolbar__group image-board-toolbar__group--advanced" role="menu" aria-label="Gioco 2D">
+            <section class="image-board-menu__section" aria-label="Player selezionato" data-context-section="game-player">
+              <h3>Player selezionato</h3>
+              <div class="image-board-menu__row">
+                <button class="image-board-button image-board-button--primary" type="button" data-image-board-menu-action="game-preview">Preview gioco</button>
+                <button class="image-board-button image-board-button--secondary" type="button" data-image-board-menu-action="game-reset">Reset player</button>
+                <button class="image-board-button image-board-button--secondary" type="button" data-image-board-menu-action="game-spawn">Piazza spawn</button>
+                <button class="image-board-button image-board-button--secondary" type="button" data-image-board-menu-action="game-walk">Disegna zona</button>
+                <button class="image-board-button image-board-button--secondary" type="button" data-image-board-menu-action="game-depth" data-requires-image>Profondità Y</button>
+              </div>
+            </section>
+            <section class="image-board-menu__section" aria-label="Ostacolo selezionato" data-context-section="game-obstacle">
+              <h3>Ostacolo selezionato</h3>
+              <div class="image-board-menu__row">
+                <button class="image-board-button image-board-button--primary" type="button" data-image-board-menu-action="game-depth" data-requires-image>Profondità Y</button>
+                <button class="image-board-button image-board-button--secondary" type="button" data-image-board-menu-action="game-role-player" data-requires-image>Trasforma in player</button>
+                <button class="image-board-button image-board-button--secondary" type="button" data-image-board-menu-action="game-preview">Preview gioco</button>
+                <button class="image-board-button image-board-button--secondary" type="button" aria-controls={`${namespace}-game-panel`} aria-expanded="false" data-uccelli-game-panel-toggle>
+                  Inspector gioco
+                </button>
+              </div>
+            </section>
+            <section class="image-board-menu__section" aria-label="Preview gioco" data-context-section="game-default">
+              <h3>Stanza</h3>
+              <div class="image-board-menu__row">
+                <button class="image-board-button image-board-button--primary" type="button" data-image-board-menu-action="game-preview">Preview gioco</button>
+                <button class="image-board-button image-board-button--secondary" type="button" data-image-board-menu-action="game-reset">Reset player</button>
+                <button class="image-board-button image-board-button--secondary" type="button" data-image-board-menu-action="game-spawn">Piazza spawn</button>
+                <button class="image-board-button image-board-button--secondary" type="button" data-image-board-menu-action="game-walk">Disegna zona</button>
+              </div>
+            </section>
+            <section class="image-board-menu__section" aria-label="Asset gioco">
+              <h3>Layer selezionato</h3>
+              <div class="image-board-menu__row">
+                <button class="image-board-button image-board-button--secondary" type="button" data-image-board-menu-action="game-role-player" data-requires-image>Player</button>
+                <button class="image-board-button image-board-button--secondary" type="button" data-image-board-menu-action="game-role-obstacle" data-requires-image>Ostacolo</button>
+                <button class="image-board-button image-board-button--secondary" type="button" data-image-board-menu-action="game-depth" data-requires-image>Profondità Y</button>
+              </div>
+            </section>
+            <section class="image-board-menu__section" aria-label="Inspector gioco">
+              <button class="image-board-button image-board-button--primary" type="button" aria-controls={`${namespace}-game-panel`} aria-expanded="false" data-uccelli-game-panel-toggle>
+                Inspector gioco
+              </button>
+            </section>
+          </div>
+        </details>
+      </nav>
+
+      <div class="image-board-quick-actions" aria-label="Stato e cronologia immagini">
+        <button class="image-board-button image-board-button--primary image-board-command-button" type="button" title="Comandi (Cmd+K)" data-image-board-command-palette-open>
+          Comandi <kbd>Cmd+K</kbd>
+        </button>
+        <button class="image-board-button image-board-button--secondary image-board-history-button" type="button" title="Annulla (Cmd+Z)" data-uccelli-image-undo-btn disabled>
+          ↶ Annulla
+        </button>
+        <button class="image-board-button image-board-button--secondary image-board-history-button" type="button" title="Ripeti (Cmd+Shift+Z)" data-uccelli-image-redo-btn disabled>
+          Ripeti ↷
+        </button>
+      </div>
+      <p class="image-board-status" data-uccelli-image-status aria-live="polite">Nessuna immagine</p>
+    </header>
+
+    <div class="image-board-command-palette" data-image-board-command-palette hidden>
+      <button class="image-board-command-palette__backdrop" type="button" aria-label="Chiudi comandi" data-image-board-command-palette-close></button>
+      <section class="image-board-command-palette__panel" role="dialog" aria-modal="true" aria-labelledby={`${namespace}-command-palette-title`}>
+        <div class="image-board-command-palette__bar">
+          <h2 id={`${namespace}-command-palette-title`}>Comandi</h2>
+          <button class="image-board-icon-button" type="button" title="Chiudi" aria-label="Chiudi" data-image-board-command-palette-close>×</button>
+        </div>
+        <label class="image-board-command-palette__search" for={`${namespace}-command-palette-search`}>
+          <span>Cerca</span>
+          <input
+            id={`${namespace}-command-palette-search`}
+            type="search"
+            placeholder="Esporta, Piazza spawn, Scontorna..."
+            autocomplete="off"
+            spellcheck="false"
+            data-image-board-command-palette-input
+            aria-controls={`${namespace}-command-palette-results`}
+          />
+        </label>
+        <div id={`${namespace}-command-palette-results`} class="image-board-command-palette__list" role="listbox" data-image-board-command-palette-list></div>
+        <p class="image-board-command-palette__empty" data-image-board-command-palette-empty hidden>Nessun comando trovato.</p>
+      </section>
+    </div>
+
+    <section class="image-board-stage" aria-label="Tavola immagini">
+      <div class="image-board-empty" data-uccelli-image-empty>
+        <button class="image-board-empty__button" type="button" data-uccelli-image-upload-btn>Importa PNG/JPG</button>
+      </div>
+      <div class="uccelli-image-layer image-board-image-layer" data-uccelli-image-layer aria-label="Immagini PNG e JPG libere"></div>
+      <div class="uccelli-gallery-layer image-board-gallery-layer" data-uccelli-gallery-layer aria-hidden="true"></div>
+    </section>
+
+    <aside class="uccelli-layers-panel image-board-layers-panel" data-uccelli-layers-panel aria-label="Livelli immagini">
+      <div class="uccelli-layers-panel__bar" data-uccelli-layers-drag>
+        <h2>Livelli</h2>
+        <button type="button" data-uccelli-layers-toggle>Nascondi</button>
+      </div>
+      <div class="uccelli-layers-panel__body">
+        <div class="image-board-layers-tools" aria-label="Ricerca e filtri livelli">
+          <label class="image-board-layers-search">
+            <span>Cerca</span>
+            <input type="search" placeholder="Nome, ruolo, effetto..." data-uccelli-layers-search />
+          </label>
+          <div class="image-board-layers-filters" aria-label="Filtra livelli">
+            <button type="button" data-uccelli-layers-filter="all" aria-pressed="true">Tutti</button>
+            <button type="button" data-uccelli-layers-filter="player" aria-pressed="false">Player</button>
+            <button type="button" data-uccelli-layers-filter="obstacle" aria-pressed="false">Ostacoli</button>
+            <button type="button" data-uccelli-layers-filter="sprite" aria-pressed="false">Sprite</button>
+            <button type="button" data-uccelli-layers-filter="web" aria-pressed="false">Web</button>
+            <button type="button" data-uccelli-layers-filter="hidden" aria-pressed="false">Nascosti</button>
+          </div>
+        </div>
+        <div class="uccelli-layers-list" data-uccelli-layers-list></div>
+      </div>
+    </aside>
+
+    <aside id={`${namespace}-motion-panel`} class="image-board-motion-panel" data-uccelli-motion-panel aria-label="Movimento e parallasse" hidden>
+      <div class="image-board-motion-panel__bar">
+        <h2>Movimento</h2>
+        <button type="button" data-uccelli-motion-panel-hide>Nascondi</button>
+      </div>
+      <div class="image-board-motion-panel__body">
+        <section class="image-board-motion-panel__section" aria-label="Animazione immagine">
+          <h3>Animazione</h3>
+          <label class="image-board-effect-control" for={`${namespace}-motion-preset`}>
+            <span>Preset</span>
+            <select id={`${namespace}-motion-preset`} data-uccelli-image-motion-preset>
+              <option value="none">Fermo</option>
+              <option value="float">Fluttua</option>
+              <option value="drift-x">Onda X</option>
+              <option value="drift-y">Onda Y</option>
+              <option value="orbit">Orbita</option>
+              <option value="sway">Dondola</option>
+              <option value="scroll-left">Scorre ←</option>
+            </select>
+          </label>
+          <label class="image-board-layer-control image-board-layer-control--motion-speed" for={`${namespace}-motion-speed`}>
+            <span>Velocità</span>
+            <input id={`${namespace}-motion-speed`} type="range" min="0.1" max="4" step="0.1" value="1" data-uccelli-image-motion-speed />
+            <output data-uccelli-image-value="motionSpeed">1x</output>
+          </label>
+          <label class="image-board-layer-control image-board-layer-control--motion-distance" for={`${namespace}-motion-distance`}>
+            <span>Ampiezza</span>
+            <input id={`${namespace}-motion-distance`} type="range" min="0" max="320" step="1" value="40" data-uccelli-image-motion-distance />
+            <output data-uccelli-image-value="motionDistance">40px</output>
+          </label>
+        </section>
+
+        <section class="image-board-motion-panel__section" aria-label="Parallasse immagine">
+          <h3>Parallasse</h3>
+          <label class="image-board-checkbox-control">
+            <input type="checkbox" data-uccelli-image-parallax-enabled />
+            <span>Attiva</span>
+          </label>
+          <label class="image-board-layer-control image-board-layer-control--parallax-depth" for={`${namespace}-parallax-depth`}>
+            <span>Profondità</span>
+            <input id={`${namespace}-parallax-depth`} type="range" min="0" max="2.5" step="0.1" value="1" data-uccelli-image-parallax-depth />
+            <output data-uccelli-image-value="parallaxDepth">1x</output>
+          </label>
+        </section>
+
+        <section class="image-board-motion-panel__section" aria-label="Drag pubblico immagine">
+          <h3>Drag pubblico</h3>
+          <label class="image-board-checkbox-control">
+            <input type="checkbox" data-uccelli-image-public-drag-enabled />
+            <span>Trascinabile</span>
+          </label>
+          <label class="image-board-layer-control image-board-layer-control--public-drag-inertia" for={`${namespace}-public-drag-inertia`}>
+            <span>Inerzia</span>
+            <input id={`${namespace}-public-drag-inertia`} type="range" min="0" max="0.98" step="0.01" value="0.88" data-uccelli-image-public-drag-inertia />
+            <output data-uccelli-image-value="publicDragInertia">88%</output>
+          </label>
+        </section>
+
+        <section class="image-board-motion-panel__section" aria-label="Trigger layer">
+          <h3>Trigger</h3>
+          <label class="image-board-effect-control" for={`${namespace}-trigger-action`}>
+            <span>Azione</span>
+            <select id={`${namespace}-trigger-action`} data-uccelli-layer-trigger-action>
+              <option value="show">Mostra layer</option>
+              <option value="play">Avvia animazione</option>
+            </select>
+          </label>
+          <label class="image-board-effect-control" for={`${namespace}-trigger-mode`}>
+            <span>Quando</span>
+            <select id={`${namespace}-trigger-mode`} data-uccelli-layer-trigger-mode>
+              <option value="immediate">Subito</option>
+              <option value="delay">Dopo tempo</option>
+              <option value="click">Click sul layer</option>
+              <option value="key">Tasto</option>
+              <option value="after-layer">Dopo layer</option>
+            </select>
+          </label>
+          <label class="image-board-layer-control" for={`${namespace}-trigger-delay`}>
+            <span>Ritardo</span>
+            <input id={`${namespace}-trigger-delay`} type="range" min="0" max="30" step="0.5" value="0" data-uccelli-layer-trigger-delay />
+            <output data-uccelli-image-value="triggerDelay">0s</output>
+          </label>
+          <label class="image-board-layer-control" for={`${namespace}-trigger-key`}>
+            <span>Tasto</span>
+            <input id={`${namespace}-trigger-key`} type="text" maxlength="12" value="Space" data-uccelli-layer-trigger-key />
+          </label>
+          <label class="image-board-effect-control" for={`${namespace}-trigger-layer`}>
+            <span>Dopo</span>
+            <select id={`${namespace}-trigger-layer`} data-uccelli-layer-trigger-target>
+              <option value="">Nessun layer</option>
+            </select>
+          </label>
+          <p class="image-board-trigger-hint" data-uccelli-layer-trigger-hint>
+            Per mostrare un layer nascosto usa tempo, tasto o dopo layer.
+          </p>
+        </section>
+
+        <section class="image-board-motion-panel__section image-board-motion-panel__section--path" aria-label="Percorso immagine">
+          <h3>Percorso</h3>
+          <label class="image-board-checkbox-control">
+            <input type="checkbox" data-uccelli-image-path-enabled />
+            <span>Attiva</span>
+          </label>
+          <label class="image-board-layer-control image-board-layer-control--path-duration" for={`${namespace}-path-duration`}>
+            <span>Durata</span>
+            <input id={`${namespace}-path-duration`} type="range" min="1" max="30" step="0.5" value="6" data-uccelli-image-path-duration />
+            <output data-uccelli-image-value="pathDuration">6s</output>
+          </label>
+          <div class="image-board-path-actions" aria-label="Azioni percorso">
+            <button class="image-board-button image-board-button--secondary" type="button" title="Attiva il posizionamento dei punti nel canvas" aria-pressed="false" data-uccelli-image-path-add-point>Punto da canvas</button>
+            <button class="image-board-button image-board-button--secondary" type="button" data-uccelli-image-path-toggle>Play</button>
+            <button class="image-board-button image-board-button--secondary" type="button" data-uccelli-image-path-clear>Pulisci</button>
+            <output class="image-board-path-count" data-uccelli-image-value="pathPoints">0 punti</output>
+          </div>
+        </section>
+
+        <section class="image-board-motion-panel__section image-board-motion-panel__section--camera" aria-label="Camera parallasse">
+          <h3>Camera</h3>
+          <p class="image-board-camera-readout">
+            <span>X</span><output data-uccelli-camera-value="x">0</output>
+            <span>Y</span><output data-uccelli-camera-value="y">0</output>
+          </p>
+          <button class="image-board-button image-board-button--secondary" type="button" data-uccelli-camera-reset>
+            Reset
+          </button>
+        </section>
+      </div>
+    </aside>
+
+    <aside id={`${namespace}-sprite-panel`} class="image-board-sprite-panel" data-uccelli-sprite-panel aria-label="Sprite animati" hidden>
+      <div class="image-board-sprite-panel__bar">
+        <h2>Sprite</h2>
+        <button type="button" data-uccelli-sprite-panel-hide>Nascondi</button>
+      </div>
+      <div class="image-board-sprite-panel__body">
+        <section class="image-board-sprite-panel__section" aria-label="Controlli sprite">
+          <h3>Animazione</h3>
+          <button class="image-board-button image-board-button--secondary" type="button" data-uccelli-sprite-play-toggle>
+            Play
+          </button>
+          <label class="image-board-layer-control" for={`${namespace}-sprite-fps`}>
+            <span>FPS</span>
+            <input id={`${namespace}-sprite-fps`} type="range" min="1" max="30" step="1" value="8" data-uccelli-sprite-fps />
+            <output data-uccelli-image-value="spriteFps">8</output>
+          </label>
+          <label class="image-board-checkbox-control">
+            <input type="checkbox" data-uccelli-sprite-loop checked />
+            <span>Loop</span>
+          </label>
+          <label class="image-board-effect-control" for={`${namespace}-sprite-mode`}>
+            <span>Modo</span>
+            <select id={`${namespace}-sprite-mode`} data-uccelli-sprite-mode>
+              <option value="forward">Avanti</option>
+              <option value="pingpong">Ping-pong</option>
+            </select>
+          </label>
+          <label class="image-board-checkbox-control">
+            <input type="checkbox" data-uccelli-sprite-sync-motion />
+            <span>Sync movimento</span>
+          </label>
+        </section>
+
+        <section class="image-board-sprite-panel__section image-board-sprite-panel__section--wide" aria-label="Sprite direzionali">
+          <h3>Direzioni</h3>
+          <label class="image-board-checkbox-control">
+            <input type="checkbox" data-uccelli-sprite-directional-enabled />
+            <span>Direzionale automatico</span>
+          </label>
+          <label class="image-board-effect-control" for={`${namespace}-sprite-direction-state`}>
+            <span>Stato</span>
+            <select id={`${namespace}-sprite-direction-state`} data-uccelli-sprite-direction-state>
+              <option value="idle-down">idle-down</option>
+              <option value="walk-down">walk-down</option>
+              <option value="walk-left">walk-left</option>
+              <option value="walk-right">walk-right</option>
+              <option value="walk-up">walk-up</option>
+            </select>
+          </label>
+          <div class="image-board-sprite-actions">
+            <button class="image-board-button image-board-button--secondary" type="button" data-uccelli-sprite-direction-import>Importa stato</button>
+            <button class="image-board-button image-board-button--secondary" type="button" data-uccelli-sprite-direction-copy-base>Usa timeline</button>
+            <button class="image-board-button image-board-button--secondary" type="button" data-uccelli-sprite-direction-clear>Cancella stato</button>
+          </div>
+          <p class="image-board-game-hint" data-uccelli-sprite-direction-status>
+            In preview gioco, il player usa walk-up/down/left/right mentre si muove e idle-down quando si ferma.
+          </p>
+        </section>
+
+        <section class="image-board-sprite-panel__section image-board-sprite-panel__section--wide" aria-label="Frame sprite">
+          <h3>Frame</h3>
+          <label class="image-board-layer-control" for={`${namespace}-sprite-frame`}>
+            <span>Frame</span>
+            <input id={`${namespace}-sprite-frame`} type="range" min="0" max="0" step="1" value="0" data-uccelli-sprite-frame />
+            <output data-uccelli-image-value="spriteFrame">1/1</output>
+          </label>
+          <div class="image-board-sprite-actions">
+            <button class="image-board-button image-board-button--secondary" type="button" data-uccelli-sprite-prev-frame>Indietro</button>
+            <button class="image-board-button image-board-button--secondary" type="button" data-uccelli-sprite-next-frame>Avanti</button>
+            <button class="image-board-button image-board-button--secondary" type="button" data-uccelli-sprite-fit-frames>Uniforma frame</button>
+          </div>
+          <label class="image-board-checkbox-control">
+            <input type="checkbox" data-uccelli-sprite-onion-enabled />
+            <span>Onion skin</span>
+          </label>
+          <label class="image-board-layer-control" for={`${namespace}-sprite-onion-opacity`}>
+            <span>Opacità onion</span>
+            <input id={`${namespace}-sprite-onion-opacity`} type="range" min="5" max="80" step="1" value="35" data-uccelli-sprite-onion-opacity />
+            <output data-uccelli-image-value="spriteOnionOpacity">35%</output>
+          </label>
+          <div class="image-board-sprite-strip" data-uccelli-sprite-strip aria-label="Mini timeline sprite"></div>
+        </section>
+      </div>
+    </aside>
+
+    <aside id={`${namespace}-cutout-panel`} class="image-board-cutout-panel" data-uccelli-cutout-panel aria-label="Scontorno immagine" hidden>
+      <div class="image-board-cutout-panel__bar">
+        <h2>Scontorna</h2>
+        <button type="button" data-uccelli-cutout-panel-hide>Nascondi</button>
+      </div>
+      <div class="image-board-cutout-panel__body">
+        <section class="image-board-cutout-panel__section" aria-label="Maschera scontorno">
+          <h3>Maschera</h3>
+          <label class="image-board-layer-control" for={`${namespace}-cutout-tolerance`}>
+            <span>Tolleranza</span>
+            <input id={`${namespace}-cutout-tolerance`} type="range" min="0" max="120" step="1" value="38" data-uccelli-cutout-tolerance />
+            <output data-uccelli-image-value="cutoutTolerance">38</output>
+          </label>
+          <label class="image-board-layer-control" for={`${namespace}-cutout-feather`}>
+            <span>Sfumatura</span>
+            <input id={`${namespace}-cutout-feather`} type="range" min="0" max="32" step="1" value="3" data-uccelli-cutout-feather />
+            <output data-uccelli-image-value="cutoutFeather">3px</output>
+          </label>
+          <label class="image-board-layer-control" for={`${namespace}-cutout-edge`}>
+            <span>Bordo</span>
+            <input id={`${namespace}-cutout-edge`} type="range" min="-12" max="12" step="1" value="0" data-uccelli-cutout-edge />
+            <output data-uccelli-image-value="cutoutEdge">0px</output>
+          </label>
+          <label class="image-board-checkbox-control">
+            <input type="checkbox" data-uccelli-cutout-smooth checked />
+            <span>Morbida</span>
+          </label>
+          <label class="image-board-checkbox-control">
+            <input type="checkbox" data-uccelli-cutout-crop checked />
+            <span>Ritaglia risultato</span>
+          </label>
+          <label class="image-board-layer-control" for={`${namespace}-cutout-margin`}>
+            <span>Margine</span>
+            <input id={`${namespace}-cutout-margin`} type="range" min="0" max="80" step="1" value="8" data-uccelli-cutout-margin />
+            <output data-uccelli-image-value="cutoutMargin">8px</output>
+          </label>
+        </section>
+        <section class="image-board-cutout-panel__section image-board-cutout-panel__section--wide" aria-label="Azioni scontorno">
+          <h3>Scacchiera / colore</h3>
+          <div class="image-board-cutout-actions">
+            <button class="image-board-button image-board-button--primary" type="button" data-uccelli-cutout-apply>
+              Applica
+            </button>
+            <button class="image-board-button image-board-button--secondary" type="button" data-uccelli-cutout-reset>
+              Ripristina
+            </button>
+          </div>
+        </section>
+      </div>
+    </aside>
+
+    <aside id={`${namespace}-background-panel`} class="image-board-background-panel" data-uccelli-background-panel aria-label="Sfondo canvas" hidden>
+      <div class="image-board-background-panel__bar">
+        <h2>Sfondo</h2>
+        <button type="button" data-uccelli-background-panel-hide>Nascondi</button>
+      </div>
+      <div class="image-board-background-panel__body">
+        <section class="image-board-background-panel__section" aria-label="Colore sfondo">
+          <h3>Colore</h3>
+          <label class="image-board-effect-control image-board-effect-control--color" for={`${namespace}-bg-base`}>
+            <span>Base</span>
+            <input id={`${namespace}-bg-base`} type="color" value="#fbfaf7" data-uccelli-bg-base />
+          </label>
+          <label class="image-board-checkbox-control">
+            <input type="checkbox" data-uccelli-bg-editor-grid />
+            <span>Griglia editor</span>
+          </label>
+        </section>
+
+        <section class="image-board-background-panel__section" aria-label="Gradiente sfondo">
+          <h3>Gradiente</h3>
+          <label class="image-board-checkbox-control">
+            <input type="checkbox" data-uccelli-bg-gradient-enabled />
+            <span>Attiva</span>
+          </label>
+          <label class="image-board-effect-control" for={`${namespace}-bg-gradient-type`}>
+            <span>Tipo</span>
+            <select id={`${namespace}-bg-gradient-type`} data-uccelli-bg-gradient-type>
+              <option value="linear">Lineare</option>
+              <option value="radial">Radiale</option>
+            </select>
+          </label>
+          <label class="image-board-layer-control" for={`${namespace}-bg-gradient-angle`}>
+            <span>Angolo</span>
+            <input id={`${namespace}-bg-gradient-angle`} type="range" min="0" max="360" step="1" value="135" data-uccelli-bg-gradient-angle />
+            <output data-uccelli-bg-value="angle">135°</output>
+          </label>
+        </section>
+
+        <section class="image-board-background-panel__section image-board-background-panel__section--wide" aria-label="Punti gradiente">
+          <h3>Punti gradiente</h3>
+          <label class="image-board-layer-control image-board-background-stop">
+            <span>P1</span>
+            <input type="color" value="#fbfaf7" data-uccelli-bg-stop-color="0" />
+            <input type="range" min="0" max="100" step="1" value="0" data-uccelli-bg-stop-position="0" />
+            <output data-uccelli-bg-stop-value="0">0%</output>
+          </label>
+          <label class="image-board-layer-control image-board-background-stop">
+            <span>P2</span>
+            <input type="color" value="#f2b6bf" data-uccelli-bg-stop-color="1" />
+            <input type="range" min="0" max="100" step="1" value="52" data-uccelli-bg-stop-position="1" />
+            <output data-uccelli-bg-stop-value="1">52%</output>
+          </label>
+          <label class="image-board-layer-control image-board-background-stop">
+            <span>P3</span>
+            <input type="color" value="#b9c7ef" data-uccelli-bg-stop-color="2" />
+            <input type="range" min="0" max="100" step="1" value="100" data-uccelli-bg-stop-position="2" />
+            <output data-uccelli-bg-stop-value="2">100%</output>
+          </label>
+        </section>
+
+        <section class="image-board-background-panel__section image-board-background-panel__section--wide" aria-label="Carta ruvida">
+          <h3>Carta ruvida</h3>
+          <label class="image-board-checkbox-control">
+            <input type="checkbox" data-uccelli-bg-paper-enabled />
+            <span>Attiva</span>
+          </label>
+          <label class="image-board-layer-control" for={`${namespace}-bg-paper-strength`}>
+            <span>Intensità</span>
+            <input id={`${namespace}-bg-paper-strength`} type="range" min="0" max="100" step="1" value="32" data-uccelli-bg-paper-strength />
+            <output data-uccelli-bg-value="paperStrength">32%</output>
+          </label>
+          <label class="image-board-layer-control" for={`${namespace}-bg-paper-scale`}>
+            <span>Scala</span>
+            <input id={`${namespace}-bg-paper-scale`} type="range" min="0.5" max="4" step="0.1" value="1" data-uccelli-bg-paper-scale />
+            <output data-uccelli-bg-value="paperScale">1x</output>
+          </label>
+          <button class="image-board-button image-board-button--secondary" type="button" data-uccelli-bg-reset>
+            Reset sfondo
+          </button>
+        </section>
+      </div>
+    </aside>
+
+    <aside id={`${namespace}-game-panel`} class="image-board-game-panel" data-uccelli-game-panel aria-label="Gioco 2D" hidden>
+      <div class="image-board-game-panel__bar">
+        <h2>Gioco 2D</h2>
+        <button type="button" data-uccelli-game-panel-hide>Nascondi</button>
+      </div>
+      <div class="image-board-game-panel__body">
+        <section class="image-board-game-panel__section" aria-label="Ruolo asset 2D">
+          <h3>Asset</h3>
+          <label class="image-board-effect-control" for={`${namespace}-game-role`}>
+            <span>Ruolo</span>
+            <select id={`${namespace}-game-role`} data-uccelli-game-role>
+              <option value="web">Web / decorazione</option>
+              <option value="background">Sfondo stanza</option>
+              <option value="prop">Oggetto / prop</option>
+              <option value="player">Personaggio player</option>
+              <option value="npc">Personaggio NPC</option>
+              <option value="obstacle">Ostacolo</option>
+            </select>
+          </label>
+          <label class="image-board-checkbox-control">
+            <input type="checkbox" data-uccelli-game-player />
+            <span>Player principale</span>
+          </label>
+          <label class="image-board-checkbox-control">
+            <input type="checkbox" data-uccelli-game-depth-sort />
+            <span>Profondità con Y</span>
+          </label>
+        </section>
+
+        <section class="image-board-game-panel__section" aria-label="Movimento player 2D">
+          <h3>Movimento</h3>
+          <label class="image-board-layer-control" for={`${namespace}-game-speed`}>
+            <span>Velocità</span>
+            <input id={`${namespace}-game-speed`} type="range" min="40" max="640" step="10" value="180" data-uccelli-game-speed />
+            <output data-uccelli-image-value="gameSpeed">180px/s</output>
+          </label>
+          <label class="image-board-checkbox-control">
+            <input type="checkbox" data-uccelli-game-auto-flip />
+            <span>Specchia verso sinistra</span>
+          </label>
+          <div class="image-board-game-actions">
+            <button class="image-board-button image-board-button--primary" type="button" aria-pressed="false" data-uccelli-game-preview-toggle>
+              Anteprima cammina
+            </button>
+            <button class="image-board-button image-board-button--secondary" type="button" data-uccelli-game-preview-reset>
+              Reset player
+            </button>
+          </div>
+          <p class="image-board-game-hint" data-uccelli-game-status>
+            Seleziona un layer, assegnalo a Player e attiva l'anteprima.
+          </p>
+        </section>
+
+        <section class="image-board-game-panel__section image-board-game-panel__section--wide" aria-label="Input gioco 2D">
+          <h3>Input</h3>
+          <div class="image-board-input-map" data-uccelli-game-input-map>
+            {[
+              ["move-up", "Su"],
+              ["move-down", "Giù"],
+              ["move-left", "Sinistra"],
+              ["move-right", "Destra"],
+              ["action", "Azione"],
+              ["cancel", "Annulla"],
+            ].map(([action, label]) => (
+              <div class="image-board-input-map__row">
+                <span>{label}</span>
+                <button class="image-board-button image-board-button--secondary" type="button" data-uccelli-game-input-key={`${action}:0`}>
+                  -
+                </button>
+                <button class="image-board-button image-board-button--secondary" type="button" data-uccelli-game-input-key={`${action}:1`}>
+                  -
+                </button>
+              </div>
+            ))}
+          </div>
+          <label class="image-board-checkbox-control">
+            <input type="checkbox" data-uccelli-game-input-mirror />
+            <span>Specchia con sinistra/destra</span>
+          </label>
+          <div class="image-board-game-actions">
+            <button class="image-board-button image-board-button--secondary" type="button" data-uccelli-game-input-reset>
+              Reset input
+            </button>
+          </div>
+          <p class="image-board-game-hint" data-uccelli-game-input-status>
+            Clicca un tasto e premi la nuova scorciatoia.
+          </p>
+        </section>
+
+        <section class="image-board-game-panel__section" aria-label="Spawn player 2D">
+          <h3>Spawn player</h3>
+          <div class="image-board-game-actions">
+            <button class="image-board-button image-board-button--secondary" type="button" aria-pressed="false" data-uccelli-game-spawn-pick>
+              Piazza spawn
+            </button>
+            <button class="image-board-button image-board-button--secondary" type="button" data-uccelli-game-spawn-from-player>
+              Da player
+            </button>
+            <button class="image-board-button image-board-button--secondary" type="button" data-uccelli-game-spawn-clear disabled>
+              Cancella spawn
+            </button>
+          </div>
+          <p class="image-board-game-hint" data-uccelli-game-spawn-status>
+            Imposta il punto piedi dove appare il player quando parte la stanza.
+          </p>
+        </section>
+
+        <section class="image-board-game-panel__section image-board-game-panel__section--wide" aria-label="Zona camminabile 2D">
+          <h3>Zona camminabile</h3>
+          <label class="image-board-checkbox-control">
+            <input type="checkbox" data-uccelli-game-walk-enabled />
+            <span>Limita movimento alla zona</span>
+          </label>
+          <div class="image-board-game-actions">
+            <button class="image-board-button image-board-button--secondary" type="button" aria-pressed="false" data-uccelli-game-walk-draw>
+              Disegna zona
+            </button>
+            <button class="image-board-button image-board-button--secondary" type="button" data-uccelli-game-walk-close disabled>
+              Chiudi zona
+            </button>
+            <button class="image-board-button image-board-button--secondary" type="button" data-uccelli-game-walk-delete-point disabled>
+              Elimina punto
+            </button>
+            <button class="image-board-button image-board-button--secondary" type="button" data-uccelli-game-walk-clear>
+              Cancella zona
+            </button>
+          </div>
+          <p class="image-board-game-hint" data-uccelli-game-walk-status>
+            Clicca nel canvas per aggiungere punti. Con almeno 3 punti, la preview usa l'area come pavimento.
+          </p>
+        </section>
+      </div>
+    </aside>
+
+    <input type="file" accept="image/png,image/jpeg,.png,.jpg,.jpeg" multiple hidden data-uccelli-image-upload-input />
+    <input type="file" accept="image/png,image/jpeg,.png,.jpg,.jpeg" multiple hidden data-uccelli-sprite-upload-input />
+    <input type="file" accept="application/json,.json" hidden data-uccelli-image-import-data-input />
+    <button class="image-board-editor-return" type="button" data-image-board-editor-mode-btn>
+      Editor
+    </button>
+  </main>
+
+  <script is:inline>
+    window.dispatchEvent(new CustomEvent("content-editor:ready"));
+  </script>
+  <script src={`${base}image-canvas-editor/image-canvas-core.js?v=1`}></script>
+  <script src={`${base}image-canvas-editor/public-page-exporter.js?v=3`}></script>
+  <script src={`${base}shared-advanced-editor.js?v=24`}></script>
+</BioLayout>

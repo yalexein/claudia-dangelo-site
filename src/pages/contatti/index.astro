@@ -1,0 +1,725 @@
+---
+import BioLayout from "../../layouts/BioLayout.astro";
+import StyleEditorPanel from "../../components/StyleEditorPanel.astro";
+import SharedEditorExtraControls from "../../components/SharedEditorExtraControls.astro";
+import SharedEditorLayers from "../../components/SharedEditorLayers.astro";
+import { sharedEditorPageControls, sharedEditorPageDefaults, sharedPagesNav } from "../../lib/sharedEditorConfig";
+import WindowBird from "../../components/WindowBird.astro";
+import "../../styles/landing.css";
+import "../../styles/uccelli.css";
+import "../../styles/contatti.css";
+
+const base = import.meta.env.BASE_URL;
+
+const contattiPresets = {
+  background: "#ecd7cd",
+  background2: "#ecd7cd",
+  background3: "#ecd7cd",
+  backgroundMode: "solid",
+  backgroundAngle: 90,
+  text: "#17231f",
+  text2: "#17231f",
+  text3: "#17231f",
+  textMode: "solid",
+  textAngle: 90,
+  accent: "#2f6f75",
+  font: '"PT Mono Local", "IBM Plex Mono", "Courier New", monospace',
+  titleFont: '"PT Mono Local", "IBM Plex Mono", "Courier New", monospace',
+  fontSize: 15.6,
+  lineHeight: 1.6,
+  letterSpacing: 0,
+  wordSpacing: 0,
+  copyWidth: 66,
+  align: "left",
+  x: 0,
+  y: 0,
+};
+
+const contattiPageDefaults = {
+  contactImgX: 0,
+  contactImgY: 0,
+  contactImgScale: 1,
+  contactImgWidth: 520,
+  contactImgRotate: 0,
+  contactImgOpacity: 1,
+  contactImgScroll: false,
+  ...sharedEditorPageDefaults,
+  showTitleCard: true,
+  showGuestbook: true,
+};
+
+const contattiPageControls = [
+  { key: "showTitleCard", type: "toggle", label: "Mostra box titolo", default: true, wide: true },
+  { key: "showGuestbook", type: "toggle", label: "Mostra guestbook", default: true, wide: true },
+  ...sharedEditorPageControls,
+  { key: "contactImgX", type: "range", label: "Immagine X", default: 0, min: -900, max: 900, step: 1, unit: "px", cssVar: "--contatti-img-x" },
+  { key: "contactImgY", type: "range", label: "Immagine Y", default: 0, min: -900, max: 900, step: 1, unit: "px", cssVar: "--contatti-img-y" },
+  { key: "contactImgScale", type: "range", label: "Scala immagine", default: 1, min: 0.2, max: 2.8, step: 0.01, cssVar: "--contatti-img-scale" },
+  { key: "contactImgWidth", type: "range", label: "Larghezza immagine", default: 520, min: 180, max: 980, step: 1, unit: "px", cssVar: "--contatti-img-width" },
+  { key: "contactImgRotate", type: "range", label: "Rotazione immagine", default: 0, min: -180, max: 180, step: 1, unit: "deg", cssVar: "--contatti-img-rotate" },
+  { key: "contactImgOpacity", type: "range", label: "Opacita immagine", default: 1, min: 0, max: 1, step: 0.01, cssVar: "--contatti-img-opacity" },
+  { key: "contactImgScroll", type: "toggle", label: "Scorre con pagina", default: false, cssVar: "--contatti-img-scroll", wide: true },
+];
+
+const contattiContentSchema = [
+  {
+    id: "contatti-title-card",
+    label: "Box titolo",
+    selector: ".contact-title-card",
+    defaultText: "",
+    editable: true,
+    transform: "xy",
+    deletable: true,
+    resizable: true,
+    defaultWidth: 520,
+  },
+  {
+    id: "contatti-guestbook-title",
+    label: "Titolo guestbook",
+    selector: '[data-content-block="contatti-guestbook-title"]',
+    defaultText: "Guestbook",
+    editable: true,
+    transform: "xy",
+    deletable: true,
+    resizable: true,
+    defaultWidth: 360,
+  },
+];
+---
+
+<BioLayout title="Contatti">
+  <section class="contact-page" data-contact-stage data-advanced-editor-root data-advanced-editor-namespace="contatti">
+    <StyleEditorPanel
+      panelTitle="Contatti editor"
+      storageNamespace="contatti"
+      pagesNav={sharedPagesNav}
+      presets={contattiPresets}
+      pageControls={contattiPageControls}
+      pageDefaults={contattiPageDefaults}
+      pageSectionTitle="Contatti • controlli"
+      contentSchema={contattiContentSchema}
+      contentStorageNamespace="contatti"
+    >
+      <SharedEditorExtraControls slot="extra" namespace="contatti" />
+    </StyleEditorPanel>
+
+    <div class="contact-bg" aria-label="Immagine pagina Contatti">
+      <figure class="contact-bg-box" data-contatti-bg-box>
+        <img
+          class="contact-bg__img"
+          src={`${base}images/contatti/penguin-interviews.jpg`}
+          alt=""
+          draggable="false"
+          loading="eager"
+          decoding="async"
+          data-contatti-bg-img
+        />
+        <button class="uccelli-image-box__handle uccelli-image-box__handle--drag" type="button" aria-label="Sposta immagine" data-contatti-img-drag>↕</button>
+        <button class="uccelli-image-box__handle uccelli-image-box__handle--delete" type="button" aria-label="Elimina immagine" data-contatti-img-delete>×</button>
+        <button class="uccelli-image-box__handle uccelli-image-box__handle--resize" type="button" aria-label="Ridimensiona immagine" data-contatti-img-resize>↘</button>
+        <button class="uccelli-image-box__handle uccelli-image-box__handle--rotate" type="button" aria-label="Ruota immagine" data-contatti-img-rotate>⟳</button>
+      </figure>
+    </div>
+
+    <WindowBird
+      className="contact-bird"
+      size="half"
+      variant={1}
+      preset="default"
+      stageSelector="[data-contact-stage]"
+      ariaLabel="Fai girare l'uccello dei contatti"
+    />
+
+    <header class="contact-title-card editable-text" data-contact-box="title" data-contatti-title data-content-block="contatti-title-card" data-content-rich="html">
+      <button class="contatti-box-remove" type="button" aria-label="Elimina box titolo" data-contatti-remove="showTitleCard">
+        ×
+      </button>
+      <h1>contatti</h1>
+      <p>scrivimi, trovami, lasciami una traccia</p>
+      <a href={`${base}`} class="home-link">return home</a>
+    </header>
+
+    <section class="contact-panel" data-contact-panel aria-label="Guestbook" data-contatti-guestbook>
+      <button class="contatti-box-remove" type="button" aria-label="Elimina guestbook" data-contatti-remove="showGuestbook">
+        ×
+      </button>
+      <button class="contact-panel__drag" type="button" aria-label="Sposta pannello" data-contact-panel-drag>
+        ⇳
+      </button>
+      <span class="contact-panel__resize" aria-hidden="true" data-contact-panel-resize></span>
+
+      <div class="contact-panel__section">
+        <h2 class="editable-text" data-content-block="contatti-guestbook-title" data-content-rich="html">Guestbook</h2>
+        <form class="contact-panel__form" data-guestbook-form>
+          <label>
+            nome
+            <input name="name" autocomplete="name" required />
+          </label>
+          <label>
+            messaggio
+            <textarea name="message" rows="4" required></textarea>
+          </label>
+          <button type="submit">send</button>
+        </form>
+        <div class="contact-panel__entries" data-guestbook-list aria-live="polite"></div>
+      </div>
+    </section>
+
+
+    <div class="contact-spacer" aria-hidden="true"></div>
+
+    <SharedEditorLayers base={base} label="Contatti" />
+  </section>
+
+  <script>
+    const storageKey = "claudia-editor-contatti-settings";
+    const root = document.documentElement;
+    const img = document.querySelector("[data-contatti-bg-box]");
+    const resizeHandle = document.querySelector("[data-contatti-img-resize]");
+    const rotateHandle = document.querySelector("[data-contatti-img-rotate]");
+    const deleteButton = document.querySelector("[data-contatti-img-delete]");
+    const body = document.body;
+
+    const toNumber = (value, fallback) => {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : fallback;
+    };
+
+    const readCssNumber = (name, fallback) => {
+      const value = getComputedStyle(root).getPropertyValue(name).trim();
+      if (!value) return fallback;
+      const match = value.match(/-?\d+(\.\d+)?/);
+      return match ? toNumber(match[0], fallback) : fallback;
+    };
+
+    const writeSetting = (partial) => {
+      try {
+        const raw = window.localStorage.getItem(storageKey);
+        const parsed = raw ? JSON.parse(raw) : {};
+        const next = { ...(parsed && typeof parsed === "object" ? parsed : {}), ...partial };
+        window.localStorage.setItem(storageKey, JSON.stringify(next));
+      } catch {}
+    };
+
+    const syncControl = (key, value) => {
+      document.querySelectorAll(`[data-style-control="${key}"]`).forEach((node) => {
+        if (node instanceof HTMLInputElement) {
+          node.value = String(value);
+          node.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+      });
+    };
+
+    const setVar = (name, value) => root.style.setProperty(name, value);
+
+    if (img instanceof HTMLElement) {
+      let dragging = false;
+      let startX = 0;
+      let startY = 0;
+      let baseX = 0;
+      let baseY = 0;
+
+      const beginDrag = (event) => {
+        if (!(event instanceof PointerEvent)) return;
+        if (event.button !== 0) return;
+        if (event.target instanceof HTMLElement && event.target.closest("[data-contatti-img-delete], [data-contatti-img-resize], [data-contatti-img-rotate]")) return;
+        dragging = true;
+        startX = event.clientX;
+        startY = event.clientY;
+        baseX = readCssNumber("--contatti-img-x", 0);
+        baseY = readCssNumber("--contatti-img-y", 0);
+        img.setPointerCapture(event.pointerId);
+      };
+
+      const moveDrag = (event) => {
+        if (!dragging || !(event instanceof PointerEvent)) return;
+        const nextX = Math.round(baseX + (event.clientX - startX));
+        const nextY = Math.round(baseY + (event.clientY - startY));
+        setVar("--contatti-img-x", `${nextX}px`);
+        setVar("--contatti-img-y", `${nextY}px`);
+        syncControl("contactImgX", nextX);
+        syncControl("contactImgY", nextY);
+      };
+
+      const endDrag = () => {
+        if (!dragging) return;
+        dragging = false;
+        const nextX = readCssNumber("--contatti-img-x", 0);
+        const nextY = readCssNumber("--contatti-img-y", 0);
+        writeSetting({ contactImgX: nextX, contactImgY: nextY });
+      };
+
+      img.addEventListener("pointerdown", beginDrag);
+      img.addEventListener("pointermove", moveDrag);
+      img.addEventListener("pointerup", endDrag);
+      img.addEventListener("pointercancel", endDrag);
+
+      if (resizeHandle instanceof HTMLElement) {
+        let resizing = null;
+        resizeHandle.addEventListener("pointerdown", (event) => {
+          if (!(event instanceof PointerEvent)) return;
+          resizing = {
+            startX: event.clientX,
+            baseWidth: readCssNumber("--contatti-img-width", 520),
+          };
+          resizeHandle.setPointerCapture(event.pointerId);
+          event.preventDefault();
+          event.stopPropagation();
+        });
+        resizeHandle.addEventListener("pointermove", (event) => {
+          if (!resizing || !(event instanceof PointerEvent)) return;
+          const nextWidth = Math.min(1600, Math.max(120, Math.round(resizing.baseWidth + event.clientX - resizing.startX)));
+          setVar("--contatti-img-width", `${nextWidth}px`);
+          syncControl("contactImgWidth", nextWidth);
+        });
+        const endResize = () => {
+          if (!resizing) return;
+          resizing = null;
+          writeSetting({ contactImgWidth: readCssNumber("--contatti-img-width", 520) });
+        };
+        resizeHandle.addEventListener("pointerup", endResize);
+        resizeHandle.addEventListener("pointercancel", endResize);
+      }
+
+      if (rotateHandle instanceof HTMLElement) {
+        let rotating = false;
+        rotateHandle.addEventListener("pointerdown", (event) => {
+          if (!(event instanceof PointerEvent)) return;
+          rotating = true;
+          rotateHandle.setPointerCapture(event.pointerId);
+          event.preventDefault();
+          event.stopPropagation();
+        });
+        rotateHandle.addEventListener("pointermove", (event) => {
+          if (!rotating || !(event instanceof PointerEvent)) return;
+          const rect = img.getBoundingClientRect();
+          const centerX = rect.left + rect.width / 2;
+          const centerY = rect.top + rect.height / 2;
+          const angle = Math.round(Math.atan2(event.clientY - centerY, event.clientX - centerX) * (180 / Math.PI) + 90);
+          setVar("--contatti-img-rotate", `${angle}deg`);
+          syncControl("contactImgRotate", angle);
+        });
+        const endRotate = () => {
+          if (!rotating) return;
+          rotating = false;
+          writeSetting({ contactImgRotate: readCssNumber("--contatti-img-rotate", 0) });
+        };
+        rotateHandle.addEventListener("pointerup", endRotate);
+        rotateHandle.addEventListener("pointercancel", endRotate);
+      }
+
+      deleteButton?.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        setVar("--contatti-img-opacity", "0");
+        syncControl("contactImgOpacity", 0);
+        writeSetting({ contactImgOpacity: 0 });
+      });
+
+      img.addEventListener(
+        "wheel",
+        (event) => {
+          if (!(event instanceof WheelEvent)) return;
+          if (!event.shiftKey) return;
+          event.preventDefault();
+
+          const current = toNumber(
+            getComputedStyle(root).getPropertyValue("--contatti-img-scale").trim(),
+            1,
+          );
+          const delta = event.deltaY > 0 ? -0.04 : 0.04;
+          const next = Math.min(2.8, Math.max(0.2, Math.round((current + delta) * 100) / 100));
+          setVar("--contatti-img-scale", `${next}`);
+          syncControl("contactImgScale", next);
+          writeSetting({ contactImgScale: next });
+        },
+        { passive: false },
+      );
+    }
+  </script>
+
+  <script>
+    const storageKey = "claudia-editor-contatti-settings";
+    const body = document.body;
+    const className = "contatti-bg-scroll";
+
+    const toBoolean = (value) =>
+      value === true || value === 1 || value === "1" || value === "true" || value === "on";
+
+    const applyScrollMode = (enabled) => {
+      if (!(body instanceof HTMLBodyElement)) return;
+      body.classList.toggle(className, Boolean(enabled));
+    };
+
+    const readScrollSetting = () => {
+      try {
+        const raw = window.localStorage.getItem(storageKey);
+        if (!raw) return false;
+        const parsed = JSON.parse(raw);
+        return toBoolean(parsed?.contactImgScroll);
+      } catch {
+        return false;
+      }
+    };
+
+    applyScrollMode(readScrollSetting());
+
+    document.querySelectorAll('[data-style-control="contactImgScroll"]').forEach((node) => {
+      if (!(node instanceof HTMLInputElement)) return;
+      applyScrollMode(node.checked);
+      node.addEventListener("change", () => applyScrollMode(node.checked));
+    });
+
+    window.addEventListener("style-editor:state", (event) => {
+      const detail = event?.detail;
+      if (detail && typeof detail === "object" && detail.storageKey === storageKey) {
+        applyScrollMode(readScrollSetting());
+      }
+    });
+  </script>
+
+  <script>
+    // Toggle visibility for the legacy "boxes" (title card + guestbook panel) via StyleEditor settings.
+    const storageKey = "claudia-editor-contatti-settings";
+    const body = document.body;
+
+    const toBoolean = (value) =>
+      value === true || value === 1 || value === "1" || value === "true" || value === "on";
+
+    const readSetting = (key, fallback) => {
+      try {
+        const raw = window.localStorage.getItem(storageKey);
+        if (!raw) return fallback;
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== "object") return fallback;
+        const value = parsed[key];
+        return typeof value === "undefined" ? fallback : toBoolean(value);
+      } catch {
+        return fallback;
+      }
+    };
+
+    const applyVisibility = () => {
+      if (!(body instanceof HTMLBodyElement)) return;
+      body.classList.toggle("contatti-hide-title", !readSetting("showTitleCard", true));
+      body.classList.toggle("contatti-hide-guestbook", !readSetting("showGuestbook", true));
+    };
+
+    applyVisibility();
+
+    document.querySelectorAll('[data-style-control="showTitleCard"]').forEach((node) => {
+      if (!(node instanceof HTMLInputElement)) return;
+      node.addEventListener("change", applyVisibility);
+    });
+    document.querySelectorAll('[data-style-control="showGuestbook"]').forEach((node) => {
+      if (!(node instanceof HTMLInputElement)) return;
+      node.addEventListener("change", applyVisibility);
+    });
+
+    window.addEventListener("style-editor:state", (event) => {
+      const detail = event?.detail;
+      if (detail && typeof detail === "object" && detail.storageKey === storageKey) applyVisibility();
+    });
+  </script>
+
+  <script>
+    // Inline delete affordances for the legacy boxes (same settings as the toggles).
+    const storageKey = "claudia-editor-contatti-settings";
+    const body = document.body;
+
+    const toBoolean = (value) =>
+      value === true || value === 1 || value === "1" || value === "true" || value === "on";
+
+    const readState = () => {
+      try {
+        const raw = window.localStorage.getItem(storageKey);
+        return raw ? JSON.parse(raw) : {};
+      } catch {
+        return {};
+      }
+    };
+
+    const writeState = (partial) => {
+      try {
+        const current = readState();
+        const next = { ...(current && typeof current === "object" ? current : {}), ...partial };
+        window.localStorage.setItem(storageKey, JSON.stringify(next));
+      } catch {}
+    };
+
+    const applyVisibility = () => {
+      if (!(body instanceof HTMLBodyElement)) return;
+      const state = readState();
+      const showTitle = typeof state.showTitleCard === "undefined" ? true : toBoolean(state.showTitleCard);
+      const showGuestbook = typeof state.showGuestbook === "undefined" ? true : toBoolean(state.showGuestbook);
+      body.classList.toggle("contatti-hide-title", !showTitle);
+      body.classList.toggle("contatti-hide-guestbook", !showGuestbook);
+    };
+
+    const syncToggle = (key, value) => {
+      document.querySelectorAll(`[data-style-control="${key}"]`).forEach((node) => {
+        if (!(node instanceof HTMLInputElement)) return;
+        node.checked = Boolean(value);
+        node.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+    };
+
+    applyVisibility();
+
+    document.querySelectorAll("[data-contatti-remove]").forEach((node) => {
+      if (!(node instanceof HTMLButtonElement)) return;
+      node.addEventListener("click", () => {
+        const key = node.dataset.contattiRemove || "";
+        if (key !== "showTitleCard" && key !== "showGuestbook") return;
+        writeState({ [key]: false });
+        syncToggle(key, false);
+        applyVisibility();
+      });
+    });
+  </script>
+
+  <script>
+    const settingsKey = "claudia-editor-contatti-settings";
+
+    const toBoolean = (value) =>
+      value === true || value === 1 || value === "1" || value === "true" || value === "on";
+
+    const writeSettings = (partial) => {
+      try {
+        const raw = window.localStorage.getItem(settingsKey);
+        const parsed = raw ? JSON.parse(raw) : {};
+        const next = { ...(parsed && typeof parsed === "object" ? parsed : {}), ...partial };
+        window.localStorage.setItem(settingsKey, JSON.stringify(next));
+      } catch {}
+    };
+
+    const readSettings = () => {
+      try {
+        const raw = window.localStorage.getItem(settingsKey);
+        return raw ? JSON.parse(raw) : {};
+      } catch {
+        return {};
+      }
+    };
+
+    // Settings helpers reserved for future controls.
+  </script>
+
+  <script>
+    const legacyPanelKey = "claudia-contatti-contact-panel-v1";
+    const panelKey = "claudia-editor-contatti-contact-panel-v1";
+    const panel = document.querySelector("[data-contact-panel]");
+    const drag = document.querySelector("[data-contact-panel-drag]");
+    const resize = document.querySelector("[data-contact-panel-resize]");
+
+    const toNumber = (value, fallback = 0) => {
+      if (typeof value === "string") {
+        const match = value.trim().match(/-?\d+(\.\d+)?/);
+        if (match) {
+          const parsed = Number(match[0]);
+          return Number.isFinite(parsed) ? parsed : fallback;
+        }
+        return fallback;
+      }
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : fallback;
+    };
+
+    const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+    const readPanel = () => {
+      try {
+        const raw = window.localStorage.getItem(panelKey) ?? window.localStorage.getItem(legacyPanelKey);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== "object") return null;
+        return {
+          x: toNumber(parsed.x, 420),
+          y: toNumber(parsed.y, 190),
+          w: toNumber(parsed.w, 520),
+        };
+      } catch {
+        return null;
+      }
+    };
+
+    const writePanel = (value) => {
+      try {
+        window.localStorage.setItem(panelKey, JSON.stringify(value));
+        window.localStorage.removeItem(legacyPanelKey);
+      } catch {}
+    };
+
+    const applyPanel = (state) => {
+      if (!(panel instanceof HTMLElement) || !state) return;
+      panel.style.setProperty("--cp-x", `${toNumber(state.x, 0)}px`);
+      panel.style.setProperty("--cp-y", `${toNumber(state.y, 0)}px`);
+      panel.style.setProperty("--cp-w", `${toNumber(state.w, 520)}px`);
+    };
+
+    if (panel instanceof HTMLElement) {
+      const initialPanelState = readPanel() ?? { x: 420, y: 190, w: 520 };
+      applyPanel(initialPanelState);
+      writePanel(initialPanelState);
+    }
+
+    if (panel instanceof HTMLElement && drag instanceof HTMLButtonElement) {
+      let moving = null;
+      drag.addEventListener("pointerdown", (event) => {
+        if (!(event instanceof PointerEvent)) return;
+        moving = {
+          startX: event.clientX,
+          startY: event.clientY,
+          baseX: toNumber(getComputedStyle(panel).getPropertyValue("--cp-x"), 0),
+          baseY: toNumber(getComputedStyle(panel).getPropertyValue("--cp-y"), 0),
+        };
+        drag.setPointerCapture(event.pointerId);
+        event.preventDefault();
+        event.stopPropagation();
+      });
+
+      const movePanel = (event) => {
+        if (!moving || !(event instanceof PointerEvent)) return;
+        const x = Math.round(moving.baseX + (event.clientX - moving.startX));
+        const y = Math.round(moving.baseY + (event.clientY - moving.startY));
+        applyPanel({ x, y, w: toNumber(getComputedStyle(panel).getPropertyValue("--cp-w"), 520) });
+      };
+
+      const endPanelMove = () => {
+        if (!moving) return;
+        moving = null;
+        const state = {
+          x: toNumber(getComputedStyle(panel).getPropertyValue("--cp-x"), 0),
+          y: toNumber(getComputedStyle(panel).getPropertyValue("--cp-y"), 0),
+          w: toNumber(getComputedStyle(panel).getPropertyValue("--cp-w"), 520),
+        };
+        writePanel(state);
+      };
+
+      document.addEventListener("pointermove", movePanel);
+      document.addEventListener("pointerup", endPanelMove);
+      document.addEventListener("pointercancel", endPanelMove);
+    }
+
+    if (panel instanceof HTMLElement && resize instanceof HTMLElement) {
+      let resizing = null;
+      resize.addEventListener("pointerdown", (event) => {
+        if (!(event instanceof PointerEvent)) return;
+        resizing = {
+          startX: event.clientX,
+          baseW: toNumber(getComputedStyle(panel).getPropertyValue("--cp-w"), 520),
+        };
+        resize.setPointerCapture(event.pointerId);
+        event.preventDefault();
+        event.stopPropagation();
+      });
+
+      const movePanelResize = (event) => {
+        if (!resizing || !(event instanceof PointerEvent)) return;
+        const nextW = clamp(Math.round(resizing.baseW + (event.clientX - resizing.startX)), 220, 980);
+        panel.style.setProperty("--cp-w", `${nextW}px`);
+      };
+
+      const endPanelResize = () => {
+        if (!resizing) return;
+        resizing = null;
+        const state = {
+          x: toNumber(getComputedStyle(panel).getPropertyValue("--cp-x"), 0),
+          y: toNumber(getComputedStyle(panel).getPropertyValue("--cp-y"), 0),
+          w: toNumber(getComputedStyle(panel).getPropertyValue("--cp-w"), 520),
+        };
+        writePanel(state);
+      };
+
+      document.addEventListener("pointermove", movePanelResize);
+      document.addEventListener("pointerup", endPanelResize);
+      document.addEventListener("pointercancel", endPanelResize);
+    }
+
+    window.addEventListener("style-editor:save-all", () => {
+      if (!(panel instanceof HTMLElement)) return;
+      writePanel({
+        x: toNumber(getComputedStyle(panel).getPropertyValue("--cp-x"), 0),
+        y: toNumber(getComputedStyle(panel).getPropertyValue("--cp-y"), 0),
+        w: toNumber(getComputedStyle(panel).getPropertyValue("--cp-w"), 520),
+      });
+    });
+  </script>
+
+  <script>
+    const guestbookKey = "claudia-contatti-guestbook-v1";
+    const form = document.querySelector("[data-guestbook-form]");
+    const list = document.querySelector("[data-guestbook-list]");
+
+    const escapeHtml = (value) =>
+      String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+
+    const today = () =>
+      new Intl.DateTimeFormat("it-IT", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      }).format(new Date());
+
+    const readEntries = () => {
+      try {
+        const raw = window.localStorage.getItem(guestbookKey);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    };
+
+    const writeEntries = (entries) => {
+      try {
+        window.localStorage.setItem(guestbookKey, JSON.stringify(entries));
+      } catch {}
+    };
+
+    let entries = readEntries();
+
+    const renderEntries = () => {
+      if (!(list instanceof HTMLElement)) return;
+      list.innerHTML = entries
+        .slice(0, 30)
+        .map(
+          (entry) => `
+          <article class="contact-panel__entry">
+            <div class="contact-panel__entry-meta">
+              <strong>${escapeHtml(entry.name || "anon")}</strong>
+              <time>${escapeHtml(entry.date || "")}</time>
+            </div>
+            <p>${escapeHtml(entry.message || "")}</p>
+          </article>
+        `,
+        )
+        .join("");
+    };
+
+    renderEntries();
+
+    if (form instanceof HTMLFormElement) {
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const data = new FormData(form);
+        const name = String(data.get("name") || "").trim();
+        const message = String(data.get("message") || "").trim();
+        if (!name || !message) return;
+
+        entries = [{ id: `g-${Date.now()}`, name, message, date: today() }, ...entries];
+        writeEntries(entries);
+        form.reset();
+        renderEntries();
+      });
+    }
+
+    window.addEventListener("style-editor:save-all", () => writeEntries(entries));
+  </script>
+
+</BioLayout>

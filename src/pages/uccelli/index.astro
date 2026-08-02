@@ -1,0 +1,227 @@
+---
+import BioLayout from "../../layouts/BioLayout.astro";
+import StyleEditorPanel from "../../components/StyleEditorPanel.astro";
+import SharedEditorExtraControls from "../../components/SharedEditorExtraControls.astro";
+import SharedEditorLayers from "../../components/SharedEditorLayers.astro";
+import { sharedEditorPageControls, sharedEditorPageDefaults, sharedPagesNav } from "../../lib/sharedEditorConfig";
+import "../../styles/bio.css";
+import "../../styles/uccelli.css";
+import "../../styles/contatti.css";
+
+const base = import.meta.env.BASE_URL;
+
+const uccelliPresets = {
+  background: "#401206",
+  background2: "#f7f2eb",
+  background3: "#ffe1e6",
+  backgroundMode: "solid",
+  backgroundAngle: 90,
+  text: "#1f1a17",
+  text2: "#65453d",
+  text3: "#ef4b5b",
+  textMode: "solid",
+  textAngle: 90,
+  accent: "#2f6f75",
+  font: '"PT Mono Local", "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace',
+  titleFont:
+    '"PT Mono Local", "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace',
+  fontSize: 21,
+  lineHeight: 1.5,
+  letterSpacing: -0.01,
+  wordSpacing: 0,
+  copyWidth: 72,
+  align: "left",
+  x: 6,
+  y: 6,
+};
+
+const uccelliContentSchema = [
+  {
+    id: "uccelli-title",
+    label: "Titolo",
+    selector: '[data-content-block="uccelli-title"]',
+    defaultText: "uccelli,",
+    editable: true,
+    transform: "xy",
+    deletable: true,
+    resizable: true,
+    defaultWidth: 480,
+  },
+  {
+    id: "uccelli-body",
+    label: "Testo intro",
+    selector: '[data-content-block="uccelli-body"]',
+    defaultText:
+      "Una pagina per chi guarda: mappe, iniziative, letture, film e archivi. Qui tengo anche le mie fotografie e un piccolo “uccello del mese”, con immagine e suono.",
+    editable: true,
+    transform: "xy",
+    deletable: true,
+    resizable: true,
+    defaultWidth: 760,
+  },
+  {
+    id: "uccelli-box-links",
+    label: "Box link",
+    selector: ".uccelli-box--links",
+    defaultText: "",
+    editable: true,
+    transform: "xy",
+    deletable: true,
+    resizable: true,
+    defaultWidth: 760,
+  },
+  {
+    id: "uccelli-box-photos",
+    label: "Box foto",
+    selector: ".uccelli-box--photos",
+    defaultText: "",
+    editable: true,
+    transform: "xy",
+    deletable: true,
+    resizable: true,
+    defaultWidth: 760,
+  },
+  {
+    id: "uccelli-box-month",
+    label: "Box uccello mese",
+    selector: ".uccelli-box--month",
+    defaultText: "",
+    editable: true,
+    transform: "xy",
+    deletable: true,
+    resizable: true,
+    defaultWidth: 760,
+  },
+];
+---
+
+<BioLayout title="Uccelli">
+  <section class="bio-page uccelli-page" data-advanced-editor-root data-advanced-editor-namespace="uccelli">
+    <script>
+      try {
+        const key = "claudia-editor-uccelli-settings";
+        const raw = window.localStorage.getItem(key);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && typeof parsed === "object") {
+            if (parsed.background === "#fffdfb") {
+              parsed.background = "#401206";
+            }
+            parsed.font =
+              '"PT Mono Local", "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace';
+            parsed.titleFont =
+              '"PT Mono Local", "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace';
+            window.localStorage.setItem(key, JSON.stringify(parsed));
+          }
+        }
+      } catch {}
+    </script>
+
+    <StyleEditorPanel
+      panelTitle="Uccelli editor"
+      storageNamespace="uccelli"
+      pagesNav={sharedPagesNav}
+      presets={uccelliPresets}
+      pageControls={sharedEditorPageControls}
+      pageDefaults={sharedEditorPageDefaults}
+      pageSectionTitle="Sfondo e immagine"
+      contentSchema={uccelliContentSchema}
+      contentStorageNamespace="uccelli"
+    >
+      <SharedEditorExtraControls slot="extra" namespace="uccelli" />
+    </StyleEditorPanel>
+
+    <div class="bio-frame">
+      <div class="bio-canvas">
+        <article class="bio-copy">
+          <h1 class="bio-title editable-text" data-content-block="uccelli-title" data-content-rich="html">uccelli<span>,</span></h1>
+
+      <div
+        class="bio-body editable-text"
+        data-content-block="uccelli-body"
+        data-content-rich="html"
+      >
+            <p>
+              Una pagina per chi guarda: mappe, iniziative, letture, film e archivi. Qui tengo anche le
+              mie fotografie e un piccolo “uccello del mese”, con immagine e suono.
+            </p>
+          </div>
+
+          <section class="uccelli-boxes" aria-label="Risorse per birdwatching">
+            <section
+              class="uccelli-box uccelli-box--links editable-text"
+              aria-label="Link utili"
+              data-content-rich="html"
+            >
+              <h2>Link utili</h2>
+              <p>Una piccola raccolta per partire (e tornare).</p>
+
+              <h3>Iniziative</h3>
+              <ul>
+                <li><a href="https://ebird.org/" target="_blank" rel="noreferrer">eBird</a></li>
+                <li><a href="https://www.inaturalist.org/" target="_blank" rel="noreferrer">iNaturalist</a></li>
+                <li><a href="https://www.birdlife.org/" target="_blank" rel="noreferrer">BirdLife International</a></li>
+              </ul>
+
+              <h3>Giornate per celebrare</h3>
+              <ul>
+                <li><a href="https://www.worldmigratorybirdday.org/" target="_blank" rel="noreferrer">World Migratory Bird Day</a></li>
+              </ul>
+
+              <h3>Articoli e archivi</h3>
+              <ul>
+                <li><a href="https://www.birds.cornell.edu/home/" target="_blank" rel="noreferrer">Cornell Lab of Ornithology</a></li>
+                <li><a href="https://xeno-canto.org/" target="_blank" rel="noreferrer">Xeno-canto (suoni)</a></li>
+                <li><a href="https://www.macaulaylibrary.org/" target="_blank" rel="noreferrer">Macaulay Library</a></li>
+              </ul>
+
+              <h3>Associazioni e mappe</h3>
+              <ul>
+                <li><a href="https://www.lipu.it/" target="_blank" rel="noreferrer">LIPU</a></li>
+                <li><a href="https://www.rspb.org.uk/" target="_blank" rel="noreferrer">RSPB</a></li>
+              </ul>
+            </section>
+
+            <section
+              class="uccelli-box uccelli-box--photos editable-text"
+              aria-label="Le mie foto"
+              data-content-rich="html"
+            >
+              <h2>Le mie foto</h2>
+              <p>
+                Qui posso mettere un carosello, oppure una serie di immagini.
+              </p>
+              <p>
+                <img src={`${base}images/uccelli/uccelli.jpg`} alt="Placeholder foto uccelli" loading="lazy" decoding="async" />
+              </p>
+            </section>
+
+            <section
+              class="uccelli-box uccelli-box--month editable-text"
+              aria-label="Uccello del mese"
+              data-content-rich="html"
+            >
+              <h2>Uccello del mese</h2>
+              <p>Immagine + suono (esempio).</p>
+              <p>
+                <img src={`${base}images/uccelli/uccelli.jpg`} alt="Uccello del mese (placeholder)" loading="lazy" decoding="async" />
+              </p>
+              <p>
+                <audio controls preload="none" src={`${base}audio/birds/placeholder.wav`}></audio>
+              </p>
+              <p><strong>Archivio:</strong></p>
+              <ul>
+                <li>Pettirosso — <em>Erithacus rubecula</em></li>
+                <li>Merlo — <em>Turdus merula</em></li>
+                <li>Cinciallegra — <em>Parus major</em></li>
+              </ul>
+            </section>
+          </section>
+        </article>
+      </div>
+    </div>
+
+    <SharedEditorLayers base={base} label="Uccelli" />
+  </section>
+
+</BioLayout>

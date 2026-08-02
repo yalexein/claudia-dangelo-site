@@ -1,0 +1,578 @@
+:root {
+  --uccelli-bg-x: 0px;
+  --uccelli-bg-y: 0px;
+  --uccelli-bg-scale: 1;
+  --uccelli-bg-width: 560px;
+  --uccelli-bg-opacity: 1;
+  --uccelli-bottom-space: 1200px;
+}
+
+.uccelli-page .bio-title {
+  margin-bottom: clamp(42px, 6vw, 72px);
+}
+
+.uccelli-page {
+  position: relative;
+  min-height: calc(100vh + var(--uccelli-bottom-space, 1200px));
+  overflow: visible;
+}
+
+.uccelli-page .bio-frame,
+.uccelli-page .bio-canvas {
+  min-height: calc(100vh + var(--uccelli-bottom-space, 1200px));
+}
+
+.uccelli-bg-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+body.uccelli-bg-scroll .uccelli-bg-layer {
+  position: absolute;
+}
+
+.uccelli-bg-layer__img {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: var(--uccelli-bg-width, 560px);
+  max-width: none;
+  height: auto;
+  opacity: var(--uccelli-bg-opacity, 1);
+  transform: translate(var(--uccelli-bg-x), calc(-50% + var(--uccelli-bg-y))) scale(var(--uccelli-bg-scale));
+  transform-origin: left center;
+  user-select: none;
+  pointer-events: auto;
+  cursor: grab;
+}
+
+.uccelli-bg-layer__img[hidden] {
+  display: none;
+}
+
+.bio-frame {
+  position: relative;
+  z-index: auto;
+}
+
+.uccelli-layers-panel {
+  position: fixed;
+  top: 22px;
+  right: 22px;
+  z-index: 86;
+  width: min(310px, calc(100vw - 28px));
+  max-height: min(680px, calc(100vh - 44px));
+  overflow: hidden;
+  border: 1px solid rgba(18, 18, 18, 0.16);
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.82);
+  color: rgba(28, 24, 22, 0.92);
+  box-shadow: 0 22px 60px rgba(15, 12, 10, 0.16);
+  backdrop-filter: blur(18px);
+  opacity: 0.24;
+  transition:
+    opacity 180ms ease,
+    box-shadow 180ms ease,
+    transform 120ms ease;
+}
+
+.uccelli-layers-panel:hover,
+.uccelli-layers-panel:focus-within,
+.uccelli-layers-panel.is-dragging {
+  opacity: 1;
+  box-shadow: 0 26px 70px rgba(15, 12, 10, 0.22);
+}
+
+.uccelli-layers-panel__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 14px 8px 18px;
+  cursor: grab;
+  user-select: none;
+}
+
+.uccelli-layers-panel__bar:active {
+  cursor: grabbing;
+}
+
+.uccelli-layers-panel h2 {
+  margin: 0;
+  color: rgba(58, 55, 54, 0.78);
+  font: 800 15px/1.1 "PT Mono Local", "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.uccelli-layers-panel button {
+  border: 1px solid rgba(18, 18, 18, 0.16);
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.72);
+  color: rgba(18, 18, 18, 0.84);
+  font: 700 13px/1 "PT Mono Local", "IBM Plex Mono", ui-monospace, monospace;
+  cursor: pointer;
+}
+
+.uccelli-layers-panel button:hover {
+  background: rgba(22, 18, 16, 0.92);
+  color: #fff;
+}
+
+.uccelli-layers-panel__body {
+  display: grid;
+  gap: 10px;
+  padding: 0 14px 14px;
+  max-height: calc(100vh - 120px);
+  overflow: auto;
+}
+
+.uccelli-layers-panel.is-collapsed {
+  width: min(210px, calc(100vw - 28px));
+}
+
+.uccelli-layers-panel.is-collapsed .uccelli-layers-panel__body {
+  display: none;
+}
+
+.uccelli-layers-panel__body p {
+  margin: 0;
+  color: rgba(42, 38, 35, 0.62);
+  font: 500 12px/1.35 "PT Mono Local", "IBM Plex Mono", ui-monospace, monospace;
+}
+
+.uccelli-layers-list {
+  display: grid;
+  gap: 7px;
+}
+
+.uccelli-layers-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+  padding: 10px 11px;
+  border: 1px solid rgba(18, 18, 18, 0.12);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.58);
+  text-align: left;
+}
+
+.uccelli-layers-item__name {
+  overflow: hidden;
+  color: rgba(20, 18, 17, 0.88);
+  font: 800 12px/1.15 "PT Mono Local", "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: 0.01em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.uccelli-layers-item__meta {
+  color: rgba(20, 18, 17, 0.54);
+  font: 700 11px/1 "PT Mono Local", "IBM Plex Mono", ui-monospace, monospace;
+}
+
+.uccelli-layers-item.is-active {
+  border-color: rgba(22, 18, 16, 0.82);
+  background: rgba(22, 18, 16, 0.9);
+}
+
+.uccelli-layers-item.is-active .uccelli-layers-item__name,
+.uccelli-layers-item.is-active .uccelli-layers-item__meta {
+  color: #fff;
+}
+
+.uccelli-image-layer {
+  position: absolute;
+  inset: 0;
+  z-index: auto;
+  min-height: calc(100vh + var(--uccelli-bottom-space, 1200px));
+  pointer-events: none;
+}
+
+.uccelli-gallery-layer {
+  position: absolute;
+  inset: 0;
+  z-index: auto;
+  min-height: calc(100vh + var(--uccelli-bottom-space, 1200px));
+  pointer-events: none;
+}
+
+.uccelli-image-box {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  width: 320px;
+  max-width: none;
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+  cursor: grab;
+}
+
+.uccelli-image-box:active {
+  cursor: grabbing;
+}
+
+.uccelli-image-box.is-active {
+  outline: 2px solid rgba(60, 70, 210, 0.72);
+  outline-offset: 4px;
+}
+
+.uccelli-image-box img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+.uccelli-image-box__handle {
+  position: absolute;
+  z-index: 2;
+  inline-size: 28px;
+  block-size: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(18, 18, 18, 0.24);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  color: rgba(21, 21, 21, 0.92);
+  font: 700 15px/1 ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+  box-shadow: 0 8px 20px rgba(14, 14, 14, 0.16);
+}
+
+.uccelli-image-box__handle--drag {
+  top: -14px;
+  left: -14px;
+  cursor: grab;
+}
+
+.uccelli-image-box__handle--delete {
+  top: -14px;
+  right: -14px;
+  cursor: pointer;
+}
+
+.uccelli-image-box__handle--resize {
+  right: -12px;
+  bottom: -12px;
+  inline-size: 24px;
+  block-size: 24px;
+  cursor: nwse-resize;
+}
+
+.uccelli-image-box__handle--rotate {
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: grab;
+}
+
+.uccelli-image-box__handle--rotate:active {
+  cursor: grabbing;
+}
+
+.uccelli-image-box__handle:hover {
+  background: rgba(22, 18, 16, 0.94);
+  color: #fff;
+}
+
+.uccelli-gallery-box {
+  --gallery-columns: 3;
+  --gallery-gap: 10px;
+  --gallery-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  width: 620px;
+  max-width: none;
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+  cursor: grab;
+}
+
+.uccelli-gallery-box:active {
+  cursor: grabbing;
+}
+
+.uccelli-gallery-box.is-active {
+  outline: 2px solid rgba(60, 70, 210, 0.72);
+  outline-offset: 5px;
+}
+
+.uccelli-gallery-box__track {
+  display: grid;
+  grid-template-columns: repeat(var(--gallery-columns), minmax(0, 1fr));
+  gap: var(--gallery-gap);
+}
+
+.uccelli-gallery-box__track img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  height: auto;
+  object-fit: var(--gallery-fit);
+  border: 0;
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.2);
+  cursor: zoom-in;
+}
+
+.uccelli-gallery-box[data-gallery-layout="masonry"] .uccelli-gallery-box__track {
+  display: block;
+  columns: var(--gallery-columns);
+  column-gap: var(--gallery-gap);
+}
+
+.uccelli-gallery-box[data-gallery-layout="masonry"] .uccelli-gallery-box__track img {
+  break-inside: avoid;
+  margin: 0 0 var(--gallery-gap);
+  aspect-ratio: auto;
+  object-fit: contain;
+}
+
+.uccelli-gallery-box[data-gallery-layout="filmstrip"] .uccelli-gallery-box__track {
+  display: flex;
+  gap: var(--gallery-gap);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 4px;
+}
+
+.uccelli-gallery-box[data-gallery-layout="filmstrip"] .uccelli-gallery-box__track img {
+  flex: 0 0 min(78%, 360px);
+  scroll-snap-align: start;
+}
+
+.uccelli-gallery-box[data-gallery-layout="slideshow"] .uccelli-gallery-box__track {
+  display: block;
+  position: relative;
+  overflow: hidden;
+}
+
+.uccelli-gallery-box[data-gallery-layout="slideshow"] .uccelli-gallery-box__track img {
+  display: none;
+  aspect-ratio: 16 / 10;
+}
+
+.uccelli-gallery-box[data-gallery-layout="slideshow"] .uccelli-gallery-box__track img.is-active {
+  display: block;
+}
+
+.uccelli-gallery-box__handle,
+.uccelli-gallery-box__nav {
+  position: absolute;
+  z-index: 3;
+  inline-size: 28px;
+  block-size: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(18, 18, 18, 0.24);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  color: rgba(21, 21, 21, 0.92);
+  font: 700 15px/1 ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+  box-shadow: 0 8px 20px rgba(14, 14, 14, 0.16);
+}
+
+.uccelli-gallery-box__handle--drag {
+  top: -14px;
+  left: -14px;
+  cursor: grab;
+}
+
+.uccelli-gallery-box__handle--delete {
+  top: -14px;
+  right: -14px;
+  cursor: pointer;
+}
+
+.uccelli-gallery-box__handle--resize {
+  right: -12px;
+  bottom: -12px;
+  inline-size: 24px;
+  block-size: 24px;
+  cursor: nwse-resize;
+}
+
+.uccelli-gallery-box__handle--rotate {
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: grab;
+}
+
+.uccelli-gallery-box__handle--rotate:active {
+  cursor: grabbing;
+}
+
+.uccelli-gallery-box__nav {
+  top: 50%;
+  translate: 0 -50%;
+  opacity: 0;
+  transition: opacity 160ms ease;
+  cursor: pointer;
+}
+
+.uccelli-gallery-box:hover .uccelli-gallery-box__nav,
+.uccelli-gallery-box.is-active .uccelli-gallery-box__nav {
+  opacity: 1;
+}
+
+.uccelli-gallery-box__nav--prev {
+  left: 8px;
+}
+
+.uccelli-gallery-box__nav--next {
+  right: 8px;
+}
+
+.uccelli-gallery-box:not([data-gallery-layout="slideshow"]) .uccelli-gallery-box__nav,
+.uccelli-gallery-box:not([data-gallery-layout="slideshow"]) .uccelli-gallery-box__counter {
+  display: none;
+}
+
+.uccelli-gallery-box__counter {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 3;
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  color: rgba(21, 21, 21, 0.84);
+  font: 700 11px/1 ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+}
+
+.uccelli-gallery-box__handle:hover,
+.uccelli-gallery-box__nav:hover {
+  background: rgba(22, 18, 16, 0.94);
+  color: #fff;
+}
+
+.uccelli-gallery-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  border: 0;
+  padding: 28px;
+  background: rgba(10, 10, 10, 0.78);
+  cursor: zoom-out;
+}
+
+.uccelli-gallery-lightbox[hidden] {
+  display: none;
+}
+
+.uccelli-gallery-lightbox img {
+  display: block;
+  max-width: min(1100px, 94vw);
+  max-height: 90vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
+}
+
+.uccelli-boxes {
+  margin-top: 26px;
+  display: grid;
+  gap: 28px;
+}
+
+.uccelli-box {
+  position: relative;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  padding: 8px 0;
+}
+
+.uccelli-box::after {
+  content: none;
+}
+
+.uccelli-page .content-editor-block--custom-style :where(h1, h2, h3, h4, h5, h6, p, ul, ol, li, a, span, strong, em) {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  word-spacing: inherit;
+  text-align: inherit;
+  color: inherit;
+  -webkit-text-fill-color: inherit;
+}
+
+.uccelli-page .content-editor-block--custom-style :where(h1, h2, h3, h4, h5, h6, strong) {
+  font-weight: inherit;
+}
+
+.uccelli-page .content-editor-block--custom-style :where(em) {
+  font-style: inherit;
+}
+
+.uccelli-box h2 {
+  margin: 0 0 14px;
+  font-size: clamp(18px, 2vw, 24px);
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  font-weight: 800;
+  color: rgba(31, 26, 23, 0.92);
+}
+
+.uccelli-box p {
+  margin: 0 0 14px;
+  font-size: 15px;
+  line-height: 1.58;
+  color: rgba(31, 26, 23, 0.86);
+}
+
+.uccelli-box h3 {
+  margin: 18px 0 8px;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(31, 26, 23, 0.78);
+}
+
+.uccelli-box ul {
+  margin: 0 0 14px;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+}
+
+.uccelli-box a {
+  color: rgba(28, 78, 85, 0.98);
+  text-underline-offset: 3px;
+}
+
+.uccelli-box img {
+  width: min(680px, 100%);
+  height: auto;
+  display: block;
+  margin: 10px 0 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(31, 26, 23, 0.12);
+}
+
+.uccelli-box audio {
+  width: 100%;
+}

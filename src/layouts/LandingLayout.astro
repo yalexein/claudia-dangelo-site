@@ -1,5 +1,6 @@
 ---
 import "../styles/landing.css";
+import LanguageSwitcher from "../components/LanguageSwitcher.astro";
 
 const { title = "Sito personale" } = Astro.props;
 const base = import.meta.env.BASE_URL;
@@ -11,8 +12,10 @@ const base = import.meta.env.BASE_URL;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+    <script is:inline src={`${base}site-locale.js?v=1`}></script>
   </head>
   <body>
+    <LanguageSwitcher />
     <main class="container">
       <slot />
     </main>

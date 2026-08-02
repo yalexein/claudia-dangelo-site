@@ -1,0 +1,88 @@
+@font-face {
+  font-family: "PT Mono Local";
+  src: url("/fonts/newsletter/PTMono.ttc") format("truetype-collection");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background: #f5f5f5;
+  color: #1a1a1a;
+  font-family: "PT Mono Local", "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+}
+
+.sketch-page {
+  min-height: 100vh;
+  padding: clamp(24px, 5vw, 60px) 18px;
+  display: grid;
+  place-items: start center;
+}
+
+.sketch-card {
+  width: min(980px, 100%);
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.08);
+  padding: clamp(34px, 5vw, 60px);
+}
+
+.sketch-header {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.sketch-hash {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.55;
+}
+
+.sketch-title {
+  margin: 0;
+  font-size: clamp(22px, 2.4vw, 28px);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.sketch-body {
+  font-size: clamp(16px, 1.65vw, 20px);
+  line-height: 1.75;
+  letter-spacing: 0;
+  max-width: 72ch;
+}
+
+.sketch-body p {
+  margin: 0 0 18px;
+}
+
+.sketch-body mark {
+  background: rgba(175, 195, 255, 0.6);
+  padding: 0.04em 0.14em;
+}
+
+.sketch-figure {
+  margin: 26px 0 0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f1f1f1;
+}
+
+.sketch-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+}

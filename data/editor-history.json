@@ -1,0 +1,236 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "updatedAt": "2026-08-02T10:22:57.854Z",
+      "type": "replace",
+      "revision": 7498,
+      "updatedBy": "browser-1c6020da-0eeb-4bbf-a4a5-8b89acef9382",
+      "changedKeys": [
+        "claudia-editor-scritture-panel-open",
+        "claudia-editor-eventi-settings",
+        "claudia-editor-scritture-settings",
+        "claudia-editor-immagini-demo-seeded-v1",
+        "claudia-editor-scritture-image-boxes-v1",
+        "claudia-editor-contatti-galleries-v1",
+        "claudia-editor-bio-panel-pos-v1",
+        "claudia-content-contatti-v1-edit-mode",
+        "claudia-editor-il-vizio-della-scrittura-layers-panel-v1",
+        "claudia-editor-uccelli-image-boxes-v1",
+        "claudia-editor-sketches-panel-open",
+        "claudia-editor-immagini-image-boxes-v1",
+        "claudia-editor-uccelli-galleries-v1",
+        "claudia-editor-bio-galleries-v1",
+        "claudia-editor-bio-layers-panel-v1",
+        "claudia-editor-il-vizio-della-scrittura-panel-open",
+        "claudia-editor-contatti-contact-panel-v1",
+        "claudia-content-bio-v1-edit-mode",
+        "claudia-editor-contatti-image-boxes-v1",
+        "claudia-editor-contatti-settings",
+        "claudia-content-eventi-v1-edit-mode",
+        "claudia-editor-immagini-demo-layer-styles-v1",
+        "claudia-content-sketches-v1-edit-mode",
+        "claudia-editor-contatti-panel-open",
+        "claudia-editor-eventi-layers-panel-v1",
+        "claudia-editor-bio-settings",
+        "claudia-editor-bio-image-boxes-v1",
+        "claudia-content-uccelli-v1",
+        "claudia-editor-bio-panel-open",
+        "claudia-editor-uccelli-panel-pos-v1",
+        "claudia-editor-uccelli-panel-open",
+        "claudia-editor-il-vizio-della-scrittura-panel-pos-v1",
+        "claudia-content-uccelli-v1-edit-mode",
+        "claudia-editor-uccelli-settings",
+        "claudia-content-scritture-v1-edit-mode",
+        "claudia-content-il-vizio-della-scrittura-v1-edit-mode",
+        "claudia-editor-immagini-layers-panel-v1",
+        "claudia-editor-scritture-layers-panel-v1",
+        "claudia-editor-contatti-panel-pos-v1",
+        "claudia-content-contatti-v1",
+        "claudia-editor-uccelli-settings-presets-v1",
+        "claudia-content-scritture-v1",
+        "claudia-editor-scritture-panel-pos-v1",
+        "claudia-editor-scritture-galleries-v1",
+        "claudia-editor-uccelli-layers-panel-v1",
+        "claudia-editor-bio-settings-presets-v1",
+        "claudia-content-bio-v1",
+        "claudia-editor-scritture-settings-presets-v1",
+        "claudia-editor-sketches-layers-panel-v1",
+        "claudia-content-link-v1-edit-mode",
+        "claudia-editor-link-layers-panel-v1",
+        "claudia-editor-sketches-panel-pos-v1",
+        "claudia-editor-contatti-layers-panel-v1",
+        "claudia-editor-il-vizio-della-scrittura-settings",
+        "claudia-content-il-vizio-della-scrittura-v1"
+      ],
+      "removedKeys": [],
+      "replace": true
+    },
+    {
+      "updatedAt": "2026-08-02T10:22:58.161Z",
+      "type": "save",
+      "revision": 7499,
+      "updatedBy": "browser-1c6020da-0eeb-4bbf-a4a5-8b89acef9382",
+      "changedKeys": [
+        "claudia-editor-immagini-demo-parallax-styles-v1",
+        "claudia-editor-immagini-demo-public-drag-styles-v1",
+        "claudia-editor-immagini-demo-path-styles-v1",
+        "claudia-editor-immagini-demo-sprite-seeded-v1",
+        "claudia-editor-immagini-floating-panels-v1",
+        "claudia-editor-immagini-layers-panel-v1",
+        "claudia-editor-immagini-image-boxes-v1"
+      ],
+      "removedKeys": [],
+      "replace": false
+    },
+    {
+      "updatedAt": "2026-08-02T10:23:03.222Z",
+      "type": "save",
+      "revision": 7500,
+      "updatedBy": "browser-1c6020da-0eeb-4bbf-a4a5-8b89acef9382",
+      "changedKeys": [
+        "claudia-editor-immagini-floating-panels-v1",
+        "claudia-editor-immagini-image-boxes-v1"
+      ],
+      "removedKeys": [],
+      "replace": false
+    },
+    {
+      "updatedAt": "2026-08-02T10:23:08.517Z",
+      "type": "save",
+      "revision": 7501,
+      "updatedBy": "browser-1c6020da-0eeb-4bbf-a4a5-8b89acef9382",
+      "changedKeys": [
+        "claudia-editor-immagini-floating-panels-v1",
+        "claudia-editor-immagini-image-boxes-v1"
+      ],
+      "removedKeys": [],
+      "replace": false
+    },
+    {
+      "updatedAt": "2026-08-02T10:24:38.055Z",
+      "type": "save",
+      "revision": 7502,
+      "updatedBy": "browser-1c6020da-0eeb-4bbf-a4a5-8b89acef9382",
+      "changedKeys": [
+        "claudia-editor-immagini-image-boxes-v1"
+      ],
+      "removedKeys": [],
+      "replace": false
+    },
+    {
+      "updatedAt": "2026-08-02T10:24:45.375Z",
+      "type": "save",
+      "revision": 7503,
+      "updatedBy": "browser-1c6020da-0eeb-4bbf-a4a5-8b89acef9382",
+      "changedKeys": [
+        "claudia-editor-immagini-layers-panel-v1",
+        "claudia-editor-immagini-floating-panels-v1"
+      ],
+      "removedKeys": [],
+      "replace": false
+    },
+    {
+      "updatedAt": "2026-08-02T10:24:45.830Z",
+      "type": "save",
+      "revision": 7504,
+      "updatedBy": "browser-1c6020da-0eeb-4bbf-a4a5-8b89acef9382",
+      "changedKeys": [
+        "claudia-editor-immagini-image-boxes-v1",
+        "claudia-editor-immagini-floating-panels-v1"
+      ],
+      "removedKeys": [],
+      "replace": false
+    },
+    {
+      "updatedAt": "2026-08-02T10:40:44.281Z",
+      "type": "save",
+      "revision": 7505,
+      "updatedBy": "browser-1c6020da-0eeb-4bbf-a4a5-8b89acef9382",
+      "changedKeys": [
+        "claudia-editor-bio-floating-panels-v1"
+      ],
+      "removedKeys": [],
+      "replace": false
+    },
+    {
+      "updatedAt": "2026-08-02T10:40:44.393Z",
+      "type": "save",
+      "revision": 7506,
+      "updatedBy": "browser-1c6020da-0eeb-4bbf-a4a5-8b89acef9382",
+      "changedKeys": [
+        "claudia-editor-bio-floating-panels-v1"
+      ],
+      "removedKeys": [],
+      "replace": false
+    },
+    {
+      "updatedAt": "2026-08-02T10:40:44.681Z",
+      "type": "save",
+      "revision": 7507,
+      "updatedBy": "browser-1c6020da-0eeb-4bbf-a4a5-8b89acef9382",
+      "changedKeys": [
+        "claudia-editor-bio-image-boxes-v1"
+      ],
+      "removedKeys": [],
+      "replace": false
+    },
+    {
+      "updatedAt": "2026-08-02T10:46:03.342Z",
+      "type": "save",
+      "revision": 7508,
+      "updatedBy": "browser-1c6020da-0eeb-4bbf-a4a5-8b89acef9382",
+      "changedKeys": [
+        "claudia-editor-bio-layers-panel-v1",
+        "claudia-editor-bio-floating-panels-v1"
+      ],
+      "removedKeys": [],
+      "replace": false
+    },
+    {
+      "updatedAt": "2026-08-02T10:46:03.625Z",
+      "type": "save",
+      "revision": 7509,
+      "updatedBy": "browser-1c6020da-0eeb-4bbf-a4a5-8b89acef9382",
+      "changedKeys": [
+        "claudia-editor-bio-layers-panel-v1",
+        "claudia-editor-bio-floating-panels-v1"
+      ],
+      "removedKeys": [],
+      "replace": false
+    },
+    {
+      "updatedAt": "2026-08-02T10:52:48.215Z",
+      "type": "save",
+      "revision": 7510,
+      "updatedBy": "browser-1c6020da-0eeb-4bbf-a4a5-8b89acef9382",
+      "changedKeys": [
+        "claudia-editor-bio-floating-panels-v1"
+      ],
+      "removedKeys": [],
+      "replace": false
+    },
+    {
+      "updatedAt": "2026-08-02T10:52:48.557Z",
+      "type": "save",
+      "revision": 7511,
+      "updatedBy": "browser-1c6020da-0eeb-4bbf-a4a5-8b89acef9382",
+      "changedKeys": [
+        "claudia-editor-bio-floating-panels-v1"
+      ],
+      "removedKeys": [],
+      "replace": false
+    },
+    {
+      "updatedAt": "2026-08-02T10:57:46.618Z",
+      "type": "save",
+      "revision": 7512,
+      "updatedBy": "browser-1c6020da-0eeb-4bbf-a4a5-8b89acef9382",
+      "changedKeys": [
+        "claudia-editor-immagini-floating-panels-v1"
+      ],
+      "removedKeys": [],
+      "replace": false
+    }
+  ]
+}

@@ -16,6 +16,21 @@ Sito statico costruito con **Astro** e pubblicabile su **GitHub Pages**.
 1) Installa dipendenze: `npm install`
 2) Avvia: `npm run dev`
 
+## Editor condiviso da più PC
+
+Per editare e salvare da più computer sulla stessa rete, usa il piccolo server editor locale:
+
+1) Sul Mac principale avvia: `npm run editor`
+2) Il terminale mostra un indirizzo tipo `http://192.168.x.x:4321/`
+3) Dall’altro PC apri quell’indirizzo, per esempio `http://192.168.x.x:4321/uccelli/`
+4) Usa l’editor e premi `Salva`: i dati vengono condivisi nel file locale `data/editor-state.json`
+
+Il server serve il sito compilato da `dist/` e mantiene tutte le impostazioni dell’editor in `data/editor-state.json`.
+Il file non va committato: è il salvataggio centrale del Mac che sta facendo da server.
+CLAUDIA crea anche un backup locale in `data/editor-state.backup.json`: viene aggiornato a ogni salvataggio riuscito e comunque riscritto ogni 2 minuti. Se il salvataggio principale non è leggibile, CLAUDIA prova a recuperare dal backup.
+
+Nota: su GitHub Pages il sito resta statico, quindi l’editor può funzionare nel browser locale ma non può salvare su `data/editor-state.json`. Per il salvataggio condiviso serve aprire il sito tramite `npm run editor`.
+
 ## Deploy su GitHub Pages
 
 È inclusa una GitHub Action in `.github/workflows/deploy.yml`.

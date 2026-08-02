@@ -1,0 +1,19 @@
+---
+import LandingLayout from "../../layouts/LandingLayout.astro";
+const base = import.meta.env.BASE_URL;
+---
+
+<LandingLayout title="Curriculum — Claudia D'Angelo">
+  <section class="placeholder-page" data-locale-only="it">
+    <p class="placeholder-kicker">curriculum</p>
+    <h1>Curriculum</h1>
+    <p class="placeholder-text">Questa pagina è in preparazione.</p>
+    <p><a class="btn ghost" href={base}>Torna alla home</a></p>
+  </section>
+  <section class="placeholder-page" data-locale-only="en" hidden>
+    <p class="placeholder-kicker">résumé</p>
+    <h1>Résumé</h1>
+    <p class="placeholder-text">This page is being prepared.</p>
+    <p><a class="btn ghost" href={base}>Return home</a></p>
+  </section>
+</LandingLayout>

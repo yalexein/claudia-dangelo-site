@@ -1,6 +1,10 @@
 ---
+import LanguageSwitcher from "../components/LanguageSwitcher.astro";
+
 const { title = "Bio" } = Astro.props;
 const base = import.meta.env.BASE_URL;
+const webFontsHref =
+  "https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@400;600;700&family=Comic+Neue:wght@400;700&family=Cormorant+Garamond:wght@400;600;700&family=Cormorant+Infant:wght@400;600;700&family=EB+Garamond:wght@400;600;700&family=Fira+Mono:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700;800&family=Libre+Baskerville:wght@400;700&family=Libre+Franklin:wght@400;500;600;700;800&family=Lora:wght@400;500;600;700&family=Merriweather:wght@400;700;900&family=Montserrat:wght@400;500;600;700;800&family=Patrick+Hand&family=Playfair+Display:wght@400;600;700;800&family=Source+Sans+3:wght@400;500;600;700;800&family=Source+Serif+4:wght@400;600;700&family=Space+Mono:wght@400;700&family=Spectral:wght@400;500;600;700&display=swap";
 ---
 
 <!doctype html>
@@ -10,8 +14,46 @@ const base = import.meta.env.BASE_URL;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+    <script is:inline src={`${base}site-locale.js?v=1`}></script>
+    <script is:inline>
+      (() => {
+        document.documentElement.classList.add("editor-hydrating");
+
+        let syncReady = false;
+        let contentReady = false;
+
+        const reveal = () => {
+          if (!syncReady || !contentReady) return;
+          document.documentElement.classList.remove("editor-hydrating");
+        };
+
+        window.addEventListener("editor-sync:ready", () => {
+          syncReady = true;
+          reveal();
+        });
+
+        window.addEventListener("content-editor:ready", () => {
+          contentReady = true;
+          reveal();
+        });
+
+        window.setTimeout(() => {
+          document.documentElement.classList.remove("editor-hydrating");
+        }, 3500);
+      })();
+    </script>
+    <style is:inline>
+      html.editor-hydrating [data-advanced-editor-root] {
+        visibility: hidden;
+      }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href={webFontsHref} />
+    <script src={`${base}editor-sync.js?v=13`}></script>
   </head>
   <body>
+    <LanguageSwitcher />
     <slot />
   </body>
 </html>

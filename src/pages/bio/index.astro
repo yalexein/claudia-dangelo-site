@@ -1,7 +1,13 @@
 ---
 import BioLayout from "../../layouts/BioLayout.astro";
 import StyleEditorPanel from "../../components/StyleEditorPanel.astro";
+import SharedEditorExtraControls from "../../components/SharedEditorExtraControls.astro";
+import SharedEditorLayers from "../../components/SharedEditorLayers.astro";
+import { sharedEditorPageControls, sharedEditorPageDefaults, sharedPagesNav } from "../../lib/sharedEditorConfig";
+import "../../styles/uccelli.css";
 import "../../styles/bio.css";
+
+const base = import.meta.env.BASE_URL;
 
 const bioPresets = {
   background: "#fffdfb",
@@ -35,7 +41,10 @@ const bioContentSchema = [
     selector: '[data-content-block="bio-title"]',
     defaultText: "claudia,",
     editable: true,
-    transform: "none",
+    transform: "xy",
+    deletable: true,
+    resizable: true,
+    defaultWidth: 520,
   },
   {
     id: "bio-body",
@@ -44,27 +53,36 @@ const bioContentSchema = [
     defaultText:
       "Claudia D'Angelo e una scrittrice e artista visiva italiana che lavora tra scrittura breve, collage analogico e immagini d'archivio. La sua pratica nasce dall'osservazione di materiali minimi, fotografie trovate, lettere incomplete, margini annotati, che vengono ricomposti in testi e pagine dove il bianco, il ritmo e la voce hanno lo stesso peso delle parole.\n\nNel suo lavoro convivono memoria, precisione editoriale e una forma di intimita trattenuta. Costruisce libri d'artista, sequenze di collage e prose essenziali, cercando un equilibrio tra nitidezza visiva e sospensione narrativa, con attenzione per il dettaglio che resta, per cio che si perde e per cio che ritorna.\n\nLa sua ricerca si muove attorno a una domanda semplice: come si racconta una presenza senza esaurirla? In questa traiettoria, la biografia non e un elenco di tappe ma una forma di montaggio, un modo di avvicinare il lettore a un paesaggio interiore sobrio, silenzioso e profondamente umano.",
     editable: true,
-    transform: "none",
+    transform: "xy",
+    deletable: true,
+    resizable: true,
+    defaultWidth: 760,
   },
 ];
 ---
 
 <BioLayout title="Bio">
-  <section class="bio-page">
+  <section class="bio-page" data-advanced-editor-root data-advanced-editor-namespace="bio">
     <StyleEditorPanel
       panelTitle="Bio editor"
       storageNamespace="bio"
+      pagesNav={sharedPagesNav}
       presets={bioPresets}
+      pageControls={sharedEditorPageControls}
+      pageDefaults={sharedEditorPageDefaults}
+      pageSectionTitle="Sfondo e immagine"
       contentSchema={bioContentSchema}
       contentStorageNamespace="bio"
-    />
+    >
+      <SharedEditorExtraControls slot="extra" namespace="bio" />
+    </StyleEditorPanel>
 
     <div class="bio-frame">
       <div class="bio-canvas">
         <article class="bio-copy">
-          <h1 class="bio-title editable-text" data-content-block="bio-title">claudia<span>,</span></h1>
+          <h1 class="bio-title editable-text" data-content-block="bio-title" data-content-rich="html">claudia<span>,</span></h1>
 
-          <div class="bio-body editable-text" data-content-block="bio-body" data-content-rich="paragraphs">
+          <div class="bio-body editable-text" data-content-block="bio-body" data-content-rich="html">
             <p>
               Claudia D'Angelo e una <span class="accent">scrittrice</span> e artista visiva italiana che
               lavora tra <span class="accent">scrittura breve</span>, collage analogico e immagini d'archivio.
@@ -90,5 +108,7 @@ const bioContentSchema = [
         </article>
       </div>
     </div>
+
+    <SharedEditorLayers base={base} label="Bio" />
   </section>
 </BioLayout>

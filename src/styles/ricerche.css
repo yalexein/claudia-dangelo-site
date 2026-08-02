@@ -73,8 +73,8 @@ body {
   background:
     repeating-linear-gradient(
       to bottom,
-      color-mix(in srgb, var(--editor-bg-fill) 98%, #ffffff 2%) 0,
-      color-mix(in srgb, var(--editor-bg-fill) 98%, #ffffff 2%) calc(var(--ricerche-rules-gap) - 2px),
+      color-mix(in srgb, var(--editor-bg-color, var(--editor-bg-1)) 98%, #ffffff 2%) 0,
+      color-mix(in srgb, var(--editor-bg-color, var(--editor-bg-1)) 98%, #ffffff 2%) calc(var(--ricerche-rules-gap) - 2px),
       color-mix(
           in srgb,
           var(--editor-fg) calc(var(--ricerche-rules-tint) * 100%),

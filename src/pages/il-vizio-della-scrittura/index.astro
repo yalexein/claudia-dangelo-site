@@ -1,0 +1,209 @@
+---
+import BioLayout from "../../layouts/BioLayout.astro";
+import StyleEditorPanel from "../../components/StyleEditorPanel.astro";
+import SharedEditorExtraControls from "../../components/SharedEditorExtraControls.astro";
+import SharedEditorLayers from "../../components/SharedEditorLayers.astro";
+import { sharedEditorPageControls, sharedEditorPageDefaults, sharedPagesNav } from "../../lib/sharedEditorConfig";
+import "../../styles/bio.css";
+import "../../styles/uccelli.css";
+import "../../styles/il-vizio.css";
+
+const base = import.meta.env.BASE_URL;
+const namespace = "il-vizio-della-scrittura";
+const portraitSrc = `${base}images/il-vizio-della-scrittura/mathew-brady-theatrical-costume.jpg`;
+
+const vizioPresets = {
+  background: "#ffffff",
+  background2: "#f4f4f1",
+  background3: "#d8d8d2",
+  backgroundMode: "solid",
+  backgroundAngle: 90,
+  text: "#111111",
+  text2: "#3f3f3d",
+  text3: "#6f6f6a",
+  textMode: "solid",
+  textAngle: 90,
+  accent: "#111111",
+  font: '"Avenir Next", Avenir, Montserrat, "Helvetica Neue", Arial, sans-serif',
+  titleFont: '"Avenir Next", Avenir, Montserrat, "Helvetica Neue", Arial, sans-serif',
+  fontSize: 16,
+  lineHeight: 1.18,
+  letterSpacing: 0,
+  wordSpacing: 0,
+  copyWidth: 75,
+  align: "left",
+  x: 0,
+  y: 0,
+};
+
+const bodyHtml = `
+  <div class="il-vizio-intro">
+    <p>Nelle mie storie c’è sempre un elemento fantastico: magico, orrorifico, straordinario, perlopiù perturbante.</p>
+    <p>Nonostante non viva più in Campania da quasi dieci anni, la mia terra continua a ispirarmi, e spesso parlo di veleni, omertà, rabbia, violenza, ribellione.</p>
+    <p>In questa pagina trovi i miei scritti, dai libri pubblicati ai racconti e agli articoli apparsi su riviste cartacee e online.</p>
+  </div>
+
+  <section class="il-vizio-section il-vizio-books">
+    <h2>Libri:</h2>
+
+    <div class="il-vizio-book">
+      <div class="il-vizio-book__copy">
+        <p>2024: <strong><a href="https://moscabiancaedizioni.it/prodotto/le-forze/" target="_blank" rel="noreferrer">Le forze</a></strong>, Moscabianca.</p>
+        <p class="il-vizio-kicker">Realismo magico, horror, “gotico flegreo”</p>
+        <p><em>Quello che non è stato sotterrato e che non resta a gonfiarsi e a decomporsi viene bruciato. Brucia per poi ricadere dall’alto come neve grigia e nefasta. Bruciano le foglie, i rami secchi e le cose che non devono essere scoperte. Anche di notte, su questa superficie, regna un sole eterno.</em></p>
+        <p>Leggi le recensioni su <a href="https://squadernauti.wordpress.com/2024/11/22/le-forze/" target="_blank" rel="noreferrer">Gli squadernauti</a> | <a href="https://www.goodreads.com/it/book/show/219106887-le-forze" target="_blank" rel="noreferrer">Goodreads</a> | <a href="https://fable.co/book/le-forze-by-claudia-dangelo-0F85MtlAsO" target="_blank" rel="noreferrer">Fable</a></p>
+      </div>
+
+      <figure class="il-vizio-book__image">
+        <img src="${portraitSrc}" alt="Ritratto fotografico antico in bianco e nero" loading="lazy" decoding="async" />
+      </figure>
+    </div>
+  </section>
+
+  <section class="il-vizio-section il-vizio-publications">
+    <h2>Racconti e articoli apparsi in antologie, riviste cartacee e online</h2>
+
+    <article>
+      <p>2026: <strong>Sorry, baby: l’indicibile nel fuori campo</strong>, L’Indiependente.</p>
+      <p><em>A rappresentare e immagazzinare la violenza non è un corpo, ma una casa. Solo la sua facciata è in primo piano, con le luci degli interni a provarne la vita, e quella del cielo a scandirne il tempo. Una scena semplice eppure orrorifica, dove non vediamo nulla, tutto succede fuori dal nostro campo visivo ma esattamente davanti ai nostri occhi.</em></p>
+    </article>
+
+    <article>
+      <p>2026: <strong>Amica Sailor moon</strong>, Micorrize.</p>
+      <p><em>Sentii un brivido all’altezza dello stomaco, all’epoca ne soffrivo spesso, e oggi di tanto in tanto ancora lo sento. Quando un pensiero sconosciuto mi ricorda della mia infanzia, o quando le calze mi stringono troppo in vita e avverto il disagio in cui sono costretta. Provai l’impulso di sbottonarmi e liberare la pancia gonfia di bambina che stava già scomparendo, e invece trovai la comoda molla della tuta.</em></p>
+    </article>
+
+    <article>
+      <p>2025: <strong>Food served all day</strong>, Malgrado le mosche no. 1.</p>
+      <p class="il-vizio-kicker">Horror, distopico, rosa</p>
+      <p><em>Ogni venerdì mi riunivo con altri della fabbrica in una bettola che un tempo sarà stato pubblicizzato come "il pub più vecchio d'Irlanda", il cui proprietario adesso produceva alcool fatto in casa con le patate e i resti delle cavallette che gli portavamo. Fuori c'era ancora l'insegna al neon luminosa FOOD SERVED ALL DAY che di tanto in tanto tornava a risplendere come una stella cometa.</em></p>
+      <p>Un estratto dalla mia <a href="https://divagazioniaccurate.substack.com/p/larte-della-gioia" target="_blank" rel="noreferrer">newsletter</a> | Nella classifica di <a href="https://neutopiablog.org/2025/12/20/classifica-dei-migliori-racconti-2025/" target="_blank" rel="noreferrer">Neutopia</a>!</p>
+    </article>
+
+    <article>
+      <p>2025: <strong>Attack on Titan: sulla propaganda della memoria</strong>, L’indiscreto.</p>
+      <p><em>Come Israele, il governo di Marley, che dalla defezione degli eldiani e grazie all’aiuto dei giganti è diventato una superpotenza, utilizza il ricordo di ciò che è stato per legittimare le azioni inumane contro gli abitanti dell’isola di Paradis. Anche qui la propaganda della memoria viene strumentalizzata a favore di un disegno politico e, scopriremo, economico.</em></p>
+      <p>Ascolta l’intervista su RSI</p>
+    </article>
+
+    <article>
+      <p>2023: <strong>I vangeli del Nasturzio</strong>, <a href="https://www.pidgin.it/prodotto/cloris-vol1/" target="_blank" rel="noreferrer">Cloris. Storie per i tarocchi</a> (scritto insieme a La Vecchia Verde), Pidgin.</p>
+      <p class="il-vizio-kicker">Fantastico</p>
+      <p><em>«Si vede che sei triste», mi aveva detto, con quella bocca da zingaro. Si rivolgeva agli sguardi dolenti, afflitti, stanchi. «Fermati, dammi due minuti, e se credi che abbiano aggiunto valore alla tua vita, rivolgiti al dio denaro e fammi la grazia».</em></p>
+    </article>
+
+    <article>
+      <p>2022: <strong>Mancato ritorno</strong>, Menelique no. 8, “Sud”.</p>
+      <p><em>L’avevo già notata dall’altra parte dei binari, con la sua ciurma di ragazze dai capelli piastrati e i giubbottini neri. Mi fissava mentre le altre cinguettavano intorno, ma non riuscivo a captarne l’intenzione a quella distanza. Dopo aver dato un’occhiata a destra e a sinistra ha poi deciso di attraversare i binari con la squadra al seguito. Erano minacciose nelle loro tenute attillate.</em></p>
+    </article>
+
+    <article>
+      <p>2022: <strong>Tebaldo deve morire</strong>, Verde.</p>
+      <p><em>Christian e Mirko si odiavano per colpe irrisolte dei loro avi. Il loro odio era un’eredità sinistra e contorta che i due avevano cominciato a covare in fasce, avviluppato insieme ai sogni di ricchezza con cui erano stati nutriti. Lo vedevo nella guerra di autoveicoli e scarpe che si facevano le famiglie, nella ricerca spasmodica dei nuovi outfit da sfoggiare.</em></p>
+    </article>
+
+    <article>
+      <p>2020: <strong>Mirakuru Garuzu</strong>, Verde.</p>
+      <p><em>Anche io avevo rotto il suo bracciale, gli avevo anzi fatto fare una fine ben peggiore: una caduta da sette piani di altezza: irrecuperabile. Lei allora aveva scaraventato il mio per terra, sul pavimento, una distanza direttamente proporzionale a quello che provava per me: la lunghezza di una gamba - e la sua è pure corta.</em></p>
+    </article>
+
+    <article>
+      <p>2020: <strong>Gé-ni-ùs</strong>, In fuga dalla bocciofila.</p>
+      <p><em>Ivan mi accennò di Ugo dicendo: «è un genio». Quando poi l’ho conosciuto proprio non mi capacitavo su dove potesse risiedere questo suo “genio”, sotto quale strato di mento, o se appeso alle sopracciglia, motivo per cui le teneva sempre alzate quando il suo sguardo toccava la mia tovaglia, la mia televisione, i miei genitori, me.</em></p>
+    </article>
+
+    <article>
+      <p>2020: <strong>Carsismo</strong>, L’Inquieto.</p>
+      <p><em>Mia madre, in qualche modo, era diventata come quella casa: non aveva storia, non aveva legami o non li ricordava; era più che mai in balìa del tempo. Mi disse sottovoce una frase che non dimenticherò mai e poi mi ordinò di tornare da zia Maria. Non esitai, e i passi, dapprincipio nervosi, impacciati, diventarono fuga veloce da quella rivelazione: mi aveva detto, con dolore e spavento, che i fantasmi non esistono.</em></p>
+    </article>
+
+    <article>
+      <p>2020: <strong>La stagione dell’amore</strong>, Verde.</p>
+      <p><em>Di giorno lavoro, remota lo sono sempre stata, il pomeriggio faccio le stesse cose che fanno tutti: tante pizze, seguo i profili Instagram dei personal trainer più entusiasti e faccio del mio meglio. Ogni tanto mi affaccio alla finestra, ma questa è la stagione dell’amore, volano batuffoli di sperma di piante e mi lacrimano gli occhi.</em></p>
+    </article>
+
+    <article>
+      <p>2020: <strong>Contatto erede</strong>, Narrandom.</p>
+      <p><em>«Vai su Facebook» dice infine, «Cerca Attilio Grandi». «Suo figlio?» Fa una smorfia e muove la mano come per rifiutare un piatto sgradito. Tra i primi risultati mi compare proprio lui: quarantenne sorridente, mezzo busto in polo bianca, figlio sdentato al petto, seduto sulla sua Audi TT coupé rossa. «Che faccia da culo» scappa a Grandi. Sul profilo del figlio diversi sfoghi sul governo, qualche richiesta di intercessione divina. Mi dice di lasciare stare e torniamo sull’elenco di Attili.</em></p>
+    </article>
+
+    <article>
+      <p>2019: <strong>Gravicoma</strong>, <a href="https://www.wojtekedizioni.it/prodotto/vocabolario/" target="_blank" rel="noreferrer">Vocabolario minimo delle parole inventate</a>, Wojtek.</p>
+      <p><em>«Il mal di spazio colpisce solo gli astronauti», mi dissero un giorno. «Beh, mio padre è un astronauta». «È chiaro». «Allora può succedere anche a me», perché avevo già un senso di inappetenza ogni tanto, un po' di nausea, sensazioni vaghe che mi ricordavano i pomeriggi passati a far niente. «Solo se torni da un altro pianeta. Se torni», ma a quanto ne sapevo, nei miti è accaduto molte volte che si tornasse dal paese da cui nessuno ritorna.</em></p>
+      <p>Leggi il racconto su <a href="https://www.altrianimali.it/2019/05/28/gravicoma/" target="_blank" rel="noreferrer">Altri Animali</a></p>
+    </article>
+
+    <article>
+      <p>2018: <strong>Un invito a pranzo</strong>, selezionato per la serata “8x8 si sente la voce” dell’agenzia letteraria Oblique.</p>
+      <p><em>Non lo sa che per me ormai rispondere a un invito a pranzo è diventato un enigma, decidere di accettarlo è un atto rivoluzionario, conversare tra un boccone e un altro una guerra.</em></p>
+    </article>
+  </section>
+`;
+
+const vizioContentSchema = [
+  {
+    id: `${namespace}-title`,
+    label: "Titolo",
+    selector: `[data-content-block="${namespace}-title"]`,
+    defaultText: "Il vizio della scrittura",
+    editable: true,
+    transform: "xy",
+    deletable: true,
+    resizable: true,
+    defaultWidth: 720,
+  },
+  {
+    id: `${namespace}-body`,
+    label: "Pagina",
+    selector: `[data-content-block="${namespace}-body"]`,
+    defaultText: bodyHtml,
+    editable: true,
+    transform: "xy",
+    deletable: true,
+    resizable: true,
+    defaultWidth: 760,
+  },
+];
+---
+
+<BioLayout title="Il vizio della scrittura">
+  <section class="bio-page uccelli-page il-vizio-page" data-advanced-editor-root data-advanced-editor-namespace={namespace}>
+    <StyleEditorPanel
+      panelTitle="Il vizio editor"
+      storageNamespace={namespace}
+      pagesNav={sharedPagesNav}
+      presets={vizioPresets}
+      pageControls={sharedEditorPageControls}
+      pageDefaults={sharedEditorPageDefaults}
+      pageSectionTitle="Sfondo e immagine"
+      contentSchema={vizioContentSchema}
+      contentStorageNamespace={namespace}
+    >
+      <SharedEditorExtraControls slot="extra" namespace={namespace} />
+    </StyleEditorPanel>
+
+    <div class="bio-frame">
+      <div class="bio-canvas">
+        <article class="bio-copy il-vizio-copy">
+          <h1
+            class="bio-title il-vizio-title editable-text"
+            data-content-block={`${namespace}-title`}
+            data-content-rich="html"
+          >
+            Il vizio della scrittura
+          </h1>
+
+          <div
+            class="bio-body il-vizio-body editable-text"
+            data-content-block={`${namespace}-body`}
+            data-content-rich="html"
+            set:html={bodyHtml}
+          >
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <SharedEditorLayers base={base} label="Il vizio" />
+  </section>
+</BioLayout>

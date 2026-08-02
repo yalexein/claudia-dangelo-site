@@ -1,0 +1,42 @@
+---
+import BioLayout from "../../layouts/BioLayout.astro";
+import "../../styles/sketch.css";
+---
+
+<BioLayout title="Sketch">
+  <main class="sketch-page">
+    <article class="sketch-card" aria-label="Esempio layout sketch">
+      <header class="sketch-header">
+        <p class="sketch-hash" aria-hidden="true">#</p>
+        <h1 class="sketch-title">Crete</h1>
+      </header>
+
+      <div class="sketch-body">
+        <p>
+          The Ship of Theseus is a <mark>thought experiment</mark> about whether an object that has had all
+          of its original components replaced remains the same object.
+        </p>
+        <p>
+          According to legend, <mark>Theseus</mark>, the mythical Greek founder-king of Athens, had rescued
+          the children of Athens from King <mark>Minos</mark> after slaying the <mark>minotaur</mark> and
+          then escaped on a ship to <mark>Delos</mark>.
+        </p>
+        <p>
+          Every year, the Athenians commemorated this legend by taking the ship on a pilgrimage to Delos
+          to honor <mark>Apollo</mark>. The question was raised by ancient philosophers: After several
+          centuries of maintenance, if every part of the Ship of Theseus had been replaced, one at a
+          time, was it still the same ship?
+        </p>
+      </div>
+
+      <figure class="sketch-figure">
+        <img
+          src="/images/sketch/crete-layout.png"
+          alt="Immagine di esempio per il layout"
+          loading="eager"
+          decoding="async"
+        />
+      </figure>
+    </article>
+  </main>
+</BioLayout>

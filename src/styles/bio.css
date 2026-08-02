@@ -15,23 +15,25 @@ body {
 }
 
 .bio-page {
-  min-height: 100vh;
+  position: relative;
+  min-height: calc(100vh + var(--uccelli-bottom-space, 1200px));
   padding: 8px 0 0;
   background: var(--editor-bg-fill);
+  overflow: visible;
 }
 
 .bio-frame {
   position: relative;
-  min-height: calc(100vh - 8px);
+  min-height: calc(100vh + var(--uccelli-bottom-space, 1200px));
   margin: 0 1px;
   border: 1px solid rgba(31, 26, 23, 0.08);
   border-radius: 9px;
   background: var(--editor-bg-fill);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .bio-canvas {
-  min-height: calc(100vh - 8px);
+  min-height: calc(100vh + var(--uccelli-bottom-space, 1200px));
   padding: clamp(54px, 7vw, 82px) clamp(52px, 7vw, 86px) clamp(48px, 6vw, 64px);
 }
 

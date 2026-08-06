@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "updatedAt": "2026-08-03T15:13:08.235Z",
+  "global": {
+    "fontUrl": "",
+    "variables": {
+      "--contact-aqua": "#3d4233",
+      "--contact-ink-deep": "#24251e",
+      "--contact-coral": "#ead8b7",
+      "--contact-paper": "#f3ead8"
+    }
+  },
+  "elements": {}
+}

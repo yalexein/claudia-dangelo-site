@@ -1,0 +1,30 @@
+[
+  { "id": "buon-natale-digitale", "file": "collage_Buon Natale digitale.jpg", "naturalWidth": 334, "naturalHeight": 481, "x": 472, "y": 18, "width": 128, "rotation": -5, "z": 19 },
+  { "id": "i-am-not-a-poet", "file": "collage_I am not a poet_RGB.jpg", "naturalWidth": 339, "naturalHeight": 480, "x": 592, "y": 3, "width": 136, "rotation": 3, "z": 10 },
+  { "id": "ballerina", "file": "collage_ballerina_persocial.jpg", "naturalWidth": 342, "naturalHeight": 480, "x": 720, "y": 24, "width": 132, "rotation": -2, "z": 21 },
+  { "id": "comunicazione-altramarea", "file": "collage_comunicazione_altramarea.jpg", "naturalWidth": 540, "naturalHeight": 540, "x": 846, "y": 8, "width": 164, "rotation": 4, "z": 6 },
+  { "id": "delitto-di-mafia", "file": "collage_delitto di mafia2.jpg", "naturalWidth": 340, "naturalHeight": 481, "x": 981, "y": 17, "width": 130, "rotation": -4, "z": 14 },
+
+  { "id": "earthly-dysphoria", "file": "collage_earthly dysphoria (2025).jpg", "naturalWidth": 340, "naturalHeight": 480, "x": 484, "y": 167, "width": 135, "rotation": 4, "z": 9 },
+  { "id": "fairy-tale", "file": "collage_fairy tale.jpg", "naturalWidth": 340, "naturalHeight": 481, "x": 610, "y": 153, "width": 130, "rotation": -3, "z": 22 },
+  { "id": "hanging-out-with-my-demon", "file": "collage_hangin out with my demon.jpg", "naturalWidth": 403, "naturalHeight": 481, "x": 730, "y": 172, "width": 148, "rotation": 182, "z": 12 },
+  { "id": "high-fluids", "file": "collage_high-fluids (2025).jpg", "naturalWidth": 451, "naturalHeight": 480, "x": 858, "y": 150, "width": 156, "rotation": -5, "z": 24 },
+  { "id": "il-cammino", "file": "collage_il cammino.jpg", "naturalWidth": 344, "naturalHeight": 481, "x": 989, "y": 171, "width": 128, "rotation": 183, "z": 7 },
+
+  { "id": "origine-umanita", "file": "collage_l'origine dell'umanità.jpg", "naturalWidth": 342, "naturalHeight": 481, "x": 470, "y": 325, "width": 132, "rotation": -3, "z": 16 },
+  { "id": "la-calosca", "file": "collage_la calosca_RGB.jpg", "naturalWidth": 340, "naturalHeight": 481, "x": 598, "y": 318, "width": 136, "rotation": 5, "z": 4 },
+  { "id": "mamma-gatta", "file": "collage_mamma gatta rgb.jpg", "naturalWidth": 403, "naturalHeight": 481, "x": 724, "y": 331, "width": 148, "rotation": -4, "z": 18 },
+  { "id": "monsieur-mars", "file": "collage_monsieur mars_scontornato_piccolo.jpg", "naturalWidth": 340, "naturalHeight": 481, "x": 854, "y": 316, "width": 130, "rotation": 2, "z": 11 },
+  { "id": "nerovertigo", "file": "collage_nerovertigo_RGB.jpg", "naturalWidth": 409, "naturalHeight": 481, "x": 978, "y": 328, "width": 150, "rotation": -2, "z": 20 },
+
+  { "id": "obsession", "file": "collage_obsession (2025).jpg", "naturalWidth": 340, "naturalHeight": 481, "x": 486, "y": 487, "width": 132, "rotation": 4, "z": 5 },
+  { "id": "penetrano-per-le-fessure", "file": "collage_penetrano per le fessure come i raggi della luna.jpg", "naturalWidth": 413, "naturalHeight": 481, "x": 610, "y": 474, "width": 151, "rotation": -5, "z": 23 },
+  { "id": "rendono-le-donne-rabbiose", "file": "collage_rendono le donne rabbiose.jpg", "naturalWidth": 413, "naturalHeight": 480, "x": 740, "y": 491, "width": 148, "rotation": 3, "z": 8 },
+  { "id": "ricalibrarsi", "file": "collage_ricalibrarsi.jpg", "naturalWidth": 340, "naturalHeight": 481, "x": 868, "y": 477, "width": 130, "rotation": -3, "z": 17 },
+  { "id": "sogni-doro", "file": "collage_sogni d'oro.jpg", "naturalWidth": 340, "naturalHeight": 481, "x": 989, "y": 493, "width": 132, "rotation": 4, "z": 3 },
+
+  { "id": "speak-memory", "file": "collage_speak memory (2022).jpg", "naturalWidth": 408, "naturalHeight": 480, "x": 484, "y": 646, "width": 148, "rotation": -4, "z": 13 },
+  { "id": "un-tuffo", "file": "collage_un tuffo.jpg", "naturalWidth": 466, "naturalHeight": 480, "x": 624, "y": 641, "width": 158, "rotation": 2, "z": 2 },
+  { "id": "wake", "file": "collage_wake.jpg", "naturalWidth": 383, "naturalHeight": 481, "x": 766, "y": 650, "width": 143, "rotation": -2, "z": 15 },
+  { "id": "watching-my-thoughts", "file": "collage_watching my thoughts (2023).jpg", "naturalWidth": 341, "naturalHeight": 481, "x": 902, "y": 638, "width": 133, "rotation": 5, "z": 1 }
+]

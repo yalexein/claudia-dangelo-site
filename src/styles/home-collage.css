@@ -23,6 +23,7 @@ body {
   margin: 0;
   overflow: hidden;
   background: var(--page-background);
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -51,7 +52,25 @@ body {
 }
 
 .public-canvas {
+  opacity: 0;
+  visibility: hidden;
   touch-action: manipulation;
+}
+
+.public-canvas[data-collage-ready="true"] {
+  opacity: 1;
+  visibility: visible;
+}
+
+.public-canvas a,
+.public-image[href],
+.language-switcher a,
+.collage-fallback a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.public-image[href]:focus:not(:focus-visible) {
+  outline: none;
 }
 
 .public-image {

@@ -1,19 +1,117 @@
 ---
 import LandingLayout from "../../layouts/LandingLayout.astro";
+import "../../styles/miscellanea.css";
+
 const base = import.meta.env.BASE_URL;
+const imageUrl = `${base}uploads/uccelli/20260429-144816094-9ba31c70-Jan-Davidsz-de-Heem_Vase-of-flowers_ca-1660.jpg`;
+
+const writing = [
+  ["Dizionario d’uso De Mauro", "https://dizionario.internazionale.it/"],
+  ["Dizionario concettuale", "https://www.garzantilinguistica.it/"],
+  ["Dizionario dei sinonimi e dei contrari", "https://dizionari.corriere.it/dizionario_italiano/index.shtml"],
+  ["Dizionario enciclopedico", "https://www.treccani.it/"],
+  ["Dizionario monolingue storico-descrittivo", "https://www.tommaseobellini.it/#/"],
+  ["Dizionario storico descrittivo UTET", "https://www.gdli.it/"],
+  ["Dizionario di pronuncia italiana", "https://www.dipionline.it/"],
+  ["Stazione lessicografica", "https://www.stazionelessicografica.it/"],
+  ["Cambridge dictionary", "https://dictionary.cambridge.org/dictionary/learner-english/"],
+  ["Traduttore simultaneo", "https://www.wordreference.com/"],
+  ["OneLook thesaurus", "https://www.onelook.com/thesaurus/"],
+  ["Scrivener", "https://scrivener.software/"],
+  ["Irish writer centre", "https://irishwriterscentre.ie/", "risorsa utilissima per autorx che vivono e lavorano in Irlanda"],
+  ["Arvon, creative writing courses", "https://www.arvon.org/writing-courses/courses-retreats/?genre%5B%5D=screenwriting", "corsi di scrittura in lingua inglese, anche online!"],
+] as const;
+
+const archives = [
+  ["OpenCulture", "https://www.openculture.com/freemoviesonline", "4000+ film gratis online"],
+  ["Russian film", "https://russianfilmhub.com/", "Film in russo con sottotitoli in inglese"],
+  ["Perestroika", "https://perestroika.it/", "filmoteca dei migliori film russi e sovietici"],
+  ["Soviet movies online", "https://sovietmoviesonline.com/", "in inglese"],
+  ["Memoryscapes", "https://www.memoryscapes.it/", "una raccolta di memorie filmate italiane del secolo scorso"],
+  ["Public Domain Image Archive", "https://pdimagearchive.org/", "una collezione di oltre 10mila immagini senza copyright dai musei di tutto il mondo"],
+] as const;
 ---
 
 <LandingLayout title="Miscellanea — Claudia D'Angelo">
-  <section class="placeholder-page" data-locale-only="it">
-    <p class="placeholder-kicker">miscellanea</p>
-    <h1>Miscellanea</h1>
-    <p class="placeholder-text">Questa pagina è in preparazione.</p>
-    <p><a class="btn ghost" href={base}>Torna alla home</a></p>
-  </section>
-  <section class="placeholder-page" data-locale-only="en" hidden>
-    <p class="placeholder-kicker">miscellanea</p>
-    <h1>Miscellanea</h1>
-    <p class="placeholder-text">This page is being prepared.</p>
-    <p><a class="btn ghost" href={base}>Return home</a></p>
-  </section>
+  <script is:inline>window.ClaudiaCustomizationPage = "miscellanea";</script>
+  <script is:inline src={`${base}contact-customizer.js?v=5`}></script>
+
+  <article class="miscellanea-page" data-locale-only="it" data-contact-edit="miscellanea-page-it">
+    <a class="miscellanea-home" href={base} aria-label="Torna alla home" data-contact-edit="miscellanea-home-it">← <span data-contact-edit="miscellanea-home-label-it">torna alla home</span></a>
+
+    <header class="miscellanea-title" data-contact-edit="miscellanea-title-wrap-it">
+      <h1 data-contact-edit="miscellanea-title-it">Miscellanea</h1>
+    </header>
+
+    <div class="miscellanea-board" data-contact-edit="miscellanea-board-it">
+      <figure class="miscellanea-photo" data-contact-edit="miscellanea-photo-it">
+        <img
+          src={imageUrl}
+          alt="Vaso di fiori di Jan Davidsz. de Heem, circa 1660"
+          width="974"
+          height="1200"
+          loading="eager"
+          decoding="async"
+          data-contact-edit="miscellanea-image-it"
+        />
+      </figure>
+
+      <section class="miscellanea-note miscellanea-note--writing" data-contact-edit="miscellanea-writing-note-it">
+        <span class="miscellanea-tape" aria-hidden="true" data-contact-edit="miscellanea-tape-it"></span>
+        <h2 data-contact-edit="miscellanea-writing-title-it">Strumenti per la scrittura</h2>
+        <ul data-contact-edit="miscellanea-writing-list-it">
+          {writing.map(([name, url, note], index) => (
+            <li data-contact-edit={`miscellanea-writing-item-it-${index + 1}`}>
+              <a href={url} target="_blank" rel="noreferrer" data-contact-edit={`miscellanea-writing-link-it-${index + 1}`}>{name}</a>
+              {note && <small data-contact-edit={`miscellanea-writing-note-it-${index + 1}`}>{note}</small>}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section class="miscellanea-note miscellanea-note--archives" data-contact-edit="miscellanea-archives-note-it">
+        <span class="miscellanea-pin" aria-hidden="true" data-contact-edit="miscellanea-pin-it"></span>
+        <h2 data-contact-edit="miscellanea-archives-title-it">Open Archives</h2>
+        <ul data-contact-edit="miscellanea-archives-list-it">
+          {archives.map(([name, url, note], index) => (
+            <li data-contact-edit={`miscellanea-archives-item-it-${index + 1}`}>
+              <a href={url} target="_blank" rel="noreferrer" data-contact-edit={`miscellanea-archives-link-it-${index + 1}`}>{name}</a>
+              {note && <small data-contact-edit={`miscellanea-archives-note-it-${index + 1}`}>{note}</small>}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <p class="miscellanea-status" data-contact-edit="miscellanea-status-it">in aggiornamento</p>
+    </div>
+  </article>
+
+  <article class="miscellanea-page" data-locale-only="en" data-contact-edit="miscellanea-page-en" hidden>
+    <a class="miscellanea-home" href={base} aria-label="Return home" data-contact-edit="miscellanea-home-en">← <span data-contact-edit="miscellanea-home-label-en">return home</span></a>
+    <header class="miscellanea-title" data-contact-edit="miscellanea-title-wrap-en"><h1 data-contact-edit="miscellanea-title-en">Miscellanea</h1></header>
+    <div class="miscellanea-board" data-contact-edit="miscellanea-board-en">
+      <figure class="miscellanea-photo" data-contact-edit="miscellanea-photo-en">
+        <img src={imageUrl} alt="Vase of flowers by Jan Davidsz. de Heem, circa 1660" width="974" height="1200" data-contact-edit="miscellanea-image-en" />
+      </figure>
+      <section class="miscellanea-note miscellanea-note--writing" data-contact-edit="miscellanea-writing-note-en">
+        <span class="miscellanea-tape" aria-hidden="true" data-contact-edit="miscellanea-tape-en"></span>
+        <h2 data-contact-edit="miscellanea-writing-title-en">Writing tools</h2>
+        <ul data-contact-edit="miscellanea-writing-list-en">
+          {writing.map(([name, url, note], index) => (
+            <li data-contact-edit={`miscellanea-writing-item-en-${index + 1}`}><a href={url} target="_blank" rel="noreferrer" data-contact-edit={`miscellanea-writing-link-en-${index + 1}`}>{name}</a>{note && <small data-contact-edit={`miscellanea-writing-note-en-${index + 1}`}>{note}</small>}</li>
+          ))}
+        </ul>
+      </section>
+      <section class="miscellanea-note miscellanea-note--archives" data-contact-edit="miscellanea-archives-note-en">
+        <span class="miscellanea-pin" aria-hidden="true" data-contact-edit="miscellanea-pin-en"></span>
+        <h2 data-contact-edit="miscellanea-archives-title-en">Open Archives</h2>
+        <ul data-contact-edit="miscellanea-archives-list-en">
+          {archives.map(([name, url, note], index) => (
+            <li data-contact-edit={`miscellanea-archives-item-en-${index + 1}`}><a href={url} target="_blank" rel="noreferrer" data-contact-edit={`miscellanea-archives-link-en-${index + 1}`}>{name}</a>{note && <small data-contact-edit={`miscellanea-archives-note-en-${index + 1}`}>{note}</small>}</li>
+          ))}
+        </ul>
+      </section>
+      <p class="miscellanea-status" data-contact-edit="miscellanea-status-en">being updated</p>
+    </div>
+  </article>
 </LandingLayout>

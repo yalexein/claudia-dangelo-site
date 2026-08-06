@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="it" data-visit-theme="day">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="Mockup collage di collage interattivo per la pagina Collage." />
+    <meta name="theme-color" content="#f7f5ef" />
+    <title>Collage — collage di collage</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script>
+      (() => {
+        const applyVisitTheme = () => {
+          const requestedTheme = new URLSearchParams(window.location.search).get("theme");
+          const theme = requestedTheme === "day" || requestedTheme === "night"
+            ? requestedTheme
+            : (new Date().getHours() >= 20 || new Date().getHours() < 7 ? "night" : "day");
+          document.documentElement.dataset.visitTheme = theme;
+          document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "night" ? "#000000" : "#f7f5ef");
+        };
+        applyVisitTheme();
+        window.setInterval(applyVisitTheme, 60_000);
+      })();
+    </script>
+    <link rel="stylesheet" href="./style.css?v=9" />
+  </head>
+  <body class="composition-page">
+    <nav class="composition-nav" aria-label="Navigazione mockup">
+      <a href="./">← proposta</a>
+      <span>collage di collage</span>
+      <a href="/">home ↗</a>
+    </nav>
+
+    <main class="composition" aria-label="Collage di collage di Claudia D'Angelo">
+      <div class="composition-word" aria-label="Collage">
+        <span class="composition-letter composition-letter--c" style="--dx:7%;--dy:50%;--mx:50%;--my:7%;--lz:66">C</span>
+        <span class="composition-letter composition-letter--o is-outline is-emphasis" style="--dx:22%;--dy:48%;--mx:50%;--my:21%;--lz:66">O</span>
+        <span class="composition-letter composition-letter--l1 is-emphasis" style="--dx:35%;--dy:52%;--mx:50%;--my:35%;--lz:66">L</span>
+        <span class="composition-letter composition-letter--l2 is-outline is-emphasis" style="--dx:49%;--dy:47%;--mx:50%;--my:49%;--lz:66">L</span>
+        <span class="composition-letter composition-letter--a" style="--dx:63%;--dy:51%;--mx:50%;--my:63%;--lz:25">A</span>
+        <span class="composition-letter composition-letter--g is-outline is-emphasis" style="--dx:78%;--dy:48%;--mx:50%;--my:77%;--lz:66">G</span>
+        <span class="composition-letter composition-letter--e is-emphasis" style="--dx:92%;--dy:52%;--mx:50%;--my:91%;--lz:66">E</span>
+      </div>
+
+      <div class="composition-images" data-composition-images></div>
+
+      <p class="composition-note composition-note--top">24 opere · ritagli · sovrapposizioni</p>
+      <p class="composition-note composition-note--bottom">clicca un collage per aprire l’originale</p>
+      <p class="composition-signature">CLAUDIA D’ANGELO<br />2022—2026</p>
+    </main>
+
+    <div class="composition-lightbox" data-lightbox hidden aria-hidden="true" role="dialog" aria-modal="true" aria-label="Opera ingrandita">
+      <button type="button" data-lightbox-close aria-label="Chiudi">×</button>
+      <img data-lightbox-image alt="" />
+    </div>
+
+    <script src="./mockup.js?v=9"></script>
+  </body>
+</html>

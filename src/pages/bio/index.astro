@@ -1,114 +1,92 @@
 ---
+import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import BioLayout from "../../layouts/BioLayout.astro";
-import StyleEditorPanel from "../../components/StyleEditorPanel.astro";
-import SharedEditorExtraControls from "../../components/SharedEditorExtraControls.astro";
-import SharedEditorLayers from "../../components/SharedEditorLayers.astro";
-import { sharedEditorPageControls, sharedEditorPageDefaults, sharedPagesNav } from "../../lib/sharedEditorConfig";
-import "../../styles/uccelli.css";
 import "../../styles/bio.css";
 
 const base = import.meta.env.BASE_URL;
-
-const bioPresets = {
-  background: "#fffdfb",
-  background2: "#f7f2eb",
-  background3: "#ffe1e6",
-  backgroundMode: "solid",
-  backgroundAngle: 90,
-  text: "#1f1a17",
-  text2: "#65453d",
-  text3: "#ef4b5b",
-  textMode: "solid",
-  textAngle: 90,
-  accent: "#ef4b5b",
-  font:
-    '"Baskerville", "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Garamond, Georgia, serif',
-  titleFont: '"Didot", "Bodoni 72", "Bodoni MT", "Times New Roman", serif',
-  fontSize: 23,
-  lineHeight: 1.47,
-  letterSpacing: -0.012,
-  wordSpacing: 0,
-  copyWidth: 72,
-  align: "left",
-  x: 6,
-  y: 6,
-};
-
-const bioContentSchema = [
-  {
-    id: "bio-title",
-    label: "Titolo",
-    selector: '[data-content-block="bio-title"]',
-    defaultText: "claudia,",
-    editable: true,
-    transform: "xy",
-    deletable: true,
-    resizable: true,
-    defaultWidth: 520,
-  },
-  {
-    id: "bio-body",
-    label: "Corpo",
-    selector: '[data-content-block="bio-body"]',
-    defaultText:
-      "Claudia D'Angelo e una scrittrice e artista visiva italiana che lavora tra scrittura breve, collage analogico e immagini d'archivio. La sua pratica nasce dall'osservazione di materiali minimi, fotografie trovate, lettere incomplete, margini annotati, che vengono ricomposti in testi e pagine dove il bianco, il ritmo e la voce hanno lo stesso peso delle parole.\n\nNel suo lavoro convivono memoria, precisione editoriale e una forma di intimita trattenuta. Costruisce libri d'artista, sequenze di collage e prose essenziali, cercando un equilibrio tra nitidezza visiva e sospensione narrativa, con attenzione per il dettaglio che resta, per cio che si perde e per cio che ritorna.\n\nLa sua ricerca si muove attorno a una domanda semplice: come si racconta una presenza senza esaurirla? In questa traiettoria, la biografia non e un elenco di tappe ma una forma di montaggio, un modo di avvicinare il lettore a un paesaggio interiore sobrio, silenzioso e profondamente umano.",
-    editable: true,
-    transform: "xy",
-    deletable: true,
-    resizable: true,
-    defaultWidth: 760,
-  },
-];
+const sourceImage = process.env.CLAUDIA_BIO_IMAGE || "/Users/yalexein/Downloads/casa 3.jpg";
+let imageBuffer: Buffer;
+try {
+  imageBuffer = execFileSync(
+    "ffmpeg",
+    ["-loglevel", "error", "-i", sourceImage, "-vf", "scale=1600:-2", "-q:v", "7", "-f", "image2pipe", "-vcodec", "mjpeg", "-"],
+    { maxBuffer: 18 * 1024 * 1024 },
+  );
+} catch {
+  imageBuffer = readFileSync(sourceImage);
+}
+const bioImage = `data:image/jpeg;base64,${imageBuffer.toString("base64")}`;
 ---
 
-<BioLayout title="Bio">
-  <section class="bio-page" data-advanced-editor-root data-advanced-editor-namespace="bio">
-    <StyleEditorPanel
-      panelTitle="Bio editor"
-      storageNamespace="bio"
-      pagesNav={sharedPagesNav}
-      presets={bioPresets}
-      pageControls={sharedEditorPageControls}
-      pageDefaults={sharedEditorPageDefaults}
-      pageSectionTitle="Sfondo e immagine"
-      contentSchema={bioContentSchema}
-      contentStorageNamespace="bio"
-    >
-      <SharedEditorExtraControls slot="extra" namespace="bio" />
-    </StyleEditorPanel>
+<BioLayout title="Bio — Claudia D'Angelo">
+  <main class="contact-public bio-public-page" data-contact-edit="bio-page">
+    <aside class="bio-image-column" data-contact-edit="bio-image-column">
+      <figure class="bio-image-frame" data-contact-edit="bio-image-frame">
+        <img
+          data-contact-edit="bio-image"
+          src={bioImage}
+          alt="Casa triangolare rossa in un paesaggio rurale"
+          data-locale-alt-it="Casa triangolare rossa in un paesaggio rurale"
+          data-locale-alt-en="Red A-frame house in a rural landscape"
+        />
+      </figure>
 
-    <div class="bio-frame">
-      <div class="bio-canvas">
-        <article class="bio-copy">
-          <h1 class="bio-title editable-text" data-content-block="bio-title" data-content-rich="html">claudia<span>,</span></h1>
+      <a
+        class="bio-home-link"
+        data-contact-edit="bio-home-link"
+        href={base}
+        aria-label="Torna alla pagina iniziale"
+        data-locale-aria-label-it="Torna alla pagina iniziale"
+        data-locale-aria-label-en="Back to the home page"
+      >
+        <span data-contact-edit="bio-home-arrow" aria-hidden="true">←</span>
+        <span data-locale-only="it" data-contact-edit="bio-home-label-it">torna alla home</span>
+        <span data-locale-only="en" data-contact-edit="bio-home-label-en" hidden>back to home</span>
+      </a>
+    </aside>
 
-          <div class="bio-body editable-text" data-content-block="bio-body" data-content-rich="html">
-            <p>
-              Claudia D'Angelo e una <span class="accent">scrittrice</span> e artista visiva italiana che
-              lavora tra <span class="accent">scrittura breve</span>, collage analogico e immagini d'archivio.
-              La sua pratica nasce dall'osservazione di materiali minimi, fotografie trovate,
-              <span class="accent">lettere incomplete</span>, margini annotati, che vengono ricomposti in testi e
-              pagine dove il bianco, il ritmo e la voce hanno lo stesso peso delle parole.
-            </p>
+    <article class="bio-copy" data-contact-edit="bio-copy">
+      <h1 class="bio-title" data-contact-edit="bio-title">bio</h1>
+      <div class="bio-title-rule" data-contact-edit="bio-title-rule" aria-hidden="true"></div>
 
-            <p>
-              Nel suo lavoro convivono <span class="accent">memoria</span>, precisione editoriale e una forma di
-              intimita trattenuta. Costruisce libri d'artista, sequenze di collage e prose essenziali,
-              cercando un equilibrio tra nitidezza visiva e sospensione narrativa, con attenzione per il
-              dettaglio che resta, per cio che si perde e per cio che ritorna.
-            </p>
+      <div class="bio-body" data-contact-edit="bio-body">
+        <section class="bio-language" lang="it" data-locale-only="it" aria-label="Biografia in italiano">
+          <p data-contact-edit="bio-it-paragraph-1">Sono nata a Napoli nel 1991. Annata bestiale e fortunata (sembriamo molto giovani), anno della capra nel calendario lunare, sotto il segno del cancro, ascendente ariete: profondamente nostalgica. Per poco non nascevo lo stesso giorno di Majakovskij - la buonanima. La Russia e x russx e in generale l’Europa dell’Est mi hanno affascinata fin dall’infanzia, complice i racconti di mia nonna, che si era abbuffata di sceneggiati tratti dai classici russi, colpa di Anastasia della Disney, colpa della mia professoressa di inglese che invece amava la letteratura russa, e io così all’università ho studiato russo, per un po’. Volevo fare la slavista, ma da giovane peccavo di incostanza ed ero soprattutto impaurita dalle mie stesse ossessioni: le vedevo come delle manie da tenere a bada. La mia tesi triennale fu ovviamente su Raskol’nikov e i folli in Cristo. Ho tentato la via del Cinema, altra mia passione, ho frequentato una scuola del documentario - non faceva per me. Non il cinema, la scuola. Ho ripreso a studiare all’università, stavolta Linguistica, la materia in cui ero andata malissimo alla triennale (avevo preso forse 19), e mi sono laureata con una tesi in Scienze Cognitive sugli audiolibri. Questa virata scientifica, come mai? Sono tremendamente curiosa, e la scienza spesso mi salva dai deliri letterari. Due anni dopo il Covid, giusto per dare due coordinate buone per tuttx, mi trasferisco a Dublino insieme al mio compagno perché trovo lavoro in una compagnia di consulenza informatica: in pratica di giorno istruivo le macchine a parlare e di notte le incantavo e le confondevo con degli incantesimi e degli scioglilingua. Dopo quasi cinque anni passati così mi licenzio: il mondo corporate non fa per me. Mi dedico completamente alle mie passioni: vediamo quanto mi durano i soldi che ho pazientemente messo da parte in questi anni. Per ora vivo ancora a Dublino, insieme al mio compagno e a due amici che ormai sono come fratelli, ogni tanto ci divertiamo molto.</p>
 
-            <p>
-              La sua ricerca si muove attorno a una domanda semplice: come si racconta una presenza senza
-              esaurirla? In questa traiettoria, la <span class="accent">biografia</span> non e un elenco di tappe
-              ma una forma di montaggio, un modo di avvicinare il lettore a un paesaggio interiore sobrio,
-              silenzioso e profondamente umano.
-            </p>
-          </div>
-        </article>
+          <p data-contact-edit="bio-it-paragraph-2">Scrivo da sempre, da che ne abbia memoria, da quando cioè ho imparato a leggere (precocemente). A dieci anni ho scritto il mio primo libro completo, su una serie di fogli spillati e poi ricopiato al PC, aveva come protagonista una bambina orfana dai poteri magici che veniva adottata da una famiglia strana. A quindici anni spedii la mia prima bozza di libro fantasy, primo di tre libri: il viaggio di una vampira, un commerciante e una ragazza del mondo “reale” intrapreso per salvare l’immaginazione dei bambini - rifiutato. Ma un giorno riprenderò quella storia. Comincio a rifarmi coraggio e a farmi leggere anche da altrx dal 2018, quando invio per gioco un racconto a 8x8, il concorso letterario, e vengo selezionata per una semifinale. Da lì pubblico su riviste letterarie, frequento la scuola di scrittura Bottega Finzioni a Bologna, faccio parte di Verde rivista (la buonanima, anch’essa). Nel 2019 pubblico un racconto nel “Vocabolario minimo delle parole inventate”, edito da Wojtek edizioni. Nel 2022 scrivo un racconto a otto mani con parte della redazione di Verde per l’antologia “Cloris. Storie per i tarocchi vol.1”, edito da Pidgin. Nel 2024 esordisco con il mio primo romanzo, “Le forze”, edito da Moscabianca. Scrivo ancora e sempre racconti e da poco anche articoli, in cui parlo soprattutto di cinema. Sto attualmente scrivendo un secondo romanzo, che forse vedrà la luce, forse no, io spero di sì.</p>
+
+          <p data-contact-edit="bio-it-paragraph-3">Nella sezione “Ricerche” ci sono un po’ di spoiler sul mio prossimo lavoro. In altre sezioni del sito, invece, ci sono i miei racconti, i miei articoli, il mio libro.</p>
+
+          <p data-contact-edit="bio-it-paragraph-4">Tra le mille cose che avrei voluto fare nella vita c’era sicuramente l’accademia d’arte. Mi piace suonare e disegnare, e anche qui sopra ho riservato un posticino ad alcuni miei schizzi. Da ormai non ricordo più quando, forse il 2016, ho preso a fare collage su carta. Dopo aver ricordato questa pratica della nostra infanzia, la mia migliore amica mi regalò un quaderno con alcuni dei suoi vecchi collage per stimolarmi a farne di nuovi. È una delle attività più belle e rilassanti che ci siano, in generale, e la consiglio a chiunque. Lo è soprattutto per me. La costanza che ho messo nel collage mi ha portato a realizzare nel tempo copertine di album e riviste (come il n.55 di Zapruder, il n.8 di EX Novo, la rivista di archeologia) e di libri (come la collana “Trema” di Arcoiris). Ho anche avuto la mia prima personale nel 2025, da TabulaRasa, l’associazione culturale di Bagnoli, a Napoli. Tengo anche workshop di collage, per adulti e bambini: nella sezione “Eventi” ci sono le prossime date. La mia pratica del collage è nata senza alcuna intenzione performativa. Non mi dispiace guadagnarci, ovviamente, ma è anche il mio posto sicuro, dove creo, mi rilasso, sperimento, senza pensare a un secondo fine.</p>
+
+          <p data-contact-edit="bio-it-paragraph-5">Mi piacciono moltissimo i volatili, cantare, ballare, cucinare piatti colorati. Nel mio spazio non ci troverete foto di cibi perché le trovo maleducate, ma di sicuro ci troverete uccelli, libri, animali vari e posti dell’internet che mi piacciono.</p>
+
+          <p data-contact-edit="bio-it-paragraph-6">Mi impegno a mantenere la testa lucida e il pensiero attivo.</p>
+
+          <p data-contact-edit="bio-it-paragraph-7">La lettura, sopra ogni altra cosa, è il momento in cui torno a casa.</p>
+
+          <p data-contact-edit="bio-it-paragraph-8">Vi do il benvenuto.</p>
+        </section>
+
+        <section class="bio-language" lang="en" data-locale-only="en" aria-label="Biography in English" hidden>
+          <p data-contact-edit="bio-en-paragraph-1">I was born in Naples in 1991. A wild and lucky vintage (we look very young), the Year of the Goat in the lunar calendar, Cancer with Aries rising: deeply nostalgic. I very nearly shared a birthday with Mayakovsky — bless his soul. Russia, Russian people, and Eastern Europe more broadly have fascinated me since childhood: partly because of my grandmother’s stories — she had binged television adaptations of the Russian classics — partly because of Disney’s <em>Anastasia</em>, and partly because my English teacher loved Russian literature. So at university I studied Russian, for a while. I wanted to become a Slavist, but when I was young I lacked consistency and, above all, I was frightened by my own obsessions: I treated them like compulsions that had to be kept under control. My undergraduate dissertation was, of course, on Raskolnikov and the Holy Fools. I tried the cinema route, another passion of mine, and attended a documentary school — it was not for me. Not cinema: the school. I went back to university, this time to study Linguistics, the subject in which I had done terribly as an undergraduate (I think I got a 19 out of 30), and graduated with a thesis in Cognitive Science on audiobooks. Why the scientific turn? I am enormously curious, and science often rescues me from literary delirium. Two years after Covid, just to give everyone a couple of useful coordinates, I moved to Dublin with my partner after finding a job at an IT consulting company: by day I trained machines to speak; by night I enchanted and confused them with spells and tongue twisters. After almost five years of this, I quit: corporate life is not for me. I now devote myself entirely to my passions. We will see how long the money I patiently saved over those years lasts. For the moment I still live in Dublin with my partner and two friends who have become like brothers. Every now and then we have a lot of fun.</p>
+
+          <p data-contact-edit="bio-en-paragraph-2">I have always written, for as long as I can remember — that is, ever since I learned to read (early). At ten I wrote my first complete book, on a stack of stapled sheets and then retyped on a computer. Its protagonist was an orphaned girl with magical powers who was adopted by a strange family. At fifteen I sent out my first fantasy manuscript, the first of a planned trilogy: a vampire, a merchant, and a girl from the “real” world set off on a journey to save children’s imagination. It was rejected. But one day I will return to that story. I began finding the courage to let other people read me again in 2018, when, for fun, I submitted a short story to 8x8, the literary competition, and was selected for a semifinal. From there I began publishing in literary magazines, attended the Bottega Finzioni writing school in Bologna, and joined <em>Verde</em> magazine (the dearly departed, too). In 2019 one of my stories appeared in <em>Vocabolario minimo delle parole inventate</em>, published by Wojtek Edizioni. In 2022, together with three members of the <em>Verde</em> editorial team, I co-wrote a story for the anthology <em>Cloris. Storie per i tarocchi vol. 1</em>, published by Pidgin. In 2024 I made my debut with my first novel, <em>Le forze</em>, published by Moscabianca. I still write short stories, always, and recently articles too, mostly about cinema. I am currently writing a second novel. It may see the light of day, or it may not; I hope it does.</p>
+
+          <p data-contact-edit="bio-en-paragraph-3">The “Research” section contains a few spoilers for what I am working on next. Elsewhere on the site you will find my short stories, my articles, and my book.</p>
+
+          <p data-contact-edit="bio-en-paragraph-4">Among the thousand things I would have liked to do in life was, without question, attend art school. I like playing music and drawing, and I have made room on this site for some of my sketches too. At some point — perhaps in 2016; I no longer remember exactly — I began making paper collages. After we remembered this childhood practice of ours, my best friend gave me a notebook containing some of her old collages to encourage me to make new ones. It is one of the most beautiful and relaxing activities there is, generally speaking, and I recommend it to anyone. It is especially so for me. The consistency I brought to collage has, over time, led me to create covers for albums and magazines (including issue 55 of <em>Zapruder</em> and issue 8 of <em>EX Novo</em>, the archaeology journal), and for books (including Arcoiris’s <em>Trema</em> series). In 2025 I also had my first solo exhibition at TabulaRasa, the cultural association in Bagnoli, Naples. I also run collage workshops for adults and children; upcoming dates are listed in the “Events” section. My collage practice began without any performative intention. I do not mind earning money from it, of course, but it is also my safe place: somewhere I can create, relax, and experiment without thinking about an ulterior purpose.</p>
+
+          <p data-contact-edit="bio-en-paragraph-5">I love birds, singing, dancing, and cooking colourful food. You will not find photographs of food in my space because I consider them bad manners, but you will certainly find birds, books, assorted animals, and corners of the internet I like.</p>
+
+          <p data-contact-edit="bio-en-paragraph-6">I work to keep my head clear and my thinking active.</p>
+
+          <p data-contact-edit="bio-en-paragraph-7">Reading, above all else, is the moment when I come home.</p>
+
+          <p data-contact-edit="bio-en-paragraph-8">Welcome.</p>
+        </section>
       </div>
-    </div>
-
-    <SharedEditorLayers base={base} label="Bio" />
-  </section>
+    </article>
+  </main>
 </BioLayout>

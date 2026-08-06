@@ -11,7 +11,7 @@
     "blendMode": "normal",
     "hoverEffect": "glow",
     "clickEffect": "pulse",
-    "linkUrl": "/collages/",
+    "linkUrl": "/collage/",
     "trim": {
       "naturalWidth": 633,
       "naturalHeight": 758,
@@ -221,7 +221,7 @@
     "blendMode": "normal",
     "hoverEffect": "glow",
     "clickEffect": "pulse",
-    "linkUrl": "/scritture/",
+    "linkUrl": "/scritture-esplorazioni/g1-revisione.html",
     "trim": {
       "naturalWidth": 648,
       "naturalHeight": 861,

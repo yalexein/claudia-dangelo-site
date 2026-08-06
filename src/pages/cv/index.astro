@@ -1,19 +1,191 @@
 ---
-import LandingLayout from "../../layouts/LandingLayout.astro";
+import BioLayout from "../../layouts/BioLayout.astro";
+import "../../styles/bio.css";
+import "../../styles/cv.css";
+
 const base = import.meta.env.BASE_URL;
+const photoSrc = `${base}images/cv/me-presentazione-roma.svg`;
 ---
 
-<LandingLayout title="Curriculum — Claudia D'Angelo">
-  <section class="placeholder-page" data-locale-only="it">
-    <p class="placeholder-kicker">curriculum</p>
-    <h1>Curriculum</h1>
-    <p class="placeholder-text">Questa pagina è in preparazione.</p>
-    <p><a class="btn ghost" href={base}>Torna alla home</a></p>
+<BioLayout
+  title="Curriculum — Claudia D'Angelo"
+  descriptionIt="Curriculum letterario e artistico di Claudia D'Angelo."
+  descriptionEn="Writing and visual-art résumé of Claudia D'Angelo."
+  customizationPage="cv"
+>
+  <section class="cv-page" data-contact-edit="cv-page">
+    <div class="cv-layout" data-contact-edit="cv-layout">
+      <aside class="cv-sidebar" data-contact-edit="cv-sidebar">
+        <div class="cv-photo" aria-label="Foto profilo" data-contact-edit="cv-photo">
+          <img src={photoSrc} alt="Claudia D'Angelo" loading="eager" decoding="sync" data-contact-edit="cv-photo-image" />
+        </div>
+
+        <nav class="cv-contacts" aria-label="Contatti" data-contact-edit="cv-contacts">
+          <a class="cv-contact-item" href="mailto:clahoudini_art@proton.me" target="_blank" rel="noreferrer" title="Email" data-contact-edit="cv-contact-email" data-social-icon>
+            <span class="cv-contact-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            </span>
+          </a>
+
+          <a class="cv-contact-item" href="https://substack.com/@claudiadangelo" target="_blank" rel="noreferrer" title="Substack" data-contact-edit="cv-contact-substack" data-social-icon>
+            <span class="cv-contact-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>
+            </span>
+          </a>
+
+          <a class="cv-contact-item" href="https://www.linkedin.com/in/claudia-d-angelo-a98377100/" target="_blank" rel="noreferrer" title="LinkedIn" data-contact-edit="cv-contact-linkedin" data-social-icon>
+            <span class="cv-contact-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+            </span>
+          </a>
+
+          <a class="cv-contact-item" href="https://www.instagram.com/clahoudini_/" target="_blank" rel="noreferrer" title="Instagram (scrittura)" data-contact-edit="cv-contact-instagram-writing" data-social-icon>
+            <span class="cv-contact-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+            </span>
+          </a>
+
+          <a class="cv-contact-item cv-contact-item--accent" href="https://www.instagram.com/clahoudini_art/" target="_blank" rel="noreferrer" title="Instagram (collage)" data-contact-edit="cv-contact-instagram-art" data-social-icon>
+            <span class="cv-contact-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+            </span>
+          </a>
+        </nav>
+      </aside>
+
+      <main class="cv-main" data-contact-edit="cv-main">
+        <h1 class="cv-title" data-contact-edit="cv-title">Claudia D'Angelo</h1>
+
+        <div class="cv-tabs" role="tablist" aria-label="Seleziona la sezione del curriculum" data-contact-edit="cv-tabs">
+          <button class="cv-tab" type="button" role="tab" aria-selected="false" aria-controls="cv-home-panel" data-cv-tab="home" data-contact-edit="cv-tab-home">Home</button>
+          <button class="cv-tab cv-tab--active" type="button" role="tab" aria-selected="true" aria-controls="cv-autrice-panel" data-cv-tab="autrice" data-contact-edit="cv-tab-writing">Writing</button>
+          <button class="cv-tab" type="button" role="tab" aria-selected="false" aria-controls="cv-collagista-panel" data-cv-tab="collagista" data-contact-edit="cv-tab-visual-art">Visual art</button>
+          <span class="cv-tabs-spacer"></span>
+          <a class="cv-tab cv-tab--site-link" href={base} title="Vai al sito" data-contact-edit="cv-home-link">↗</a>
+        </div>
+
+        <div id="cv-home-panel" class="bio-body cv-body" role="tabpanel" data-contact-edit="cv-home-panel" hidden>
+          <p data-contact-edit="cv-home-introduction">Italian writer, linguist, and visual artist based in Dublin. I write fiction and essays, with a particular focus on cinema and anime. My debut novel was published in 2024, and my short stories and articles have appeared in Italian magazines, both online and in print.</p>
+        </div>
+
+        <div id="cv-autrice-panel" class="bio-body cv-body cv-body--active" role="tabpanel" data-contact-edit="cv-writing-panel">
+          <div class="cv-section-title" data-contact-edit="cv-writing-section-novel">Novel</div>
+          <div class="cv-timeline" data-contact-edit="cv-writing-timeline-novel">
+            <div class="cv-year-group"><div class="cv-year">2024</div><div class="cv-entry"><strong><a href="https://moscabiancaedizioni.it/prodotto/le-forze/" target="_blank" rel="noreferrer">Le forze</a></strong>, debut novel, Moscabianca.</div></div>
+          </div>
+
+          <div class="cv-section-title" data-contact-edit="cv-writing-section-print-fiction">Short Fiction in anthologies and print magazines</div>
+          <div class="cv-timeline" data-contact-edit="cv-writing-timeline-print-fiction">
+            <div class="cv-year-group"><div class="cv-year">2025</div><div class="cv-entry"><strong><a href="https://www.malgradolemosche.com/numeri-wip" target="_blank" rel="noreferrer">Food served all day</a></strong>, in <em>Malgrado le mosche</em>, no.1.</div></div>
+            <div class="cv-year-group"><div class="cv-year">2023</div><div class="cv-entry"><strong><a href="https://www.pidgin.it/prodotto/cloris-vol1/" target="_blank" rel="noreferrer">I vangeli del Nasturzio</a></strong>, in <em>Cloris. Storie per i tarocchi</em>, co-authored with three other writers under the collective name La Vecchia Verde (Pidgin).</div></div>
+            <div class="cv-year-group"><div class="cv-year">2022</div><div class="cv-entry"><strong><a href="https://www.menelique.com/net/8/" target="_blank" rel="noreferrer">Mancato ritorno</a></strong>, in <em>Menelique</em>, no.8.</div></div>
+            <div class="cv-year-group"><div class="cv-year">2019</div><div class="cv-entry"><strong><a href="https://www.wojtekedizioni.it/prodotto/vocabolario/" target="_blank" rel="noreferrer">Gravicorna</a></strong>, in <em>Vocabolario minimo delle parole inventate</em> (Wojtek).</div></div>
+          </div>
+
+          <div class="cv-section-title" data-contact-edit="cv-writing-section-online-fiction">Short Fiction in online magazines</div>
+          <div class="cv-timeline" data-contact-edit="cv-writing-timeline-online-fiction">
+            <div class="cv-year-group"><div class="cv-year">2026</div><div class="cv-entry"><strong><a href="https://www.malgradolemosche.com/2026/06/amor-cortese/" target="_blank" rel="noreferrer">Amor cortese</a></strong>, in <em>Malgrado le mosche</em>.</div><div class="cv-entry"><strong><a href="https://www.micorrizelitlab.it/2026/01/20/amica-sailor-moon" target="_blank" rel="noreferrer">Amica Sailor Moon</a></strong>, in <em>Micorrize</em>.</div></div>
+            <div class="cv-year-group"><div class="cv-year">2022</div><div class="cv-entry"><strong><a href="https://verderivista.wordpress.com/2022/01/10/natale-2021-11/" target="_blank" rel="noreferrer">Tebaldo deve morire</a></strong>, in <em>Verde</em>.</div></div>
+            <div class="cv-year-group">
+              <div class="cv-year">2020</div>
+              <div class="cv-entry"><strong><a href="https://verderivista.wordpress.com/2020/09/07/cover-1/" target="_blank" rel="noreferrer">Mirakuru Garuzu</a></strong>, in <em>Verde</em>.</div>
+              <div class="cv-entry"><strong><a href="https://www.infugadallabocciofila.it/lamica-geniale-ge-ni-us/" target="_blank" rel="noreferrer">Gé-ni-ùs</a></strong>, in <em>In fuga dalla bocciofila</em>.</div>
+              <div class="cv-entry"><strong><a href="https://www.linquieto.it/carsismo/" target="_blank" rel="noreferrer">Carsismo</a></strong>, in <em>L’Inquieto</em>.</div>
+              <div class="cv-entry"><strong><a href="https://verderivista.wordpress.com/2020/05/01/unapocalisse-italiana-6/" target="_blank" rel="noreferrer">La stagione dell’amore</a></strong>, in <em>Verde</em>.</div>
+              <div class="cv-entry"><strong><a href="https://narrandom.it/2020/01/15/contatto-erede/" target="_blank" rel="noreferrer">Contatto erede</a></strong>, in <em>Narrandom</em>.</div>
+            </div>
+            <div class="cv-year-group"><div class="cv-year">2018</div><div class="cv-entry"><strong><a href="http://www.oblique.it/images/eventi/8x8/8x8_serate/2018/serate/8x8_quinta-serata_25apr18.pdf" target="_blank" rel="noreferrer">Un invito a pranzo</a></strong>, selected for the “8x8” competition organised by the literary agency Oblique.</div></div>
+          </div>
+
+          <div class="cv-section-title" data-contact-edit="cv-writing-section-articles">Articles and essays</div>
+          <div class="cv-timeline" data-contact-edit="cv-writing-timeline-articles">
+            <div class="cv-year-group"><div class="cv-year">2026</div><div class="cv-entry">“<strong><a href="https://www.lindiependente.it/sorry-baby-eva-victor" target="_blank" rel="noreferrer">Sorry, baby: l’indicibile nel fuoricampo</a></strong>”, published in <em>L’Indiependente</em>.</div></div>
+            <div class="cv-year-group"><div class="cv-year">2025</div><div class="cv-entry">“<strong><a href="https://www.indiscreto.org/attack-on-titan-sulla-propaganda-della-memoria/" target="_blank" rel="noreferrer">Attack on Titan: sulla propaganda della memoria</a></strong>”, published in <em>L’indiscreto</em>; also discussed on the radio programme <em>La rivista</em> (RSI, July 2025).</div></div>
+          </div>
+
+          <div class="cv-section-title" data-contact-edit="cv-writing-section-editorial">Editorial collaboration</div>
+          <div class="cv-timeline" data-contact-edit="cv-writing-timeline-editorial">
+            <div class="cv-year-group"><div class="cv-year">2020–2022</div><div class="cv-entry">Member of the editorial team of the literary fanzine <strong><a href="https://verderivista.wordpress.com/chi-siamo/" target="_blank" rel="noreferrer">Verde</a></strong>, contributing as editor, writer, and visual artist.</div></div>
+          </div>
+        </div>
+
+        <div id="cv-collagista-panel" class="bio-body cv-body" role="tabpanel" data-contact-edit="cv-visual-art-panel" hidden>
+          <div class="cv-section-title" data-contact-edit="cv-visual-section-exhibition">Exhibition</div>
+          <div class="cv-timeline" data-contact-edit="cv-visual-timeline-exhibition">
+            <div class="cv-year-group"><div class="cv-year">2025</div><div class="cv-entry"><strong>Disforie terrestri</strong>, public exhibition of selected works at Tabula Rasa, Naples, Italy.</div></div>
+          </div>
+
+          <div class="cv-section-title" data-contact-edit="cv-visual-section-covers">Selected cover and editorial work</div>
+          <div class="cv-timeline" data-contact-edit="cv-visual-timeline-covers">
+            <div class="cv-year-group"><div class="cv-year">Forthcoming</div><div class="cv-entry">Collage selected through an open call for the cover of an upcoming issue of the <strong>UCD Journal of Philosophy</strong>, themed “Hope”.</div></div>
+            <div class="cv-year-group"><div class="cv-year">2021–2023</div><div class="cv-entry">Cover artworks for the <strong>Trema</strong> book series, published by Arcoiris edizioni (<em><a href="https://www.edizioniarcoiris.it/trema/192-ritorno-a-hanging-rock.html" target="_blank" rel="noreferrer">Ritorno a Hanging Rock</a></em>, <em><a href="https://www.edizioniarcoiris.it/trema/198-club-silencio.html" target="_blank" rel="noreferrer">Club Silencio</a></em>, <em><a href="https://www.edizioniarcoiris.it/trema/207-overlook-loop.html" target="_blank" rel="noreferrer">Overlook Loop</a></em>).</div></div>
+            <div class="cv-year-group"><div class="cv-year">2022</div><div class="cv-entry">Four of my collages included in <strong><a href="https://psicograficieditore.com/shop/libri/solo-collage/" target="_blank" rel="noreferrer">Solo Collage Italia</a></strong>, vol. 1, Psicografici editori.</div></div>
+            <div class="cv-year-group">
+              <div class="cv-year">2021</div>
+              <div class="cv-entry">Cover artwork for <strong><a href="http://storieinmovimento.org/2021/07/26/cinquantacinquesimo-numero/" target="_blank" rel="noreferrer">Zapruder</a></strong>, no. 55, published by Mimesis.</div>
+              <div class="cv-entry">Cover artwork for music releases by <strong><a href="https://soundcloud.com/days-like-hills" target="_blank" rel="noreferrer">Days like Hills</a></strong> (<em>Per sbaglio</em>, <em>Big Bang</em>, <em>Nosferatu</em>).</div>
+            </div>
+            <div class="cv-year-group"><div class="cv-year">2018–2020</div><div class="cv-entry">Cover artwork for music releases by <strong>Steven Lipsticks and his magic band</strong> (<em><a href="https://soundcloud.com/stevenlipsticks/opinions" target="_blank" rel="noreferrer">Opinions</a></em>, <em><a href="https://soundcloud.com/stevenlipsticks/stevens-problems" target="_blank" rel="noreferrer">Steven’s problems</a></em>, <em><a href="https://soundcloud.com/stevenlipsticks/the-nest" target="_blank" rel="noreferrer">The nest</a></em>, <em><a href="https://morelettersrecords.bandcamp.com/track/home" target="_blank" rel="noreferrer">Home</a></em>, <em><a href="https://soundcloud.com/stevenlipsticks/holter" target="_blank" rel="noreferrer">Holter</a></em>, <em><a href="https://soundcloud.com/stevenlipsticks/pilot" target="_blank" rel="noreferrer">Pilot</a></em>).</div></div>
+            <div class="cv-year-group"><div class="cv-year">2018</div><div class="cv-entry">Cover artwork for <strong><a href="http://archaeologiaexnovo.org/2016/practices-representations-and-meanings-of-human-mobility-in-archaeology/" target="_blank" rel="noreferrer">Ex Novo Journal of Archaeology</a></strong>, no.3, Archaeo Press Publishing.</div></div>
+          </div>
+
+          <div class="cv-section-title" data-contact-edit="cv-visual-section-projects">Selected artistic projects</div>
+          <div class="cv-timeline" data-contact-edit="cv-visual-timeline-projects">
+            <div class="cv-year-group"><div class="cv-year">2015</div><div class="cv-entry"><strong>Il dolore degli ultimi</strong>, experimental short film written, directed, and performed.</div></div>
+          </div>
+
+          <div class="cv-section-title" data-contact-edit="cv-visual-section-workshops">Workshops</div>
+          <div class="cv-timeline" data-contact-edit="cv-visual-timeline-workshops">
+            <div class="cv-year-group"><div class="cv-year">2025</div><div class="cv-entry">Collage workshops facilitated in Dublin, Ireland, and Naples, Italy, for children and adult participants.</div></div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script is:inline>
+      (() => {
+        const STORAGE_KEY = "cv-active-tab";
+        const tabs = document.querySelectorAll("[data-cv-tab]");
+        const panels = document.querySelectorAll(".cv-body");
+
+        const switchTab = (targetTab) => {
+          const targetName = targetTab.dataset.cvTab;
+
+          tabs.forEach((tab) => {
+            const isActive = tab.dataset.cvTab === targetName;
+            tab.classList.toggle("cv-tab--active", isActive);
+            tab.setAttribute("aria-selected", String(isActive));
+            tab.tabIndex = isActive ? 0 : -1;
+          });
+
+          panels.forEach((panel) => {
+            const isActive = panel.id === `cv-${targetName}-panel`;
+            panel.classList.toggle("cv-body--active", isActive);
+            panel.hidden = !isActive;
+          });
+
+          try {
+            window.localStorage.setItem(STORAGE_KEY, targetName);
+          } catch {}
+        };
+
+        const editorPreview = new URLSearchParams(window.location.search).has("editor-preview");
+        if (editorPreview) {
+          panels.forEach((panel) => {
+            panel.hidden = false;
+            panel.classList.add("cv-body--active");
+          });
+          return;
+        }
+
+        tabs.forEach((tab) => tab.addEventListener("click", () => switchTab(tab)));
+
+        try {
+          const saved = window.localStorage.getItem(STORAGE_KEY);
+          const savedTab = saved ? document.querySelector(`[data-cv-tab="${saved}"]`) : null;
+          if (savedTab) switchTab(savedTab);
+        } catch {}
+      })();
+    </script>
   </section>
-  <section class="placeholder-page" data-locale-only="en" hidden>
-    <p class="placeholder-kicker">résumé</p>
-    <h1>Résumé</h1>
-    <p class="placeholder-text">This page is being prepared.</p>
-    <p><a class="btn ghost" href={base}>Return home</a></p>
-  </section>
-</LandingLayout>
+</BioLayout>

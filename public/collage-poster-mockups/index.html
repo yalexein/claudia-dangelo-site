@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="it" data-visit-theme="day">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Proposta collage di collage per la pagina Collage di Claudia D'Angelo." />
+    <meta name="theme-color" content="#f7f5ef" />
+    <title>Collage — collage di collage</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script>
+      (() => {
+        const applyVisitTheme = () => {
+          const requestedTheme = new URLSearchParams(window.location.search).get("theme");
+          const theme = requestedTheme === "day" || requestedTheme === "night"
+            ? requestedTheme
+            : (new Date().getHours() >= 20 || new Date().getHours() < 7 ? "night" : "day");
+          document.documentElement.dataset.visitTheme = theme;
+          document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "night" ? "#000000" : "#f7f5ef");
+        };
+        applyVisitTheme();
+        window.setInterval(applyVisitTheme, 60_000);
+      })();
+    </script>
+    <link rel="stylesheet" href="./style.css?v=9" />
+  </head>
+  <body class="mockup-index">
+    <main class="mockup-index__layout">
+      <section class="mockup-index__copy">
+        <p class="mockup-index__eyebrow">Pagina Collage · proposta 02</p>
+        <h1>Collage<br />di collage</h1>
+        <p class="mockup-index__description">
+          Le opere formano un’unica composizione. La parola <strong>COLLAGE</strong> non è un titolo separato:
+          attraversa le immagini, scompare dietro alcuni ritagli e riemerge tra le sovrapposizioni.
+          Su desktop corre in orizzontale; su mobile diventa una colonna.
+        </p>
+        <div class="mockup-index__actions">
+          <a class="mockup-button" href="./manifesto.html">Apri a schermo intero ↗</a>
+          <a class="mockup-link" href="/collage/">Confronta con la pagina attuale</a>
+        </div>
+      </section>
+
+      <section class="mockup-index__preview" aria-label="Anteprima della proposta">
+        <div class="mockup-browser">
+          <div class="mockup-browser__bar" aria-hidden="true">
+            <span></span><span></span><span></span>
+            <strong>collage / collage di collage</strong>
+          </div>
+          <iframe src="./manifesto.html?embed=1&v=12" title="Anteprima collage di collage" loading="eager"></iframe>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

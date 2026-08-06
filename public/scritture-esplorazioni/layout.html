@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Proposta di layout per la pagina Il vizio della scrittura.">
+  <title>Il vizio della scrittura</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="variant-page">
+  <nav class="topbar" aria-label="Navigazione tra i mockup">
+    <a href="index.html">← tutte le proposte</a>
+    <span><b data-family>Terminale letterario</b> · <span data-number>01</span> · <span data-name>Archivio a cartelle</span></span>
+    <div class="variant-switch"><a data-prev href="#" aria-label="Proposta precedente">←</a><a data-next href="#" aria-label="Proposta successiva">→</a></div>
+  </nav>
+
+  <main class="page-frame">
+    <header class="masthead">
+      <p class="terminal-path">claudia@archivio:~/scritture</p>
+      <p class="edition">Archivio di scritture · edizione corrente</p>
+      <h1>Il vizio della scrittura</h1>
+      <p class="deck">Racconti, romanzi, articoli e appunti. Un archivio aperto, ordinato solo quanto basta.</p>
+      <blockquote>«La scrittura è il vizio che non smetto di coltivare.»</blockquote>
+    </header>
+
+    <nav class="categories" aria-label="Categorie delle scritture">
+      <a href="#racconti"><span>01</span><b>Racconti</b><small>Testi brevi pubblicati su carta e online.</small></a>
+      <a href="#romanzi"><span>02</span><b>Romanzi</b><small>Libri pubblicati e progetti lunghi.</small></a>
+      <a href="#articoli"><span>03</span><b>Articoli</b><small>Saggi, interventi e riflessioni.</small></a>
+      <a href="#blog"><span>04</span><b>Blog</b><small>Appunti, letture e deviazioni.</small></a>
+    </nav>
+
+    <figure class="botanical">
+      <img class="botanical-image" src="https://upload.wikimedia.org/wikipedia/commons/9/98/Blossfeldt_-_Carduus_spec.%2C_16108.jpg" alt="Fotografia botanica in bianco e nero di tre cardi" referrerpolicy="no-referrer" loading="eager" decoding="async">
+      <figcaption>Karl Blossfeldt, <i>Carduus spec.</i>, 1928</figcaption>
+    </figure>
+
+    <article class="latest">
+      <div class="latest-label"><span>Ultimo testo pubblicato</span><time datetime="2026-06-18">18.06.2026</time></div>
+      <h2>Le case ricordano più di noi</h2>
+      <p class="latest-type">Racconto · rivista online</p>
+      <p class="excerpt">La prima volta che tornai, la porta era già aperta. Nel corridoio restava l’odore del legno bagnato e delle estati passate a contare le ore. Sul tavolo, una tazza capovolta conservava il cerchio scuro dell’ultima colazione.</p>
+      <a class="read-link" href="#racconti">Leggi il testo <span>→</span></a>
+    </article>
+
+    <section class="archive-strip" aria-label="Selezione dall'archivio">
+      <article id="racconti"><span>Racconti · 2025</span><h3>Ornitologie domestiche</h3><p>Piccole tassonomie della vita quotidiana.</p><a href="#">Apri →</a></article>
+      <article id="romanzi"><span>Romanzi · in lavorazione</span><h3>Titolo provvisorio</h3><p>Una storia lunga di ritorni, case e lingue perdute.</p><a href="#">Scheda →</a></article>
+      <article id="articoli"><span>Articoli · 2024</span><h3>Scrivere contro l’oblio</h3><p>Memoria, archivi e finzione.</p><a href="#">Leggi →</a></article>
+      <article id="blog"><span>Blog · 2023</span><h3>Appunti da una città in prestito</h3><p>Taccuino di luoghi provvisori.</p><a href="#">Vai al blog →</a></article>
+    </section>
+
+    <footer class="page-footer">
+      <span>© Claudia · archivio di scritture</span>
+      <span>Bio · Contatti · Note</span>
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

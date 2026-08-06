@@ -41,7 +41,7 @@
   window.ClaudiaLocale = Object.freeze({ locale, localized, localizedUrl });
 
   window.addEventListener("DOMContentLoaded", () => {
-    const switcher = document.querySelector(".language-switcher");
+    const switcher = document.querySelector(".site-language-switcher");
     if (switcher) switcher.setAttribute("aria-label", locale === "en" ? "Language" : "Lingua");
 
     document.querySelectorAll("[data-locale-option]").forEach((link) => {
@@ -63,6 +63,21 @@
     document.querySelectorAll("[data-locale-only]").forEach((element) => {
       if (!(element instanceof HTMLElement)) return;
       element.hidden = element.dataset.localeOnly !== locale;
+    });
+
+    document.querySelectorAll("[data-locale-content-it][data-locale-content-en]").forEach((element) => {
+      const content = locale === "en" ? element.getAttribute("data-locale-content-en") : element.getAttribute("data-locale-content-it");
+      if (content !== null) element.setAttribute("content", content);
+    });
+
+    document.querySelectorAll("[data-locale-alt-it][data-locale-alt-en]").forEach((element) => {
+      const alt = locale === "en" ? element.getAttribute("data-locale-alt-en") : element.getAttribute("data-locale-alt-it");
+      if (alt !== null) element.setAttribute("alt", alt);
+    });
+
+    document.querySelectorAll("[data-locale-aria-label-it][data-locale-aria-label-en]").forEach((element) => {
+      const label = locale === "en" ? element.getAttribute("data-locale-aria-label-en") : element.getAttribute("data-locale-aria-label-it");
+      if (label !== null) element.setAttribute("aria-label", label);
     });
 
     const ogLocale = document.querySelector('meta[property="og:locale"]');

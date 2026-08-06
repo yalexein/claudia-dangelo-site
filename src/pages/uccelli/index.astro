@@ -1,227 +1,266 @@
 ---
-import BioLayout from "../../layouts/BioLayout.astro";
-import StyleEditorPanel from "../../components/StyleEditorPanel.astro";
-import SharedEditorExtraControls from "../../components/SharedEditorExtraControls.astro";
-import SharedEditorLayers from "../../components/SharedEditorLayers.astro";
-import { sharedEditorPageControls, sharedEditorPageDefaults, sharedPagesNav } from "../../lib/sharedEditorConfig";
-import "../../styles/bio.css";
-import "../../styles/uccelli.css";
-import "../../styles/contatti.css";
+import LanguageSwitcher from "../../components/LanguageSwitcher.astro";
+import "../../styles/uccelli-public.css";
 
 const base = import.meta.env.BASE_URL;
 
-const uccelliPresets = {
-  background: "#401206",
-  background2: "#f7f2eb",
-  background3: "#ffe1e6",
-  backgroundMode: "solid",
-  backgroundAngle: 90,
-  text: "#1f1a17",
-  text2: "#65453d",
-  text3: "#ef4b5b",
-  textMode: "solid",
-  textAngle: 90,
-  accent: "#2f6f75",
-  font: '"PT Mono Local", "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace',
-  titleFont:
-    '"PT Mono Local", "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace',
-  fontSize: 21,
-  lineHeight: 1.5,
-  letterSpacing: -0.01,
-  wordSpacing: 0,
-  copyWidth: 72,
-  align: "left",
-  x: 6,
-  y: 6,
-};
+const resources = [
+  {
+    id: "birdingplaces",
+    name: "Birdingplaces",
+    url: "https://www.birdingplaces.eu/it",
+    it: "Mappa online per trovare luoghi adatti al birdwatching, con itinerari e osservazioni condivise dalla comunità.",
+    en: "An online map for finding birdwatching locations, with routes and observations shared by the community.",
+  },
+  {
+    id: "merlin",
+    name: "Merlin Bird ID",
+    url: "https://www.allaboutbirds.org/guide/merlin/id",
+    it: "Una delle applicazioni più efficaci per riconoscere gli uccelli attraverso aspetto, luogo e canto.",
+    en: "One of the most effective apps for identifying birds by appearance, location and song.",
+  },
+  {
+    id: "ebird",
+    name: "eBird",
+    url: "https://ebird.org/home",
+    it: "Per tenere traccia degli avvistamenti e contribuire ai dati usati da birdwatcher e ricercatorx.",
+    en: "Track sightings and contribute data used by birders and researchers.",
+  },
+  {
+    id: "xeno-canto",
+    name: "Xeno-canto",
+    url: "https://xeno-canto.org/",
+    it: "Uno dei più grandi archivi online di registrazioni naturalistiche e canti degli uccelli.",
+    en: "One of the largest online archives of wildlife recordings and bird songs.",
+  },
+  {
+    id: "migratory-bird-day",
+    name: "World Migratory Bird Day",
+    url: "https://www.migratorybirdday.org/",
+    it: "Si celebra due volte l’anno, a maggio e ottobre. Se non trovi un evento vicino, puoi organizzarne uno.",
+    en: "Celebrated twice a year, in May and October. When there is no event nearby, you can organise one.",
+  },
+  {
+    id: "macaulay",
+    name: "Macaulay Library",
+    url: "https://www.macaulaylibrary.org/",
+    it: "Archivio mediatico sulla fauna selvatica attivo dal 1929: fotografie, video e registrazioni sonore.",
+    en: "A wildlife media archive active since 1929, collecting photographs, video and sound.",
+  },
+];
 
-const uccelliContentSchema = [
+const associations = [
   {
-    id: "uccelli-title",
-    label: "Titolo",
-    selector: '[data-content-block="uccelli-title"]',
-    defaultText: "uccelli,",
-    editable: true,
-    transform: "xy",
-    deletable: true,
-    resizable: true,
-    defaultWidth: 480,
+    id: "lipu",
+    name: "LIPU",
+    url: "https://www.lipu.it/",
+    it: "Associazione ambientalista italiana impegnata soprattutto nella protezione e conservazione degli uccelli.",
+    en: "Italian environmental organisation focused particularly on bird protection and conservation.",
   },
   {
-    id: "uccelli-body",
-    label: "Testo intro",
-    selector: '[data-content-block="uccelli-body"]',
-    defaultText:
-      "Una pagina per chi guarda: mappe, iniziative, letture, film e archivi. Qui tengo anche le mie fotografie e un piccolo “uccello del mese”, con immagine e suono.",
-    editable: true,
-    transform: "xy",
-    deletable: true,
-    resizable: true,
-    defaultWidth: 760,
+    id: "cornell",
+    name: "Cornell Lab of Ornithology",
+    url: "https://www.birds.cornell.edu/home/",
+    it: "La casa di Merlin, eBird e Macaulay Library: corsi, eventi, guide e materiali didattici.",
+    en: "Home of Merlin, eBird and the Macaulay Library, with courses, events, guides and educational material.",
   },
   {
-    id: "uccelli-box-links",
-    label: "Box link",
-    selector: ".uccelli-box--links",
-    defaultText: "",
-    editable: true,
-    transform: "xy",
-    deletable: true,
-    resizable: true,
-    defaultWidth: 760,
+    id: "birdwatch-ireland",
+    name: "BirdWatch Ireland",
+    url: "https://birdwatchireland.ie/",
+    it: "Da residente in Irlanda segnalo anche l’associazione nazionale per la conservazione degli uccelli irlandesi.",
+    en: "As a resident of Ireland, I also recommend the national organisation for Irish bird conservation.",
+  },
+];
+
+const films = [
+  {
+    id: "winged-migration",
+    name: "Winged Migration",
+    detail: "Jacques Perrin, 2001",
+    url: "https://letterboxd.com/film/winged-migration/",
   },
   {
-    id: "uccelli-box-photos",
-    label: "Box foto",
-    selector: ".uccelli-box--photos",
-    defaultText: "",
-    editable: true,
-    transform: "xy",
-    deletable: true,
-    resizable: true,
-    defaultWidth: 760,
+    id: "dancing-with-the-birds",
+    name: "Dancing with the Birds",
+    detail: "Huw Cordey, 2019",
+    url: "https://letterboxd.com/film/dancing-with-the-birds/",
   },
-  {
-    id: "uccelli-box-month",
-    label: "Box uccello mese",
-    selector: ".uccelli-box--month",
-    defaultText: "",
-    editable: true,
-    transform: "xy",
-    deletable: true,
-    resizable: true,
-    defaultWidth: 760,
-  },
+];
+
+const photos = [
+  { id: "historical", src: "images/uccelli/uccelli.jpg", caption: "Anton Schöner, 1906" },
+  { id: "personal", src: "uploads/uccelli/20260429-113952191-0c4d80a4-IMG_3625.jpg", caption: "Una fotografia dal mio archivio" },
+  { id: "flowers", src: "uploads/uccelli/20260429-144816094-9ba31c70-Jan-Davidsz-de-Heem_Vase-of-flowers_ca-1660.jpg", caption: "Jan Davidsz. de Heem, circa 1660" },
+  { id: "prokudin", src: "uploads/uccelli/20260519-160234426-fe71c33f-Sergei-Prokudin-Gorsky_Group-of-Children-Russian-E.jpg", caption: "Sergei Prokudin-Gorsky" },
 ];
 ---
 
-<BioLayout title="Uccelli">
-  <section class="bio-page uccelli-page" data-advanced-editor-root data-advanced-editor-namespace="uccelli">
-    <script>
-      try {
-        const key = "claudia-editor-uccelli-settings";
-        const raw = window.localStorage.getItem(key);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (parsed && typeof parsed === "object") {
-            if (parsed.background === "#fffdfb") {
-              parsed.background = "#401206";
-            }
-            parsed.font =
-              '"PT Mono Local", "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace';
-            parsed.titleFont =
-              '"PT Mono Local", "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace';
-            window.localStorage.setItem(key, JSON.stringify(parsed));
-          }
-        }
-      } catch {}
+<!doctype html>
+<html lang="it" data-locale="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Uccelli — Claudia D'Angelo</title>
+    <meta
+      name="description"
+      content="Quelle creature meravigliose che sono gli uccelli: risorse, associazioni, film e fotografie raccolti da Claudia D'Angelo."
+      data-locale-content-it="Quelle creature meravigliose che sono gli uccelli: risorse, associazioni, film e fotografie raccolti da Claudia D'Angelo."
+      data-locale-content-en="Those wonderful creatures that birds are: resources, organisations, films and photographs collected by Claudia D'Angelo."
+    />
+    <meta name="theme-color" content="#401206" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Uccelli — Claudia D'Angelo" />
+    <meta property="og:description" content="Risorse, associazioni, film e fotografie dedicate agli uccelli." />
+    <meta property="og:locale" content="it_IT" />
+    <meta property="og:locale:alternate" content="en_US" />
+    <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+    />
+    <script is:inline src={`${base}site-locale.js?v=2`}></script>
+    <script is:inline>window.ClaudiaCustomizationPage = "uccelli";</script>
+    <script is:inline src={`${base}contact-customizer.js?v=4`}></script>
+    <script is:inline>
+      document.addEventListener("claudia:locale-ready", (event) => {
+        const locale = event.detail?.locale === "en" ? "en" : "it";
+        document.title = locale === "en" ? "Birds — Claudia D'Angelo" : "Uccelli — Claudia D'Angelo";
+      });
     </script>
+  </head>
 
-    <StyleEditorPanel
-      panelTitle="Uccelli editor"
-      storageNamespace="uccelli"
-      pagesNav={sharedPagesNav}
-      presets={uccelliPresets}
-      pageControls={sharedEditorPageControls}
-      pageDefaults={sharedEditorPageDefaults}
-      pageSectionTitle="Sfondo e immagine"
-      contentSchema={uccelliContentSchema}
-      contentStorageNamespace="uccelli"
-    >
-      <SharedEditorExtraControls slot="extra" namespace="uccelli" />
-    </StyleEditorPanel>
+  <body>
+    <LanguageSwitcher />
 
-    <div class="bio-frame">
-      <div class="bio-canvas">
-        <article class="bio-copy">
-          <h1 class="bio-title editable-text" data-content-block="uccelli-title" data-content-rich="html">uccelli<span>,</span></h1>
+    <div class="birds-shell" data-contact-edit="uccelli-shell">
+      <main class="contact-public birds-scroll-pane" data-contact-edit="uccelli-page">
+        <header class="birds-hero" data-contact-edit="uccelli-hero">
+          <p class="birds-eyebrow" data-contact-edit="uccelli-eyebrow">Claudia D'Angelo · bird notes</p>
 
-      <div
-        class="bio-body editable-text"
-        data-content-block="uccelli-body"
-        data-content-rich="html"
-      >
-            <p>
-              Una pagina per chi guarda: mappe, iniziative, letture, film e archivi. Qui tengo anche le
-              mie fotografie e un piccolo “uccello del mese”, con immagine e suono.
-            </p>
+          <h1 data-locale-only="it" data-contact-edit="uccelli-title-it">quelle creature meravigliose che sono gli uccelli<span>,</span></h1>
+          <h1 data-locale-only="en" data-contact-edit="uccelli-title-en" hidden>those wonderful creatures that birds are<span>,</span></h1>
+
+          <div data-locale-only="it">
+            <p class="birds-lead" data-contact-edit="uccelli-lead-it">Ovvero: ex dinosauri. So che è quello che ci si aspetta da una trentenne, ma a mia discolpa posso dire di essermi appassionata ai volatili quando ancora non avevo compiuto trent’anni. Avvenne durante il Covid: non potevo fare altro che guardare fuori dalla finestra, e mi affezionai a una coppia di gazze che costruiva un nido. Adesso sono una birder.</p>
+            <p class="birds-intro" data-contact-edit="uccelli-intro-it">In questa pagina trovi risorse utili per il birdwatching e per identificare gli uccelli, associazioni impegnate nella loro conservazione, documentari interessanti e qualche fotografia fatta da me e dal mio compagno. Enjoy!</p>
           </div>
 
-          <section class="uccelli-boxes" aria-label="Risorse per birdwatching">
-            <section
-              class="uccelli-box uccelli-box--links editable-text"
-              aria-label="Link utili"
-              data-content-rich="html"
-            >
-              <h2>Link utili</h2>
-              <p>Una piccola raccolta per partire (e tornare).</p>
+          <div data-locale-only="en" hidden>
+            <p class="birds-lead" data-contact-edit="uccelli-lead-en">In other words: former dinosaurs. I know this is exactly what one expects from a woman in her thirties, but in my defence I became fascinated by birds before I turned thirty. It happened during Covid: there was little to do except look out of the window, and I grew attached to a pair of magpies building a nest. I am now a birder.</p>
+            <p class="birds-intro" data-contact-edit="uccelli-intro-en">This page gathers useful resources for birdwatching and bird identification, organisations devoted to conservation, worthwhile documentaries, and a few photographs taken by my partner and me. Enjoy!</p>
+          </div>
 
-              <h3>Iniziative</h3>
-              <ul>
-                <li><a href="https://ebird.org/" target="_blank" rel="noreferrer">eBird</a></li>
-                <li><a href="https://www.inaturalist.org/" target="_blank" rel="noreferrer">iNaturalist</a></li>
-                <li><a href="https://www.birdlife.org/" target="_blank" rel="noreferrer">BirdLife International</a></li>
-              </ul>
+        </header>
 
-              <h3>Giornate per celebrare</h3>
-              <ul>
-                <li><a href="https://www.worldmigratorybirdday.org/" target="_blank" rel="noreferrer">World Migratory Bird Day</a></li>
-              </ul>
+        <section class="birds-section birds-links" data-contact-edit="uccelli-links-section" aria-labelledby="uccelli-links-title">
+          <header class="birds-section-heading" data-contact-edit="uccelli-links-heading">
+            <h2 id="uccelli-links-title">
+              <span data-locale-only="it" data-contact-edit="uccelli-links-title-it">link utili</span>
+              <span data-locale-only="en" data-contact-edit="uccelli-links-title-en" hidden>useful links</span>
+            </h2>
+          </header>
 
-              <h3>Articoli e archivi</h3>
-              <ul>
-                <li><a href="https://www.birds.cornell.edu/home/" target="_blank" rel="noreferrer">Cornell Lab of Ornithology</a></li>
-                <li><a href="https://xeno-canto.org/" target="_blank" rel="noreferrer">Xeno-canto (suoni)</a></li>
-                <li><a href="https://www.macaulaylibrary.org/" target="_blank" rel="noreferrer">Macaulay Library</a></li>
-              </ul>
+          <ul class="birds-compact-list" data-contact-edit="uccelli-links-list">
+            {resources.map((resource) => (
+              <li>
+                <a data-contact-edit={`uccelli-resource-${resource.id}`} href={resource.url} target="_blank" rel="noreferrer">
+                  <strong data-contact-edit={`uccelli-resource-name-${resource.id}`}>{resource.name}</strong>
+                  <span class="birds-description" data-locale-only="it" data-contact-edit={`uccelli-resource-description-it-${resource.id}`}>{resource.it}</span>
+                  <span class="birds-description" data-locale-only="en" data-contact-edit={`uccelli-resource-description-en-${resource.id}`} hidden>{resource.en}</span>
+                  <span class="birds-arrow" aria-hidden="true">↗</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
 
-              <h3>Associazioni e mappe</h3>
-              <ul>
-                <li><a href="https://www.lipu.it/" target="_blank" rel="noreferrer">LIPU</a></li>
-                <li><a href="https://www.rspb.org.uk/" target="_blank" rel="noreferrer">RSPB</a></li>
-              </ul>
-            </section>
+        <section class="birds-section birds-associations" data-contact-edit="uccelli-associations-section" aria-labelledby="uccelli-associations-title">
+          <header class="birds-section-heading" data-contact-edit="uccelli-associations-heading">
+            <h2 id="uccelli-associations-title">
+              <span data-locale-only="it" data-contact-edit="uccelli-associations-title-it">associazioni</span>
+              <span data-locale-only="en" data-contact-edit="uccelli-associations-title-en" hidden>organisations</span>
+            </h2>
+          </header>
 
-            <section
-              class="uccelli-box uccelli-box--photos editable-text"
-              aria-label="Le mie foto"
-              data-content-rich="html"
-            >
-              <h2>Le mie foto</h2>
-              <p>
-                Qui posso mettere un carosello, oppure una serie di immagini.
-              </p>
-              <p>
-                <img src={`${base}images/uccelli/uccelli.jpg`} alt="Placeholder foto uccelli" loading="lazy" decoding="async" />
-              </p>
-            </section>
+          <ul class="birds-secondary-list" data-contact-edit="uccelli-associations-list">
+            {associations.map((association) => (
+              <li>
+                <a data-contact-edit={`uccelli-association-${association.id}`} href={association.url} target="_blank" rel="noreferrer">
+                  <strong data-contact-edit={`uccelli-association-name-${association.id}`}>{association.name}</strong>
+                  <span data-locale-only="it" data-contact-edit={`uccelli-association-description-it-${association.id}`}>{association.it}</span>
+                  <span data-locale-only="en" data-contact-edit={`uccelli-association-description-en-${association.id}`} hidden>{association.en}</span>
+                  <span aria-hidden="true">↗</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
 
-            <section
-              class="uccelli-box uccelli-box--month editable-text"
-              aria-label="Uccello del mese"
-              data-content-rich="html"
-            >
-              <h2>Uccello del mese</h2>
-              <p>Immagine + suono (esempio).</p>
-              <p>
-                <img src={`${base}images/uccelli/uccelli.jpg`} alt="Uccello del mese (placeholder)" loading="lazy" decoding="async" />
-              </p>
-              <p>
-                <audio controls preload="none" src={`${base}audio/birds/placeholder.wav`}></audio>
-              </p>
-              <p><strong>Archivio:</strong></p>
-              <ul>
-                <li>Pettirosso — <em>Erithacus rubecula</em></li>
-                <li>Merlo — <em>Turdus merula</em></li>
-                <li>Cinciallegra — <em>Parus major</em></li>
-              </ul>
-            </section>
-          </section>
-        </article>
-      </div>
+        <section class="birds-section birds-films" data-contact-edit="uccelli-films-section" aria-labelledby="uccelli-films-title">
+          <header class="birds-section-heading" data-contact-edit="uccelli-films-heading">
+            <h2 id="uccelli-films-title" data-contact-edit="uccelli-films-title">film</h2>
+          </header>
+
+          <ul class="birds-secondary-list birds-film-list" data-contact-edit="uccelli-films-list">
+            {films.map((film) => (
+              <li>
+                <a data-contact-edit={`uccelli-film-${film.id}`} href={film.url} target="_blank" rel="noreferrer">
+                  <strong data-contact-edit={`uccelli-film-name-${film.id}`}>{film.name}</strong>
+                  <span data-contact-edit={`uccelli-film-detail-${film.id}`}>{film.detail}</span>
+                  <span aria-hidden="true">↗</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section class="birds-section birds-gallery" data-contact-edit="uccelli-gallery-section" aria-labelledby="uccelli-gallery-title">
+          <header class="birds-section-heading" data-contact-edit="uccelli-gallery-heading">
+            <h2 id="uccelli-gallery-title">
+              <span data-locale-only="it" data-contact-edit="uccelli-gallery-title-it">fotine</span>
+              <span data-locale-only="en" data-contact-edit="uccelli-gallery-title-en" hidden>photos</span>
+            </h2>
+          </header>
+
+          <div class="birds-gallery-grid" data-contact-edit="uccelli-gallery-grid">
+            {photos.map((photo) => (
+              <figure data-contact-edit={`uccelli-photo-${photo.id}`}>
+                <img data-contact-edit={`uccelli-photo-image-${photo.id}`} src={`${base}${photo.src}`} alt={photo.caption} loading="lazy" decoding="async" />
+                <figcaption data-contact-edit={`uccelli-photo-caption-${photo.id}`}>{photo.caption}</figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+      </main>
+
+      <aside class="birds-fixed-image" data-contact-edit="uccelli-fixed-image-column">
+        <a
+          class="birds-home-link"
+          data-contact-edit="uccelli-home-link"
+          href={base}
+          aria-label="Torna alla pagina iniziale"
+          data-locale-aria-label-it="Torna alla pagina iniziale"
+          data-locale-aria-label-en="Back to the home page"
+        >
+          <span data-contact-edit="uccelli-home-arrow" aria-hidden="true">←</span>
+          <span data-locale-only="it" data-contact-edit="uccelli-home-label-it">torna alla home</span>
+          <span data-locale-only="en" data-contact-edit="uccelli-home-label-en" hidden>back to home</span>
+        </a>
+
+        <img
+          data-contact-edit="uccelli-fixed-image"
+          src={`${base}images/uccelli/uccelli.jpg`}
+          alt="Illustrazione storica di uccelli"
+          data-locale-alt-it="Illustrazione storica di uccelli"
+          data-locale-alt-en="Historical illustration of birds"
+          loading="eager"
+          decoding="async"
+        />
+        <span class="birds-image-caption" data-contact-edit="uccelli-image-caption">Anton Schöner, 1906</span>
+      </aside>
     </div>
-
-    <SharedEditorLayers base={base} label="Uccelli" />
-  </section>
-
-</BioLayout>
+  </body>
+</html>

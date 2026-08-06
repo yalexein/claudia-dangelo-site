@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow,noarchive" />
+    <title>Editor sito · Claudia</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="editor.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand__mark">C</span>
+        <div><strong>Editor sito · Claudia</strong><small>accesso riservato · modifiche salvate sul server</small></div>
+      </div>
+
+      <label class="page-picker">
+        <span>Pagina</span>
+        <select data-page-select>
+          <option value="contatti">Contatti</option>
+          <option value="bio">Bio</option>
+          <option value="uccelli">Uccelli</option>
+          <option value="miscellanea">Miscellanea</option>
+          <option value="cv">CV</option>
+          <option value="collage">Collage</option>
+          <option value="scritture-home">Scritture — prima pagina</option>
+          <option value="scritture-libri">Scritture — Libri</option>
+          <option value="scritture-racconti">Scritture — Racconti</option>
+          <option value="scritture-articoli">Scritture — Articoli</option>
+          <option value="scritture-blog">Scritture — Blog</option>
+        </select>
+      </label>
+
+      <div class="topbar__group" aria-label="Lingua della pagina">
+        <button class="compact is-active" type="button" data-language="it">IT</button>
+        <button class="compact" type="button" data-language="en">EN</button>
+      </div>
+
+      <div class="topbar__group device-switcher" aria-label="Dimensione anteprima">
+        <button class="compact is-active" type="button" data-device="desktop">Desktop</button>
+        <button class="compact" type="button" data-device="tablet">Tablet</button>
+        <button class="compact" type="button" data-device="mobile">Mobile</button>
+      </div>
+
+      <div class="topbar__actions">
+        <button class="compact" type="button" data-undo disabled aria-label="Annulla">↶</button>
+        <button class="compact" type="button" data-redo disabled aria-label="Ripeti">↷</button>
+        <a class="compact link-button" href="/contatti/?lang=it" target="_blank">Pagina pubblica ↗</a>
+        <button class="save-button" type="button" data-save>Salva modifiche</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="stage" aria-label="Anteprima modificabile">
+        <div class="stage__tip"><span></span>Clicca qualsiasi elemento. Trascinalo per spostarlo.</div>
+        <div class="viewport" data-viewport>
+          <div class="viewport__scaled" data-scaled>
+            <iframe
+              title="Anteprima pagina"
+              src="/contatti/?lang=it&editor-preview=1"
+              data-preview
+            ></iframe>
+          </div>
+        </div>
+        <div class="stage__status" data-stage-status>Caricamento pagina…</div>
+      </section>
+
+      <aside class="inspector">
+        <div class="inspector__scroll">
+          <section class="panel selection-panel">
+            <div class="eyebrow">Elemento selezionato</div>
+            <h1 data-selection-name>Nessun elemento</h1>
+            <code data-selection-selector>Clicca qualcosa nell’anteprima</code>
+            <label class="field select-field">
+              <span>Selezione rapida</span>
+              <select data-quick-select>
+                <option value="">Scegli un elemento…</option>
+              </select>
+            </label>
+          </section>
+
+          <section class="panel palette-panel">
+            <details open>
+              <summary>Palette della pagina</summary>
+              <div class="color-grid">
+                <label class="color-field"><span>Sfondo</span><input type="color" value="#70cabc" data-variable="--contact-aqua" /></label>
+                <label class="color-field"><span>Testo</span><input type="color" value="#082a26" data-variable="--contact-ink-deep" /></label>
+                <label class="color-field"><span>Accento</span><input type="color" value="#cc4b39" data-variable="--contact-coral" /></label>
+                <label class="color-field"><span>Carta</span><input type="color" value="#f4eddd" data-variable="--contact-paper" /></label>
+              </div>
+              <label class="field">
+                <span>Google Fonts URL <small>facoltativo</small></span>
+                <input type="url" placeholder="https://fonts.googleapis.com/css2?family=…" data-font-url />
+              </label>
+            </details>
+          </section>
+
+          <section class="panel controls-panel" data-controls aria-disabled="true">
+            <details class="social-controls" data-social-controls hidden open>
+              <summary>Icona social</summary>
+              <div class="grid-two">
+                <label class="field"><span>Simbolo</span><select data-icon-name><option value="">Originale</option><option value="instagram">Instagram</option><option value="mastodon">Mastodon</option><option value="substack">Substack</option><option value="bluesky">Bluesky</option><option value="facebook">Facebook</option><option value="threads">Threads</option><option value="x">X</option><option value="youtube">YouTube</option><option value="tiktok">TikTok</option><option value="pinterest">Pinterest</option><option value="github">GitHub</option></select></label>
+                <label class="field"><span>Dimensione simbolo</span><input data-icon-size placeholder="es. 21px" /></label>
+              </div>
+              <div class="shape-group" aria-label="Forma del pulsante">
+                <button type="button" data-shape="0">Quadrata</button>
+                <button type="button" data-shape="10px">Arrotondata</button>
+                <button type="button" data-shape="999px">Tonda</button>
+              </div>
+              <div class="grid-two">
+                <label class="field color-line"><span>Hover: icona</span><input type="color" data-hover-picker="color" /><input data-hover="color" placeholder="Originale" /></label>
+                <label class="field color-line"><span>Hover: sfondo</span><input type="color" data-hover-picker="background-color" /><input data-hover="background-color" placeholder="Originale" /></label>
+              </div>
+            </details>
+
+            <details class="image-controls" data-image-controls hidden open>
+              <summary>Immagine</summary>
+              <label class="field field--wide">
+                <span>Sorgente immagine</span>
+                <input type="url" data-image-src placeholder="https://… oppure /images/…" />
+              </label>
+              <label class="field field--wide">
+                <span>Carica dal computer <small>max 2 MB</small></span>
+                <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-image-file />
+              </label>
+              <label class="field field--wide">
+                <span>Testo alternativo</span>
+                <input data-image-alt placeholder="Descrizione dell’immagine" />
+              </label>
+              <div class="reset-row">
+                <button type="button" data-image-show>Mostra immagine</button>
+                <button type="button" data-image-hide>Nascondi immagine</button>
+                <button type="button" data-image-reset>Ripristina immagine</button>
+              </div>
+            </details>
+
+            <details open>
+              <summary>Testo e tipografia</summary>
+              <label class="field field--wide">
+                <span>Contenuto</span>
+                <textarea rows="4" data-text disabled placeholder="Seleziona un testo semplice"></textarea>
+              </label>
+              <div class="grid-two">
+                <label class="field"><span>Font</span><input list="font-list" data-style="font-family" placeholder="Originale" /></label>
+                <label class="field"><span>Dimensione</span><input data-style="font-size" placeholder="es. 18px" /></label>
+                <label class="field"><span>Peso</span><select data-style="font-weight"><option value="">Originale</option><option>300</option><option>400</option><option>500</option><option>600</option><option>700</option><option>800</option><option>900</option></select></label>
+                <label class="field"><span>Interlinea</span><input data-style="line-height" placeholder="es. 1.5" /></label>
+                <label class="field"><span>Spaziatura</span><input data-style="letter-spacing" placeholder="es. 0.02em" /></label>
+                <label class="field"><span>Maiuscole</span><select data-style="text-transform"><option value="">Originale</option><option value="none">Nessuna</option><option value="uppercase">MAIUSCOLE</option><option value="lowercase">minuscole</option><option value="capitalize">Iniziali</option></select></label>
+              </div>
+              <div class="align-group" aria-label="Allineamento testo">
+                <button type="button" data-choice="text-align" data-value="left">Sinistra</button>
+                <button type="button" data-choice="text-align" data-value="center">Centro</button>
+                <button type="button" data-choice="text-align" data-value="right">Destra</button>
+                <button type="button" data-choice="text-align" data-value="justify">Giustifica</button>
+              </div>
+              <div class="grid-two">
+                <label class="field color-line"><span>Colore testo</span><input type="color" data-color-picker="color" /><input data-style="color" placeholder="Originale" /></label>
+                <label class="field color-line"><span>Sfondo</span><input type="color" data-color-picker="background-color" /><input data-style="background-color" placeholder="trasparente" /></label>
+              </div>
+            </details>
+
+            <details open>
+              <summary>Posizione e dimensioni</summary>
+              <p class="scope-note">Le modifiche valgono per <strong data-scope-label>desktop e tutte le dimensioni</strong>.</p>
+              <div class="grid-two">
+                <label class="field"><span>Larghezza</span><input data-style="width" placeholder="es. 100%" /></label>
+                <label class="field"><span>Max larghezza</span><input data-style="max-width" placeholder="es. 45ch" /></label>
+                <label class="field"><span>Altezza</span><input data-style="height" placeholder="es. 420px" /></label>
+                <label class="field"><span>Altezza minima</span><input data-style="min-height" placeholder="Originale" /></label>
+                <label class="field"><span>Margine</span><input data-style="margin" placeholder="es. 20px auto" /></label>
+                <label class="field"><span>Spazio interno</span><input data-style="padding" placeholder="es. 24px" /></label>
+                <label class="field"><span>Spazio tra elementi</span><input data-style="gap" placeholder="es. 16px" /></label>
+                <label class="field"><span>Livello</span><input type="number" data-style="z-index" placeholder="auto" /></label>
+              </div>
+              <div class="move-grid">
+                <label class="field"><span>Sposta X</span><div><input type="range" min="-300" max="300" value="0" data-axis="x" /><output data-axis-output="x">0 px</output></div></label>
+                <label class="field"><span>Sposta Y</span><div><input type="range" min="-300" max="300" value="0" data-axis="y" /><output data-axis-output="y">0 px</output></div></label>
+              </div>
+              <div class="grid-two">
+                <label class="field"><span>Rotazione</span><input data-style="rotate" placeholder="es. 2deg" /></label>
+                <label class="field"><span>Scala</span><input data-style="scale" placeholder="es. 1.05" /></label>
+              </div>
+            </details>
+
+            <details>
+              <summary>Box e bordi</summary>
+              <div class="grid-two">
+                <label class="field"><span>Bordo completo</span><input data-style="border" placeholder="es. 1px solid #000" /></label>
+                <label class="field"><span>Raggio</span><input data-style="border-radius" placeholder="es. 12px" /></label>
+                <label class="field"><span>Spessore bordo</span><input data-style="border-width" placeholder="es. 2px" /></label>
+                <label class="field"><span>Stile bordo</span><select data-style="border-style"><option value="">Originale</option><option value="solid">Linea</option><option value="dashed">Tratteggio</option><option value="dotted">Puntini</option><option value="none">Nessuno</option></select></label>
+                <label class="field color-line"><span>Colore bordo</span><input type="color" data-color-picker="border-color" /><input data-style="border-color" placeholder="Originale" /></label>
+                <label class="field"><span>Ombra</span><input data-style="box-shadow" placeholder="es. 0 8px 24px #0003" /></label>
+                <label class="field"><span>Opacità</span><input type="number" min="0" max="1" step="0.05" data-style="opacity" placeholder="1" /></label>
+                <label class="field"><span>Display</span><select data-style="display"><option value="">Originale</option><option value="block">Blocco</option><option value="flex">Flex</option><option value="grid">Griglia</option><option value="inline-flex">Inline flex</option><option value="none">Nascosto</option></select></label>
+                <label class="field"><span>Allinea elementi</span><select data-style="align-items"><option value="">Originale</option><option value="flex-start">Inizio</option><option value="center">Centro</option><option value="flex-end">Fine</option><option value="stretch">Estendi</option></select></label>
+                <label class="field"><span>Distribuzione</span><select data-style="justify-content"><option value="">Originale</option><option value="flex-start">Inizio</option><option value="center">Centro</option><option value="flex-end">Fine</option><option value="space-between">Tra gli elementi</option><option value="space-around">Attorno</option></select></label>
+              </div>
+            </details>
+
+            <details>
+              <summary>Avanzato</summary>
+              <div class="grid-two">
+                <label class="field"><span>Filtro immagine</span><input data-style="filter" placeholder="es. grayscale(1)" /></label>
+                <label class="field"><span>Posizione immagine</span><input data-style="object-position" placeholder="es. 50% center" /></label>
+                <label class="field"><span>Adattamento immagine</span><select data-style="object-fit"><option value="">Originale</option><option value="cover">Copri</option><option value="contain">Contieni</option><option value="fill">Riempi</option><option value="none">Originale</option></select></label>
+                <label class="field"><span>Overflow</span><select data-style="overflow"><option value="">Originale</option><option value="visible">Visibile</option><option value="hidden">Nascosto</option><option value="auto">Auto</option></select></label>
+                <label class="field"><span>Direzione flex</span><select data-style="flex-direction"><option value="">Originale</option><option value="row">Riga</option><option value="column">Colonna</option><option value="row-reverse">Riga inversa</option><option value="column-reverse">Colonna inversa</option></select></label>
+                <label class="field"><span>Colonne griglia</span><input data-style="grid-template-columns" placeholder="es. 2fr 1fr" /></label>
+                <label class="field"><span>Righe griglia</span><input data-style="grid-template-rows" placeholder="es. auto 320px" /></label>
+                <label class="field"><span>Altezza righe automatiche</span><input data-style="grid-auto-rows" placeholder="es. minmax(180px, auto)" /></label>
+                <label class="field"><span>Colonna elemento</span><input data-style="grid-column" placeholder="es. 1 / 3" /></label>
+                <label class="field"><span>Riga elemento</span><input data-style="grid-row" placeholder="es. 2 / 4" /></label>
+                <label class="field"><span>Proporzioni</span><input data-style="aspect-ratio" placeholder="es. 4 / 5" /></label>
+                <label class="field"><span>Posizione CSS</span><select data-style="position"><option value="">Originale</option><option value="relative">Relativa</option><option value="absolute">Assoluta</option><option value="sticky">Fissa allo scroll</option><option value="fixed">Fissa viewport</option></select></label>
+                <label class="field"><span>Allinea singolo</span><select data-style="align-self"><option value="">Originale</option><option value="start">Inizio</option><option value="center">Centro</option><option value="end">Fine</option><option value="stretch">Estendi</option></select></label>
+              </div>
+            </details>
+
+            <div class="reset-row">
+              <button type="button" data-reset-scope>Ripristina qui</button>
+              <button type="button" data-reset-element>Ripristina elemento</button>
+              <button class="danger" type="button" data-reset-all>Ripristina tutta la pagina</button>
+            </div>
+          </section>
+        </div>
+
+        <footer class="inspector__footer">
+          <span class="save-state" data-save-state>Salvato</span>
+          <span>Le modifiche non pubblicano l’editor.</span>
+        </footer>
+      </aside>
+    </main>
+
+    <datalist id="font-list">
+      <option value="'Bodoni Moda', Didot, Georgia, serif"></option>
+      <option value="'IBM Plex Mono', 'PT Mono Local', monospace"></option>
+      <option value="Georgia, serif"></option>
+      <option value="Helvetica, Arial, sans-serif"></option>
+      <option value="'Times New Roman', serif"></option>
+      <option value="'Courier New', monospace"></option>
+    </datalist>
+
+    <script type="module" src="editor.js"></script>
+  </body>
+</html>

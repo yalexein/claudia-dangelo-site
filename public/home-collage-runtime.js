@@ -9,7 +9,14 @@
     const canvas = document.querySelector("[data-public-canvas]");
     const tooltip = document.querySelector("[data-collage-tooltip]");
     const rawData = document.getElementById("canvas-data");
-    const items = rawData ? JSON.parse(rawData.textContent || "[]") : [];
+    const parseCanvasData = (value) => {
+      const normalized = String(value || "[]").replace(
+        /([:[,\s])(-?)\.(\d+)/g,
+        (_match, prefix, sign, digits) => `${prefix}${sign}0.${digits}`,
+      );
+      return JSON.parse(normalized);
+    };
+    const items = rawData ? parseCanvasData(rawData.textContent) : [];
     const sourceItems = JSON.parse(JSON.stringify(items));
     const compositionBounds = Object.freeze({
       left: 471.0940323589004,
@@ -28,11 +35,10 @@
       return String(value || fallback);
     };
     let hoverId = "";
-    let touchPreviewId = "";
-    let touchPreviewUntil = 0;
-    let suppressNextTouchClick = false;
     let raf = 0;
     let inertiaRaf = 0;
+    let collageReady = false;
+    let renderGeneration = 0;
     const camera = { x: 0, y: 0 };
 
     const layoutItems = () => {
@@ -180,8 +186,74 @@
       }
     };
 
+    const waitForImage = (image, item) => new Promise((resolve) => {
+      let settled = false;
+      let fallbackAttempted = false;
+      let timeoutId = 0;
+
+      const cleanup = () => {
+        image.removeEventListener("load", handleLoad);
+        image.removeEventListener("error", handleError);
+        if (timeoutId) window.clearTimeout(timeoutId);
+      };
+
+      const finish = async (loaded) => {
+        if (settled) return;
+        settled = true;
+        cleanup();
+        if (loaded) {
+          if (typeof image.decode === "function") {
+            await Promise.race([
+              image.decode().catch(() => {}),
+              new Promise((done) => window.setTimeout(done, 2500)),
+            ]);
+          }
+          buildMask(item, image);
+        } else {
+          masks.delete(item.id);
+        }
+        resolve();
+      };
+
+      const handleLoad = () => {
+        void finish(true);
+      };
+
+      const handleError = () => {
+        const fallbackUrl = item.fallbackSrc ? new URL(item.fallbackSrc, window.location.href).href : "";
+        if (!fallbackAttempted && fallbackUrl && image.src !== fallbackUrl) {
+          fallbackAttempted = true;
+          image.src = item.fallbackSrc;
+          return;
+        }
+        void finish(false);
+      };
+
+      image.addEventListener("load", handleLoad);
+      image.addEventListener("error", handleError);
+      timeoutId = window.setTimeout(() => {
+        void finish(Boolean(image.complete && image.naturalWidth));
+      }, 20_000);
+      image.src = item.src;
+
+      if (image.complete) {
+        window.queueMicrotask(() => {
+          if (image.naturalWidth) handleLoad();
+          else handleError();
+        });
+      }
+    });
+
     const render = () => {
+      const generation = ++renderGeneration;
+      collageReady = false;
+      canvas.dataset.collageReady = "false";
+      canvas.setAttribute("aria-busy", "true");
       canvas.innerHTML = "";
+      boxes.clear();
+      masks.clear();
+      const pendingImages = [];
+
       items.forEach((item, index) => {
         if (item.hidden || !item.src) return;
         const trim = item.trim;
@@ -196,7 +268,10 @@
         box.dataset.id = item.id;
         box.dataset.hoverEffect = item.hoverEffect;
         box.dataset.clickEffect = item.clickEffect;
-        box.dataset.hasLink = resolveLink(item.linkUrl) ? "true" : "false";
+        const href = resolveLink(item.linkUrl);
+        const activatable = Boolean(href || item.activationMode);
+        box.dataset.hasLink = href ? "true" : "false";
+        box.dataset.activatable = activatable ? "true" : "false";
         box.dataset.publicDrag = publicDragActive(item) ? "true" : "false";
         box.style.width = item.width + "px";
         box.style.height = fullHeight + "px";
@@ -209,9 +284,10 @@
         box.style.setProperty("--trim-top", trimTop + "px");
         box.style.setProperty("--trim-width", trimWidth + "px");
         box.style.setProperty("--trim-height", trimHeight + "px");
-        if (resolveLink(item.linkUrl)) {
-          box.href = resolveLink(item.linkUrl);
-          box.setAttribute("aria-label", localized(item.labels, locale === "en" ? "Open section" : "Apri la sezione"));
+        if (activatable) {
+          if (href) box.href = href;
+          else box.setAttribute("role", "button");
+          box.setAttribute("aria-label", localized(item.labels, locale === "en" ? "Open image" : "Apri l’immagine"));
           box.setAttribute("aria-describedby", "collage-help");
           box.tabIndex = 0;
           box.addEventListener("focus", () => {
@@ -228,7 +304,7 @@
             }
           });
           box.addEventListener("keydown", (event) => {
-            if (event.key !== " ") return;
+            if ((event.key !== " " && event.key !== "Enter") || !collageReady) return;
             event.preventDefault();
             activate(item);
           });
@@ -236,25 +312,30 @@
         const surface = document.createElement("div");
         surface.className = "public-image__surface";
         const image = document.createElement("img");
-        image.src = item.src;
         image.loading = "eager";
         image.decoding = "async";
-        if (index < 2) image.fetchPriority = "high";
+        image.fetchPriority = "high";
         image.alt = "";
         image.draggable = false;
-        image.addEventListener("error", () => {
-          if (item.fallbackSrc && image.src !== new URL(item.fallbackSrc, window.location.href).href) {
-            image.src = item.fallbackSrc;
-          }
-        }, { once: true });
-        image.addEventListener("load", () => buildMask(item, image), { once: true });
+        pendingImages.push(waitForImage(image, item));
         surface.append(image);
         box.append(surface);
         boxes.set(item.id, box);
         canvas.append(box);
         applyTransform(item, index, window.performance.now());
       });
-      syncMotion();
+
+      Promise.allSettled(pendingImages).then(() => {
+        if (generation !== renderGeneration) return;
+        window.requestAnimationFrame(() => {
+          if (generation !== renderGeneration) return;
+          collageReady = true;
+          canvas.dataset.collageReady = "true";
+          canvas.setAttribute("aria-busy", "false");
+          syncMotion();
+          document.dispatchEvent(new CustomEvent("claudia:home-collage-ready"));
+        });
+      });
     };
 
     const hitForItem = (item, index, pageX, pageY) => {
@@ -290,6 +371,7 @@
     };
 
     const getHit = (event) => {
+      if (!collageReady) return null;
       const pageX = event.pageX || event.clientX + window.scrollX;
       const pageY = event.pageY || event.clientY + window.scrollY;
       const ordered = items.map((item, index) => ({ item, index })).sort((a, b) => b.item.z - a.item.z || b.index - a.index);
@@ -369,6 +451,7 @@
         const box = boxes.get(item.id);
         if (box) box.style.zIndex = String(item.z);
       }
+      window.dispatchEvent(new CustomEvent("collage:activate", { detail: { item } }));
       if (href) {
         window.setTimeout(() => {
           window.location.href = href;
@@ -449,7 +532,11 @@
         document.removeEventListener("pointermove", move);
         document.removeEventListener("pointerup", up);
         document.body.style.cursor = "";
-        if (!moved) return;
+        if (!moved) {
+          markClickSuppressed(id);
+          activate(item);
+          return;
+        }
         markClickSuppressed(id);
         const releaseNow = window.performance.now();
         const releaseGap = Math.max(releaseNow - lastTime, 0);
@@ -474,38 +561,18 @@
     });
 
     document.addEventListener("pointerdown", (event) => {
+      if (event.target instanceof Element && event.target.closest("[data-collage-lightbox]")) return;
       if (event.button !== 0) return;
       const hit = getHit(event);
-      if (event.pointerType === "touch") {
-        const now = Date.now();
-        if (!hit) {
-          touchPreviewId = "";
-          touchPreviewUntil = 0;
-          clearHover();
-          return;
-        }
-        const hasLink = Boolean(resolveLink(hit.item.linkUrl));
-        const alreadyPreviewed = touchPreviewId === hit.item.id && now < touchPreviewUntil;
-        if (hasLink && !alreadyPreviewed) {
-          event.preventDefault();
-          touchPreviewId = hit.item.id;
-          touchPreviewUntil = now + 4000;
-          suppressNextTouchClick = true;
-          setHover(hit);
-          return;
-        }
-        touchPreviewId = "";
-        touchPreviewUntil = 0;
+      if (!hit) {
+        if (event.pointerType === "touch") clearHover();
+        return;
       }
-      if (hit) startPublicDrag(event, hit);
+      startPublicDrag(event, hit);
     });
 
     document.addEventListener("click", (event) => {
-      if (suppressNextTouchClick) {
-        suppressNextTouchClick = false;
-        event.preventDefault();
-        return;
-      }
+      if (event.target instanceof Element && event.target.closest("[data-collage-lightbox]")) return;
       const hit = getHit(event);
       if (!hit || clickSuppressed(hit.item.id)) return;
       const href = resolveLink(hit.item.linkUrl);

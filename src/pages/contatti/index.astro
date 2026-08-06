@@ -1,725 +1,383 @@
 ---
-import BioLayout from "../../layouts/BioLayout.astro";
-import StyleEditorPanel from "../../components/StyleEditorPanel.astro";
-import SharedEditorExtraControls from "../../components/SharedEditorExtraControls.astro";
-import SharedEditorLayers from "../../components/SharedEditorLayers.astro";
-import { sharedEditorPageControls, sharedEditorPageDefaults, sharedPagesNav } from "../../lib/sharedEditorConfig";
-import WindowBird from "../../components/WindowBird.astro";
-import "../../styles/landing.css";
-import "../../styles/uccelli.css";
+import LanguageSwitcher from "../../components/LanguageSwitcher.astro";
 import "../../styles/contatti.css";
+import {
+  siBluesky,
+  siFacebook,
+  siGithub,
+  siInstagram,
+  siMastodon,
+  siPinterest,
+  siSubstack,
+  siThreads,
+  siTiktok,
+  siX,
+  siYoutube,
+} from "simple-icons";
 
 const base = import.meta.env.BASE_URL;
-
-const contattiPresets = {
-  background: "#ecd7cd",
-  background2: "#ecd7cd",
-  background3: "#ecd7cd",
-  backgroundMode: "solid",
-  backgroundAngle: 90,
-  text: "#17231f",
-  text2: "#17231f",
-  text3: "#17231f",
-  textMode: "solid",
-  textAngle: 90,
-  accent: "#2f6f75",
-  font: '"PT Mono Local", "IBM Plex Mono", "Courier New", monospace',
-  titleFont: '"PT Mono Local", "IBM Plex Mono", "Courier New", monospace',
-  fontSize: 15.6,
-  lineHeight: 1.6,
-  letterSpacing: 0,
-  wordSpacing: 0,
-  copyWidth: 66,
-  align: "left",
-  x: 0,
-  y: 0,
+const imageSrc = `${base}images/contatti/al-telefono-guardano-non-so-cosa.jpg`;
+const email = "clahoudini_art@proton.me";
+const contactIconLibrary = {
+  instagram: siInstagram.path,
+  mastodon: siMastodon.path,
+  substack: siSubstack.path,
+  bluesky: siBluesky.path,
+  facebook: siFacebook.path,
+  threads: siThreads.path,
+  x: siX.path,
+  youtube: siYoutube.path,
+  tiktok: siTiktok.path,
+  pinterest: siPinterest.path,
+  github: siGithub.path,
 };
-
-const contattiPageDefaults = {
-  contactImgX: 0,
-  contactImgY: 0,
-  contactImgScale: 1,
-  contactImgWidth: 520,
-  contactImgRotate: 0,
-  contactImgOpacity: 1,
-  contactImgScroll: false,
-  ...sharedEditorPageDefaults,
-  showTitleCard: true,
-  showGuestbook: true,
-};
-
-const contattiPageControls = [
-  { key: "showTitleCard", type: "toggle", label: "Mostra box titolo", default: true, wide: true },
-  { key: "showGuestbook", type: "toggle", label: "Mostra guestbook", default: true, wide: true },
-  ...sharedEditorPageControls,
-  { key: "contactImgX", type: "range", label: "Immagine X", default: 0, min: -900, max: 900, step: 1, unit: "px", cssVar: "--contatti-img-x" },
-  { key: "contactImgY", type: "range", label: "Immagine Y", default: 0, min: -900, max: 900, step: 1, unit: "px", cssVar: "--contatti-img-y" },
-  { key: "contactImgScale", type: "range", label: "Scala immagine", default: 1, min: 0.2, max: 2.8, step: 0.01, cssVar: "--contatti-img-scale" },
-  { key: "contactImgWidth", type: "range", label: "Larghezza immagine", default: 520, min: 180, max: 980, step: 1, unit: "px", cssVar: "--contatti-img-width" },
-  { key: "contactImgRotate", type: "range", label: "Rotazione immagine", default: 0, min: -180, max: 180, step: 1, unit: "deg", cssVar: "--contatti-img-rotate" },
-  { key: "contactImgOpacity", type: "range", label: "Opacita immagine", default: 1, min: 0, max: 1, step: 0.01, cssVar: "--contatti-img-opacity" },
-  { key: "contactImgScroll", type: "toggle", label: "Scorre con pagina", default: false, cssVar: "--contatti-img-scroll", wide: true },
-];
-
-const contattiContentSchema = [
-  {
-    id: "contatti-title-card",
-    label: "Box titolo",
-    selector: ".contact-title-card",
-    defaultText: "",
-    editable: true,
-    transform: "xy",
-    deletable: true,
-    resizable: true,
-    defaultWidth: 520,
-  },
-  {
-    id: "contatti-guestbook-title",
-    label: "Titolo guestbook",
-    selector: '[data-content-block="contatti-guestbook-title"]',
-    defaultText: "Guestbook",
-    editable: true,
-    transform: "xy",
-    deletable: true,
-    resizable: true,
-    defaultWidth: 360,
-  },
-];
 ---
 
-<BioLayout title="Contatti">
-  <section class="contact-page" data-contact-stage data-advanced-editor-root data-advanced-editor-namespace="contatti">
-    <StyleEditorPanel
-      panelTitle="Contatti editor"
-      storageNamespace="contatti"
-      pagesNav={sharedPagesNav}
-      presets={contattiPresets}
-      pageControls={contattiPageControls}
-      pageDefaults={contattiPageDefaults}
-      pageSectionTitle="Contatti • controlli"
-      contentSchema={contattiContentSchema}
-      contentStorageNamespace="contatti"
-    >
-      <SharedEditorExtraControls slot="extra" namespace="contatti" />
-    </StyleEditorPanel>
-
-    <div class="contact-bg" aria-label="Immagine pagina Contatti">
-      <figure class="contact-bg-box" data-contatti-bg-box>
-        <img
-          class="contact-bg__img"
-          src={`${base}images/contatti/penguin-interviews.jpg`}
-          alt=""
-          draggable="false"
-          loading="eager"
-          decoding="async"
-          data-contatti-bg-img
-        />
-        <button class="uccelli-image-box__handle uccelli-image-box__handle--drag" type="button" aria-label="Sposta immagine" data-contatti-img-drag>↕</button>
-        <button class="uccelli-image-box__handle uccelli-image-box__handle--delete" type="button" aria-label="Elimina immagine" data-contatti-img-delete>×</button>
-        <button class="uccelli-image-box__handle uccelli-image-box__handle--resize" type="button" aria-label="Ridimensiona immagine" data-contatti-img-resize>↘</button>
-        <button class="uccelli-image-box__handle uccelli-image-box__handle--rotate" type="button" aria-label="Ruota immagine" data-contatti-img-rotate>⟳</button>
-      </figure>
-    </div>
-
-    <WindowBird
-      className="contact-bird"
-      size="half"
-      variant={1}
-      preset="default"
-      stageSelector="[data-contact-stage]"
-      ariaLabel="Fai girare l'uccello dei contatti"
+<!doctype html>
+<html lang="it" data-locale="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta
+      name="description"
+      content="Contatti di Claudia D'Angelo: collage, scrittura e collaborazioni."
     />
+    <meta name="theme-color" content="#70cabc" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Contatti — Claudia D'Angelo" />
+    <meta
+      property="og:description"
+      content="Scrivi a Claudia D'Angelo per collage, scrittura e collaborazioni."
+    />
+    <meta property="og:locale" content="it_IT" />
+    <meta property="og:locale:alternate" content="en_US" />
+    <title>Contatti — Claudia D'Angelo</title>
+    <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+    />
+    <script is:inline src={`${base}site-locale.js?v=2`}></script>
+    <script id="contact-icon-library" type="application/json" set:html={JSON.stringify(contactIconLibrary)}></script>
+    <script is:inline src={`${base}contact-customizer.js?v=1`}></script>
+  </head>
+  <body>
+    <LanguageSwitcher />
 
-    <header class="contact-title-card editable-text" data-contact-box="title" data-contatti-title data-content-block="contatti-title-card" data-content-rich="html">
-      <button class="contatti-box-remove" type="button" aria-label="Elimina box titolo" data-contatti-remove="showTitleCard">
-        ×
-      </button>
-      <h1>contatti</h1>
-      <p>scrivimi, trovami, lasciami una traccia</p>
-      <a href={`${base}`} class="home-link">return home</a>
-    </header>
+    <main class="contact-public" data-contact-edit="page">
+      <div class="contact-shell" data-contact-edit="layout">
+        <figure class="contact-visual" data-contact-edit="image-box">
+          <img
+            data-contact-edit="image"
+            src={imageSrc}
+            alt="Una sala vintage vista attraverso un grande portale circolare, con persone intorno a un acquario cilindrico"
+            data-alt-it="Una sala vintage vista attraverso un grande portale circolare, con persone intorno a un acquario cilindrico"
+            data-alt-en="A vintage room seen through a large circular portal, with people gathered around a cylindrical aquarium"
+            width="3302"
+            height="2079"
+            loading="eager"
+            decoding="async"
+          />
 
-    <section class="contact-panel" data-contact-panel aria-label="Guestbook" data-contatti-guestbook>
-      <button class="contatti-box-remove" type="button" aria-label="Elimina guestbook" data-contatti-remove="showGuestbook">
-        ×
-      </button>
-      <button class="contact-panel__drag" type="button" aria-label="Sposta pannello" data-contact-panel-drag>
-        ⇳
-      </button>
-      <span class="contact-panel__resize" aria-hidden="true" data-contact-panel-resize></span>
+          <a
+            class="contact-home"
+            data-contact-edit="home-link"
+            href={base}
+            aria-label="Torna alla pagina iniziale"
+            data-locale-aria-label-it="Torna alla pagina iniziale"
+            data-locale-aria-label-en="Back to the home page"
+          >
+            <span data-contact-edit="home-arrow" aria-hidden="true">←</span>
+            <span data-locale-only="it" data-contact-edit="home-label-it">torna alla home</span>
+            <span data-locale-only="en" data-contact-edit="home-label-en" hidden>back to home</span>
+          </a>
+        </figure>
 
-      <div class="contact-panel__section">
-        <h2 class="editable-text" data-content-block="contatti-guestbook-title" data-content-rich="html">Guestbook</h2>
-        <form class="contact-panel__form" data-guestbook-form>
-          <label>
-            nome
-            <input name="name" autocomplete="name" required />
-          </label>
-          <label>
-            messaggio
-            <textarea name="message" rows="4" required></textarea>
-          </label>
-          <button type="submit">send</button>
-        </form>
-        <div class="contact-panel__entries" data-guestbook-list aria-live="polite"></div>
+        <section class="contact-panel" data-contact-edit="panel" aria-label="Contatti / Contact">
+          <div class="contact-panel__inner" data-contact-edit="panel-inner">
+            <header class="contact-heading" data-contact-edit="heading">
+              <p class="contact-kicker" data-contact-edit="kicker">Claudia D'Angelo</p>
+
+              <div data-locale-only="it">
+                <h1 id="contact-title-it" data-contact-edit="title-it">contatti</h1>
+              </div>
+
+              <div data-locale-only="en" hidden>
+                <h1 id="contact-title-en" data-contact-edit="title-en">contact</h1>
+              </div>
+
+              <nav class="contact-social-icons" data-contact-edit="social-icons" aria-label="Social network">
+                <a
+                  data-contact-edit="instagram-main"
+                  data-social-icon="instagram"
+                  href="https://www.instagram.com/clahoudini_/"
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="Instagram — Claudia D'Angelo"
+                  title="Instagram — Claudia D'Angelo"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d={siInstagram.path}></path></svg>
+                </a>
+                <a
+                  class="contact-social-icon--collage"
+                  data-contact-edit="instagram-collage"
+                  data-social-icon="instagram"
+                  href="https://www.instagram.com/clahoudini_art/"
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="Instagram — collage"
+                  title="Instagram — collage"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d={siInstagram.path}></path></svg>
+                  <span class="contact-social-badge" data-contact-edit="collage-badge" aria-hidden="true">collage</span>
+                </a>
+                <a
+                  data-contact-edit="substack"
+                  data-social-icon="substack"
+                  href="https://substack.com/@claudiadangelo"
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="Substack — Claudia D'Angelo"
+                  title="Substack — Claudia D'Angelo"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d={siSubstack.path}></path></svg>
+                </a>
+                <a
+                  data-contact-edit="mastodon"
+                  data-social-icon="mastodon"
+                  href="https://livellosegreto.it/@clahoudini"
+                  target="_blank"
+                  rel="me noreferrer"
+                  aria-label="Mastodon — @clahoudini"
+                  title="Mastodon — @clahoudini"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d={siMastodon.path}></path></svg>
+                </a>
+              </nav>
+
+              <div data-locale-only="it" data-contact-edit="intro-wrap-it">
+                <p class="contact-intro" data-contact-edit="intro-it">
+                  <span data-contact-edit="intro-copy-it">Puoi trovarmi online su Instagram, Substack e Mastodon. Se vuoi commissionarmi un collage
+                    o vuoi iniziare una collaborazione o qualsiasi altra cosa dalla scrittura ai collage ai
+                    complimenti alle critiche puoi scrivermi qui: </span>
+                  <a data-contact-edit="email-it" href={`mailto:${email}`}>clahoudini_art(at)proton(dot)me</a><br />
+                  <span data-contact-edit="intro-closing-it">Altrimenti, scrivimi un commento nel box qui sotto : )</span>
+                </p>
+              </div>
+
+              <div data-locale-only="en" data-contact-edit="intro-wrap-en" hidden>
+                <p class="contact-intro" data-contact-edit="intro-en">
+                  <span data-contact-edit="intro-copy-en">You can find me online on Instagram, Substack and Mastodon. If you would like to commission
+                    a collage, start a collaboration, or write about anything from words and collages to
+                    compliments and criticism, email me at </span>
+                  <a data-contact-edit="email-en" href={`mailto:${email}`}>clahoudini_art(at)proton(dot)me</a>.<br />
+                  <span data-contact-edit="intro-closing-en">Otherwise, leave me a comment in the box below : )</span>
+                </p>
+              </div>
+            </header>
+
+            <section class="guestbook" data-contact-edit="guestbook" aria-label="Guestbook">
+              <header class="guestbook__heading" data-contact-edit="guestbook-heading">
+                <div data-locale-only="it">
+                  <h2 data-contact-edit="guestbook-title-it">guestbook</h2>
+                </div>
+                <div data-locale-only="en" hidden>
+                  <h2 data-contact-edit="guestbook-title-en">guestbook</h2>
+                </div>
+              </header>
+
+              <form class="guestbook__form" data-contact-edit="guestbook-form" data-guestbook-form>
+                <label class="guestbook__field" data-contact-edit="name-field">
+                  <span data-locale-only="it" data-contact-edit="name-label-it">il tuo nome</span>
+                  <span data-locale-only="en" data-contact-edit="name-label-en" hidden>your name</span>
+                  <input data-contact-edit="name-input" name="name" type="text" autocomplete="name" maxlength="60" required />
+                </label>
+
+                <label class="guestbook__field guestbook__field--message" data-contact-edit="message-field">
+                  <span data-locale-only="it" data-contact-edit="message-label-it">il tuo messaggio</span>
+                  <span data-locale-only="en" data-contact-edit="message-label-en" hidden>your message</span>
+                  <textarea data-contact-edit="message-input" name="message" rows="4" maxlength="500" required data-guestbook-message></textarea>
+                </label>
+
+                <label class="guestbook__honeypot" aria-hidden="true">
+                  Website
+                  <input name="website" type="text" tabindex="-1" autocomplete="off" />
+                </label>
+
+                <div class="guestbook__submit-row" data-contact-edit="submit-row">
+                  <span class="guestbook__count" data-contact-edit="counter" data-guestbook-count>0 / 500</span>
+                  <button type="submit" data-contact-edit="submit-button" data-guestbook-submit>
+                    <span data-locale-only="it" data-contact-edit="submit-it">pubblica</span>
+                    <span data-locale-only="en" data-contact-edit="submit-en" hidden>publish</span>
+                  </button>
+                </div>
+
+                <p class="guestbook__status" data-guestbook-status role="status" aria-live="polite"></p>
+              </form>
+
+              <div class="guestbook__entries" data-contact-edit="guestbook-entries" data-guestbook-list aria-live="polite"></div>
+            </section>
+
+          </div>
+        </section>
       </div>
-    </section>
+    </main>
 
+    <script is:inline>
+      (() => {
+        const applyLocalizedDetails = () => {
+          const locale = document.documentElement.dataset.locale === "en" ? "en" : "it";
+          document.title = locale === "en" ? "Contact — Claudia D'Angelo" : "Contatti — Claudia D'Angelo";
 
-    <div class="contact-spacer" aria-hidden="true"></div>
+          const description = document.querySelector('meta[name="description"]');
+          if (description) {
+            description.setAttribute(
+              "content",
+              locale === "en"
+                ? "Contact Claudia D'Angelo for collage, writing and collaborations."
+                : "Contatti di Claudia D'Angelo: collage, scrittura e collaborazioni.",
+            );
+          }
 
-    <SharedEditorLayers base={base} label="Contatti" />
-  </section>
-
-  <script>
-    const storageKey = "claudia-editor-contatti-settings";
-    const root = document.documentElement;
-    const img = document.querySelector("[data-contatti-bg-box]");
-    const resizeHandle = document.querySelector("[data-contatti-img-resize]");
-    const rotateHandle = document.querySelector("[data-contatti-img-rotate]");
-    const deleteButton = document.querySelector("[data-contatti-img-delete]");
-    const body = document.body;
-
-    const toNumber = (value, fallback) => {
-      const parsed = Number(value);
-      return Number.isFinite(parsed) ? parsed : fallback;
-    };
-
-    const readCssNumber = (name, fallback) => {
-      const value = getComputedStyle(root).getPropertyValue(name).trim();
-      if (!value) return fallback;
-      const match = value.match(/-?\d+(\.\d+)?/);
-      return match ? toNumber(match[0], fallback) : fallback;
-    };
-
-    const writeSetting = (partial) => {
-      try {
-        const raw = window.localStorage.getItem(storageKey);
-        const parsed = raw ? JSON.parse(raw) : {};
-        const next = { ...(parsed && typeof parsed === "object" ? parsed : {}), ...partial };
-        window.localStorage.setItem(storageKey, JSON.stringify(next));
-      } catch {}
-    };
-
-    const syncControl = (key, value) => {
-      document.querySelectorAll(`[data-style-control="${key}"]`).forEach((node) => {
-        if (node instanceof HTMLInputElement) {
-          node.value = String(value);
-          node.dispatchEvent(new Event("input", { bubbles: true }));
-        }
-      });
-    };
-
-    const setVar = (name, value) => root.style.setProperty(name, value);
-
-    if (img instanceof HTMLElement) {
-      let dragging = false;
-      let startX = 0;
-      let startY = 0;
-      let baseX = 0;
-      let baseY = 0;
-
-      const beginDrag = (event) => {
-        if (!(event instanceof PointerEvent)) return;
-        if (event.button !== 0) return;
-        if (event.target instanceof HTMLElement && event.target.closest("[data-contatti-img-delete], [data-contatti-img-resize], [data-contatti-img-rotate]")) return;
-        dragging = true;
-        startX = event.clientX;
-        startY = event.clientY;
-        baseX = readCssNumber("--contatti-img-x", 0);
-        baseY = readCssNumber("--contatti-img-y", 0);
-        img.setPointerCapture(event.pointerId);
-      };
-
-      const moveDrag = (event) => {
-        if (!dragging || !(event instanceof PointerEvent)) return;
-        const nextX = Math.round(baseX + (event.clientX - startX));
-        const nextY = Math.round(baseY + (event.clientY - startY));
-        setVar("--contatti-img-x", `${nextX}px`);
-        setVar("--contatti-img-y", `${nextY}px`);
-        syncControl("contactImgX", nextX);
-        syncControl("contactImgY", nextY);
-      };
-
-      const endDrag = () => {
-        if (!dragging) return;
-        dragging = false;
-        const nextX = readCssNumber("--contatti-img-x", 0);
-        const nextY = readCssNumber("--contatti-img-y", 0);
-        writeSetting({ contactImgX: nextX, contactImgY: nextY });
-      };
-
-      img.addEventListener("pointerdown", beginDrag);
-      img.addEventListener("pointermove", moveDrag);
-      img.addEventListener("pointerup", endDrag);
-      img.addEventListener("pointercancel", endDrag);
-
-      if (resizeHandle instanceof HTMLElement) {
-        let resizing = null;
-        resizeHandle.addEventListener("pointerdown", (event) => {
-          if (!(event instanceof PointerEvent)) return;
-          resizing = {
-            startX: event.clientX,
-            baseWidth: readCssNumber("--contatti-img-width", 520),
-          };
-          resizeHandle.setPointerCapture(event.pointerId);
-          event.preventDefault();
-          event.stopPropagation();
-        });
-        resizeHandle.addEventListener("pointermove", (event) => {
-          if (!resizing || !(event instanceof PointerEvent)) return;
-          const nextWidth = Math.min(1600, Math.max(120, Math.round(resizing.baseWidth + event.clientX - resizing.startX)));
-          setVar("--contatti-img-width", `${nextWidth}px`);
-          syncControl("contactImgWidth", nextWidth);
-        });
-        const endResize = () => {
-          if (!resizing) return;
-          resizing = null;
-          writeSetting({ contactImgWidth: readCssNumber("--contatti-img-width", 520) });
-        };
-        resizeHandle.addEventListener("pointerup", endResize);
-        resizeHandle.addEventListener("pointercancel", endResize);
-      }
-
-      if (rotateHandle instanceof HTMLElement) {
-        let rotating = false;
-        rotateHandle.addEventListener("pointerdown", (event) => {
-          if (!(event instanceof PointerEvent)) return;
-          rotating = true;
-          rotateHandle.setPointerCapture(event.pointerId);
-          event.preventDefault();
-          event.stopPropagation();
-        });
-        rotateHandle.addEventListener("pointermove", (event) => {
-          if (!rotating || !(event instanceof PointerEvent)) return;
-          const rect = img.getBoundingClientRect();
-          const centerX = rect.left + rect.width / 2;
-          const centerY = rect.top + rect.height / 2;
-          const angle = Math.round(Math.atan2(event.clientY - centerY, event.clientX - centerX) * (180 / Math.PI) + 90);
-          setVar("--contatti-img-rotate", `${angle}deg`);
-          syncControl("contactImgRotate", angle);
-        });
-        const endRotate = () => {
-          if (!rotating) return;
-          rotating = false;
-          writeSetting({ contactImgRotate: readCssNumber("--contatti-img-rotate", 0) });
-        };
-        rotateHandle.addEventListener("pointerup", endRotate);
-        rotateHandle.addEventListener("pointercancel", endRotate);
-      }
-
-      deleteButton?.addEventListener("click", (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        setVar("--contatti-img-opacity", "0");
-        syncControl("contactImgOpacity", 0);
-        writeSetting({ contactImgOpacity: 0 });
-      });
-
-      img.addEventListener(
-        "wheel",
-        (event) => {
-          if (!(event instanceof WheelEvent)) return;
-          if (!event.shiftKey) return;
-          event.preventDefault();
-
-          const current = toNumber(
-            getComputedStyle(root).getPropertyValue("--contatti-img-scale").trim(),
-            1,
+          document.querySelector(".site-language-switcher")?.setAttribute(
+            "aria-label",
+            locale === "en" ? "Language" : "Lingua",
           );
-          const delta = event.deltaY > 0 ? -0.04 : 0.04;
-          const next = Math.min(2.8, Math.max(0.2, Math.round((current + delta) * 100) / 100));
-          setVar("--contatti-img-scale", `${next}`);
-          syncControl("contactImgScale", next);
-          writeSetting({ contactImgScale: next });
-        },
-        { passive: false },
-      );
-    }
-  </script>
 
-  <script>
-    const storageKey = "claudia-editor-contatti-settings";
-    const body = document.body;
-    const className = "contatti-bg-scroll";
+          const image = document.querySelector(".contact-visual img");
+          if (image instanceof HTMLImageElement) {
+            image.alt = locale === "en" ? image.dataset.altEn || image.alt : image.dataset.altIt || image.alt;
+          }
 
-    const toBoolean = (value) =>
-      value === true || value === 1 || value === "1" || value === "true" || value === "on";
-
-    const applyScrollMode = (enabled) => {
-      if (!(body instanceof HTMLBodyElement)) return;
-      body.classList.toggle(className, Boolean(enabled));
-    };
-
-    const readScrollSetting = () => {
-      try {
-        const raw = window.localStorage.getItem(storageKey);
-        if (!raw) return false;
-        const parsed = JSON.parse(raw);
-        return toBoolean(parsed?.contactImgScroll);
-      } catch {
-        return false;
-      }
-    };
-
-    applyScrollMode(readScrollSetting());
-
-    document.querySelectorAll('[data-style-control="contactImgScroll"]').forEach((node) => {
-      if (!(node instanceof HTMLInputElement)) return;
-      applyScrollMode(node.checked);
-      node.addEventListener("change", () => applyScrollMode(node.checked));
-    });
-
-    window.addEventListener("style-editor:state", (event) => {
-      const detail = event?.detail;
-      if (detail && typeof detail === "object" && detail.storageKey === storageKey) {
-        applyScrollMode(readScrollSetting());
-      }
-    });
-  </script>
-
-  <script>
-    // Toggle visibility for the legacy "boxes" (title card + guestbook panel) via StyleEditor settings.
-    const storageKey = "claudia-editor-contatti-settings";
-    const body = document.body;
-
-    const toBoolean = (value) =>
-      value === true || value === 1 || value === "1" || value === "true" || value === "on";
-
-    const readSetting = (key, fallback) => {
-      try {
-        const raw = window.localStorage.getItem(storageKey);
-        if (!raw) return fallback;
-        const parsed = JSON.parse(raw);
-        if (!parsed || typeof parsed !== "object") return fallback;
-        const value = parsed[key];
-        return typeof value === "undefined" ? fallback : toBoolean(value);
-      } catch {
-        return fallback;
-      }
-    };
-
-    const applyVisibility = () => {
-      if (!(body instanceof HTMLBodyElement)) return;
-      body.classList.toggle("contatti-hide-title", !readSetting("showTitleCard", true));
-      body.classList.toggle("contatti-hide-guestbook", !readSetting("showGuestbook", true));
-    };
-
-    applyVisibility();
-
-    document.querySelectorAll('[data-style-control="showTitleCard"]').forEach((node) => {
-      if (!(node instanceof HTMLInputElement)) return;
-      node.addEventListener("change", applyVisibility);
-    });
-    document.querySelectorAll('[data-style-control="showGuestbook"]').forEach((node) => {
-      if (!(node instanceof HTMLInputElement)) return;
-      node.addEventListener("change", applyVisibility);
-    });
-
-    window.addEventListener("style-editor:state", (event) => {
-      const detail = event?.detail;
-      if (detail && typeof detail === "object" && detail.storageKey === storageKey) applyVisibility();
-    });
-  </script>
-
-  <script>
-    // Inline delete affordances for the legacy boxes (same settings as the toggles).
-    const storageKey = "claudia-editor-contatti-settings";
-    const body = document.body;
-
-    const toBoolean = (value) =>
-      value === true || value === 1 || value === "1" || value === "true" || value === "on";
-
-    const readState = () => {
-      try {
-        const raw = window.localStorage.getItem(storageKey);
-        return raw ? JSON.parse(raw) : {};
-      } catch {
-        return {};
-      }
-    };
-
-    const writeState = (partial) => {
-      try {
-        const current = readState();
-        const next = { ...(current && typeof current === "object" ? current : {}), ...partial };
-        window.localStorage.setItem(storageKey, JSON.stringify(next));
-      } catch {}
-    };
-
-    const applyVisibility = () => {
-      if (!(body instanceof HTMLBodyElement)) return;
-      const state = readState();
-      const showTitle = typeof state.showTitleCard === "undefined" ? true : toBoolean(state.showTitleCard);
-      const showGuestbook = typeof state.showGuestbook === "undefined" ? true : toBoolean(state.showGuestbook);
-      body.classList.toggle("contatti-hide-title", !showTitle);
-      body.classList.toggle("contatti-hide-guestbook", !showGuestbook);
-    };
-
-    const syncToggle = (key, value) => {
-      document.querySelectorAll(`[data-style-control="${key}"]`).forEach((node) => {
-        if (!(node instanceof HTMLInputElement)) return;
-        node.checked = Boolean(value);
-        node.dispatchEvent(new Event("change", { bubbles: true }));
-      });
-    };
-
-    applyVisibility();
-
-    document.querySelectorAll("[data-contatti-remove]").forEach((node) => {
-      if (!(node instanceof HTMLButtonElement)) return;
-      node.addEventListener("click", () => {
-        const key = node.dataset.contattiRemove || "";
-        if (key !== "showTitleCard" && key !== "showGuestbook") return;
-        writeState({ [key]: false });
-        syncToggle(key, false);
-        applyVisibility();
-      });
-    });
-  </script>
-
-  <script>
-    const settingsKey = "claudia-editor-contatti-settings";
-
-    const toBoolean = (value) =>
-      value === true || value === 1 || value === "1" || value === "true" || value === "on";
-
-    const writeSettings = (partial) => {
-      try {
-        const raw = window.localStorage.getItem(settingsKey);
-        const parsed = raw ? JSON.parse(raw) : {};
-        const next = { ...(parsed && typeof parsed === "object" ? parsed : {}), ...partial };
-        window.localStorage.setItem(settingsKey, JSON.stringify(next));
-      } catch {}
-    };
-
-    const readSettings = () => {
-      try {
-        const raw = window.localStorage.getItem(settingsKey);
-        return raw ? JSON.parse(raw) : {};
-      } catch {
-        return {};
-      }
-    };
-
-    // Settings helpers reserved for future controls.
-  </script>
-
-  <script>
-    const legacyPanelKey = "claudia-contatti-contact-panel-v1";
-    const panelKey = "claudia-editor-contatti-contact-panel-v1";
-    const panel = document.querySelector("[data-contact-panel]");
-    const drag = document.querySelector("[data-contact-panel-drag]");
-    const resize = document.querySelector("[data-contact-panel-resize]");
-
-    const toNumber = (value, fallback = 0) => {
-      if (typeof value === "string") {
-        const match = value.trim().match(/-?\d+(\.\d+)?/);
-        if (match) {
-          const parsed = Number(match[0]);
-          return Number.isFinite(parsed) ? parsed : fallback;
-        }
-        return fallback;
-      }
-      const parsed = Number(value);
-      return Number.isFinite(parsed) ? parsed : fallback;
-    };
-
-    const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
-
-    const readPanel = () => {
-      try {
-        const raw = window.localStorage.getItem(panelKey) ?? window.localStorage.getItem(legacyPanelKey);
-        if (!raw) return null;
-        const parsed = JSON.parse(raw);
-        if (!parsed || typeof parsed !== "object") return null;
-        return {
-          x: toNumber(parsed.x, 420),
-          y: toNumber(parsed.y, 190),
-          w: toNumber(parsed.w, 520),
         };
-      } catch {
-        return null;
-      }
-    };
 
-    const writePanel = (value) => {
-      try {
-        window.localStorage.setItem(panelKey, JSON.stringify(value));
-        window.localStorage.removeItem(legacyPanelKey);
-      } catch {}
-    };
+        document.addEventListener("claudia:locale-ready", applyLocalizedDetails);
+        window.addEventListener("DOMContentLoaded", applyLocalizedDetails, { once: true });
 
-    const applyPanel = (state) => {
-      if (!(panel instanceof HTMLElement) || !state) return;
-      panel.style.setProperty("--cp-x", `${toNumber(state.x, 0)}px`);
-      panel.style.setProperty("--cp-y", `${toNumber(state.y, 0)}px`);
-      panel.style.setProperty("--cp-w", `${toNumber(state.w, 520)}px`);
-    };
+        const guestbookForm = document.querySelector("[data-guestbook-form]");
+        const guestbookList = document.querySelector("[data-guestbook-list]");
+        const guestbookStatus = document.querySelector("[data-guestbook-status]");
+        const guestbookMessage = document.querySelector("[data-guestbook-message]");
+        const guestbookCount = document.querySelector("[data-guestbook-count]");
+        const guestbookSubmit = document.querySelector("[data-guestbook-submit]");
 
-    if (panel instanceof HTMLElement) {
-      const initialPanelState = readPanel() ?? { x: 420, y: 190, w: 520 };
-      applyPanel(initialPanelState);
-      writePanel(initialPanelState);
-    }
-
-    if (panel instanceof HTMLElement && drag instanceof HTMLButtonElement) {
-      let moving = null;
-      drag.addEventListener("pointerdown", (event) => {
-        if (!(event instanceof PointerEvent)) return;
-        moving = {
-          startX: event.clientX,
-          startY: event.clientY,
-          baseX: toNumber(getComputedStyle(panel).getPropertyValue("--cp-x"), 0),
-          baseY: toNumber(getComputedStyle(panel).getPropertyValue("--cp-y"), 0),
+        const guestbookCopy = {
+          it: {
+            loading: "Carico i messaggi…",
+            error: "Il guestbook non è raggiungibile. Riprova tra poco.",
+            sending: "Pubblico il messaggio…",
+            success: "Il tuo messaggio è nel guestbook.",
+          },
+          en: {
+            loading: "Loading messages…",
+            error: "The guestbook is unavailable. Please try again shortly.",
+            sending: "Publishing your message…",
+            success: "Your message is now in the guestbook.",
+          },
         };
-        drag.setPointerCapture(event.pointerId);
-        event.preventDefault();
-        event.stopPropagation();
-      });
 
-      const movePanel = (event) => {
-        if (!moving || !(event instanceof PointerEvent)) return;
-        const x = Math.round(moving.baseX + (event.clientX - moving.startX));
-        const y = Math.round(moving.baseY + (event.clientY - moving.startY));
-        applyPanel({ x, y, w: toNumber(getComputedStyle(panel).getPropertyValue("--cp-w"), 520) });
-      };
-
-      const endPanelMove = () => {
-        if (!moving) return;
-        moving = null;
-        const state = {
-          x: toNumber(getComputedStyle(panel).getPropertyValue("--cp-x"), 0),
-          y: toNumber(getComputedStyle(panel).getPropertyValue("--cp-y"), 0),
-          w: toNumber(getComputedStyle(panel).getPropertyValue("--cp-w"), 520),
+        const guestbookLocale = () => (document.documentElement.dataset.locale === "en" ? "en" : "it");
+        const setGuestbookStatus = (message, state = "") => {
+          if (!(guestbookStatus instanceof HTMLElement)) return;
+          guestbookStatus.textContent = message;
+          guestbookStatus.dataset.state = state;
         };
-        writePanel(state);
-      };
 
-      document.addEventListener("pointermove", movePanel);
-      document.addEventListener("pointerup", endPanelMove);
-      document.addEventListener("pointercancel", endPanelMove);
-    }
-
-    if (panel instanceof HTMLElement && resize instanceof HTMLElement) {
-      let resizing = null;
-      resize.addEventListener("pointerdown", (event) => {
-        if (!(event instanceof PointerEvent)) return;
-        resizing = {
-          startX: event.clientX,
-          baseW: toNumber(getComputedStyle(panel).getPropertyValue("--cp-w"), 520),
+        const updateCount = () => {
+          if (!(guestbookMessage instanceof HTMLTextAreaElement) || !(guestbookCount instanceof HTMLElement)) return;
+          guestbookCount.textContent = `${guestbookMessage.value.length} / 500`;
         };
-        resize.setPointerCapture(event.pointerId);
-        event.preventDefault();
-        event.stopPropagation();
-      });
 
-      const movePanelResize = (event) => {
-        if (!resizing || !(event instanceof PointerEvent)) return;
-        const nextW = clamp(Math.round(resizing.baseW + (event.clientX - resizing.startX)), 220, 980);
-        panel.style.setProperty("--cp-w", `${nextW}px`);
-      };
+        const renderGuestbook = (entries) => {
+          if (!(guestbookList instanceof HTMLElement)) return;
+          guestbookList.replaceChildren();
+          const locale = guestbookLocale();
 
-      const endPanelResize = () => {
-        if (!resizing) return;
-        resizing = null;
-        const state = {
-          x: toNumber(getComputedStyle(panel).getPropertyValue("--cp-x"), 0),
-          y: toNumber(getComputedStyle(panel).getPropertyValue("--cp-y"), 0),
-          w: toNumber(getComputedStyle(panel).getPropertyValue("--cp-w"), 520),
+          if (!Array.isArray(entries) || entries.length === 0) {
+            return;
+          }
+
+          for (const entry of entries) {
+            const article = document.createElement("article");
+            article.className = "guestbook-entry";
+            const header = document.createElement("header");
+            const name = document.createElement("strong");
+            const date = document.createElement("time");
+            const message = document.createElement("p");
+
+            name.textContent = String(entry.name || "");
+            date.dateTime = String(entry.createdAt || "");
+            date.textContent = new Intl.DateTimeFormat(locale === "en" ? "en-IE" : "it-IT", {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+            }).format(new Date(entry.createdAt));
+            message.textContent = String(entry.message || "");
+
+            header.append(name, date);
+            article.append(header, message);
+            guestbookList.appendChild(article);
+          }
         };
-        writePanel(state);
-      };
 
-      document.addEventListener("pointermove", movePanelResize);
-      document.addEventListener("pointerup", endPanelResize);
-      document.addEventListener("pointercancel", endPanelResize);
-    }
+        const loadGuestbook = async () => {
+          const locale = guestbookLocale();
+          setGuestbookStatus(guestbookCopy[locale].loading);
+          try {
+            const response = await fetch("/api/guestbook", { headers: { Accept: "application/json" } });
+            if (!response.ok) throw new Error("guestbook unavailable");
+            const payload = await response.json();
+            renderGuestbook(payload.entries);
+            setGuestbookStatus("");
+          } catch {
+            setGuestbookStatus(guestbookCopy[locale].error, "error");
+          }
+        };
 
-    window.addEventListener("style-editor:save-all", () => {
-      if (!(panel instanceof HTMLElement)) return;
-      writePanel({
-        x: toNumber(getComputedStyle(panel).getPropertyValue("--cp-x"), 0),
-        y: toNumber(getComputedStyle(panel).getPropertyValue("--cp-y"), 0),
-        w: toNumber(getComputedStyle(panel).getPropertyValue("--cp-w"), 520),
-      });
-    });
-  </script>
+        guestbookMessage?.addEventListener("input", updateCount);
+        updateCount();
 
-  <script>
-    const guestbookKey = "claudia-contatti-guestbook-v1";
-    const form = document.querySelector("[data-guestbook-form]");
-    const list = document.querySelector("[data-guestbook-list]");
+        guestbookForm?.addEventListener("submit", async (event) => {
+          event.preventDefault();
+          if (!(guestbookForm instanceof HTMLFormElement)) return;
+          const locale = guestbookLocale();
+          const formData = new FormData(guestbookForm);
+          const payload = {
+            name: String(formData.get("name") || "").trim(),
+            message: String(formData.get("message") || "").trim(),
+            website: String(formData.get("website") || "").trim(),
+          };
 
-    const escapeHtml = (value) =>
-      String(value ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+          if (guestbookSubmit instanceof HTMLButtonElement) guestbookSubmit.disabled = true;
+          setGuestbookStatus(guestbookCopy[locale].sending);
 
-    const today = () =>
-      new Intl.DateTimeFormat("it-IT", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      }).format(new Date());
+          try {
+            const response = await fetch("/api/guestbook", {
+              method: "POST",
+              headers: { "Content-Type": "application/json", Accept: "application/json" },
+              body: JSON.stringify(payload),
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.error || "guestbook unavailable");
+            renderGuestbook(result.entries);
+            guestbookForm.reset();
+            updateCount();
+            setGuestbookStatus(guestbookCopy[locale].success, "success");
+          } catch {
+            setGuestbookStatus(guestbookCopy[locale].error, "error");
+          } finally {
+            if (guestbookSubmit instanceof HTMLButtonElement) guestbookSubmit.disabled = false;
+          }
+        });
 
-    const readEntries = () => {
-      try {
-        const raw = window.localStorage.getItem(guestbookKey);
-        const parsed = raw ? JSON.parse(raw) : [];
-        return Array.isArray(parsed) ? parsed : [];
-      } catch {
-        return [];
-      }
-    };
-
-    const writeEntries = (entries) => {
-      try {
-        window.localStorage.setItem(guestbookKey, JSON.stringify(entries));
-      } catch {}
-    };
-
-    let entries = readEntries();
-
-    const renderEntries = () => {
-      if (!(list instanceof HTMLElement)) return;
-      list.innerHTML = entries
-        .slice(0, 30)
-        .map(
-          (entry) => `
-          <article class="contact-panel__entry">
-            <div class="contact-panel__entry-meta">
-              <strong>${escapeHtml(entry.name || "anon")}</strong>
-              <time>${escapeHtml(entry.date || "")}</time>
-            </div>
-            <p>${escapeHtml(entry.message || "")}</p>
-          </article>
-        `,
-        )
-        .join("");
-    };
-
-    renderEntries();
-
-    if (form instanceof HTMLFormElement) {
-      form.addEventListener("submit", (event) => {
-        event.preventDefault();
-        const data = new FormData(form);
-        const name = String(data.get("name") || "").trim();
-        const message = String(data.get("message") || "").trim();
-        if (!name || !message) return;
-
-        entries = [{ id: `g-${Date.now()}`, name, message, date: today() }, ...entries];
-        writeEntries(entries);
-        form.reset();
-        renderEntries();
-      });
-    }
-
-    window.addEventListener("style-editor:save-all", () => writeEntries(entries));
-  </script>
-
-</BioLayout>
+        document.addEventListener("claudia:locale-ready", () => {
+          updateCount();
+          void loadGuestbook();
+        });
+        void loadGuestbook();
+      })();
+    </script>
+  </body>
+</html>

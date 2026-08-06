@@ -5,13 +5,29 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "check:syntax": "zsh -n scripts/launch-preview-service.sh scripts/migrate-editor-token-to-keychain.sh scripts/verify-public-services.sh && node --check scripts/public-preview-server.mjs && node --check scripts/lib/editor-auth.mjs && node --check scripts/lib/editor-registry.mjs && node --check scripts/lib/editor-storage.mjs && node --check scripts/lib/http-utils.mjs && node --check tools/contact-editor/editor.js && node --check tools/contact-editor/editor-api.js && node --check tools/contact-editor/editor-registry.js",
+    "check": "npm run check:syntax && npm run test:unit && npm run build",
+    "test": "npm run test:unit && npm run test:integration",
+    "test:unit": "node --test tests/editor-auth.test.mjs tests/editor-registry.test.mjs tests/editor-storage.test.mjs",
+    "test:integration": "npm run build && node --test tests/public-preview.integration.test.mjs && npm run build",
+    "playwright:install": "playwright install chromium",
+    "test:e2e": "npm run build && playwright test",
+    "verify": "npm run check && npm run test:integration && npm run test:e2e",
+    "verify:live": "zsh scripts/verify-public-services.sh",
+    "collage:cutout": "swift scripts/cutout-collages.swift",
+    "collage:cutout:overwrite": "swift scripts/cutout-collages.swift --overwrite",
     "editor:build": "astro build",
     "editor:server": "node scripts/editor-server.mjs",
     "editor": "npm run editor:build && npm run editor:server",
+    "preview:public": "node scripts/public-preview-server.mjs",
     "preview": "astro preview",
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^5.0.0"
+    "astro": "7.2.0",
+    "simple-icons": "^15.22.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.62.1"
   }
 }

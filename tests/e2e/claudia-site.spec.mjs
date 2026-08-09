@@ -10,6 +10,9 @@ test("la Home apre la pagina Collage pubblica", async ({ page }) => {
   await expect(page).toHaveURL(/\/collage\//);
   await expect(page).toHaveTitle(/Collage/);
   await expect(page.locator("[data-composition-images] button")).toHaveCount(24);
+  await expect.poll(() => page.locator("[data-composition-images] img").evaluateAll((images) => (
+    images.every((image) => image.complete && image.naturalWidth > 0)
+  ))).toBe(true);
 });
 
 test("la Home scambia Scritture e Curriculum sulle due immagini richieste", async ({ page }) => {
@@ -77,6 +80,11 @@ test("il toggle inglese traduce le pagine che prima erano monolingui", async ({ 
   await page.goto("/scritture-esplorazioni/racconti.html?lang=en");
   await expect(page.locator(".archive-header h1")).toHaveText("Stories");
   await expect(page.getByRole("heading", { name: "Sailor Moon Friend", exact: true })).toBeVisible();
+
+  await page.goto("/scritture-esplorazioni/g1-revisione.html?lang=en");
+  await expect(page.getByText("Magical realism, horror, ‘Phlegraean Gothic’", { exact: false })).toBeVisible();
+  await expect(page.getByText("Realismo magico, horror, “gotico flegreo”", { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: /All stories/ }).first()).toHaveAttribute("href", /racconti\.html\?lang=en$/);
 
   await page.goto("/cv/?lang=it");
   await expect(page.getByRole("tab", { name: "Scrittura", exact: true })).toBeVisible();

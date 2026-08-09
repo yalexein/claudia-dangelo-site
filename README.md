@@ -2,6 +2,10 @@
 
 Sito statico costruito con **Astro** e pubblicabile su **GitHub Pages**.
 
+Repository canonico: `https://github.com/clahoudini/claudia-dangelo-site`
+
+Sito pubblico: `https://claudia-dangelo.com`
+
 ## Struttura
 
 - `src/pages/index.astro`: landing

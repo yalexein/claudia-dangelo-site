@@ -11,7 +11,7 @@
   { "id": "high-fluids", "file": "collage_high-fluids (2025).jpg", "naturalWidth": 451, "naturalHeight": 480, "x": 858, "y": 150, "width": 156, "rotation": -5, "z": 24 },
   { "id": "il-cammino", "file": "collage_il cammino.jpg", "naturalWidth": 344, "naturalHeight": 481, "x": 989, "y": 171, "width": 128, "rotation": 183, "z": 7 },
 
-  { "id": "origine-umanita", "file": "collage_l'origine dell'umanità.jpg", "naturalWidth": 342, "naturalHeight": 481, "x": 470, "y": 325, "width": 132, "rotation": -3, "z": 16 },
+  { "id": "origine-umanita", "file": "collage_l-origine-dell-umanita.jpg", "naturalWidth": 342, "naturalHeight": 481, "x": 470, "y": 325, "width": 132, "rotation": -3, "z": 16 },
   { "id": "la-calosca", "file": "collage_la calosca_RGB.jpg", "naturalWidth": 340, "naturalHeight": 481, "x": 598, "y": 318, "width": 136, "rotation": 5, "z": 4 },
   { "id": "mamma-gatta", "file": "collage_mamma gatta rgb.jpg", "naturalWidth": 403, "naturalHeight": 481, "x": 724, "y": 331, "width": 148, "rotation": -4, "z": 18 },
   { "id": "monsieur-mars", "file": "collage_monsieur mars_scontornato_piccolo.jpg", "naturalWidth": 340, "naturalHeight": 481, "x": 854, "y": 316, "width": 130, "rotation": 2, "z": 11 },

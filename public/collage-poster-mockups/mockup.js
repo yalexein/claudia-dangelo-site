@@ -24,7 +24,7 @@
     { file: "collage_hangin out with my demon.jpg", title: "Hangin out with my demon", dx: 50, dy: 59, dw: 16, dr: 182, dz: 44, mx: 53, my: 43, mw: 44, mr: 182, fullRotation: 180 },
     { file: "collage_high-fluids (2025).jpg", title: "High fluids", dx: 56, dy: 10, dw: 17, dr: -5, dz: 62, mx: 0, my: 51, mw: 58, mr: -6 },
     { file: "collage_il cammino.jpg", title: "Il cammino", dx: 65, dy: 58, dw: 13, dr: 183, dz: 18, mx: 54, my: 56, mw: 43, mr: 183, fullRotation: 180 },
-    { file: "collage_l'origine dell'umanità.jpg", title: "L'origine dell'umanità", dx: 71, dy: 3, dw: 12, dr: -3, dz: 39, mx: 12, my: 63, mw: 44, mr: -3 },
+    { file: "collage_l-origine-dell-umanita.jpg", title: "L'origine dell'umanità", dx: 71, dy: 3, dw: 12, dr: -3, dz: 39, mx: 12, my: 63, mw: 44, mr: -3 },
     { file: "collage_la calosca_RGB.jpg", title: "La calosca", dx: 72, dy: 56, dw: 14, dr: 5, dz: 72, mx: 51, my: 67, mw: 46, mr: 5 },
     { file: "collage_mamma gatta rgb.jpg", title: "Mamma gatta", dx: 86, dy: 9, dw: 15, dr: -4, dz: 17, mx: 0, my: 74, mw: 56, mr: -4 },
     { file: "collage_monsieur mars_scontornato_piccolo.jpg", title: "Monsieur Mars", dx: 92, dy: 58, dw: 12, dr: 2, dz: 46, mx: 56, my: 79, mw: 41, mr: 3 },

@@ -19,6 +19,7 @@
 
   const locale = () => (document.documentElement.dataset.locale === "en" ? "en" : "it");
   const text = (post, field) => post[`${field}${locale() === "en" ? "En" : "It"}`] || post[`${field}It`] || "";
+  const localizedUrl = (path) => window.ClaudiaLocale?.localizedUrl?.(path, locale()) || path;
   const internalPostUrl = (post) => `/scritture-esplorazioni/post.html?id=${encodeURIComponent(post.id)}&lang=${locale()}`;
   const element = (tag, className, content = "") => {
     const node = document.createElement(tag);
@@ -92,7 +93,7 @@
       copy.appendChild(element("p", "metadata", [post.year, text(post, "metadata")].filter(Boolean).join(" · ")));
       copy.appendChild(element("p", "excerpt", text(post, "excerpt")));
       const allLink = element("a", "section-link", `${labels[locale()].allStories} `);
-      allLink.href = "racconti.html";
+      allLink.href = localizedUrl("racconti.html");
       allLink.appendChild(element("span", "", "→"));
       copy.appendChild(allLink);
       article.appendChild(copy);

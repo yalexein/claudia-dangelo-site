@@ -5,25 +5,22 @@
 
 <style>
   .site-language-switcher {
-    position: fixed;
-    top: max(12px, env(safe-area-inset-top));
-    right: max(12px, env(safe-area-inset-right));
-    z-index: 10000;
+    position: static;
     display: flex;
-    gap: 2px;
-    padding: 2px;
+    gap: 1px;
+    padding: 1px;
     border: 1px solid currentColor;
-    background: color-mix(in srgb, Canvas 90%, transparent);
-    color: CanvasText;
+    background: transparent;
+    color: inherit;
     font: 700 11px/1 "Courier New", Courier, monospace;
     letter-spacing: 0.08em;
   }
 
   .site-language-switcher a {
     display: grid;
-    min-width: 40px;
-    min-height: 40px;
-    padding: 6px;
+    min-width: 30px;
+    min-height: 30px;
+    padding: 4px;
     place-items: center;
     color: inherit;
     text-decoration: none;
@@ -39,5 +36,13 @@
   .site-language-switcher a:focus-visible {
     outline: 2px solid currentColor;
     outline-offset: 3px;
+  }
+
+  @media (max-width: 460px) {
+    .site-language-switcher a {
+      min-width: 27px;
+      min-height: 27px;
+      padding: 3px;
+    }
   }
 </style>

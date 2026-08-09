@@ -1,6 +1,7 @@
 ---
-import LanguageSwitcher from "../../components/LanguageSwitcher.astro";
+import SitePageHeader from "../../components/SitePageHeader.astro";
 import "../../styles/uccelli-public.css";
+import "../../styles/site-page-header.css";
 
 const base = import.meta.env.BASE_URL;
 
@@ -115,6 +116,7 @@ const photos = [
     <meta property="og:locale" content="it_IT" />
     <meta property="og:locale:alternate" content="en_US" />
     <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+    <link rel="stylesheet" href={`${base}site-settings.css?v=1`} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -123,7 +125,7 @@ const photos = [
     />
     <script is:inline src={`${base}site-locale.js?v=2`}></script>
     <script is:inline>window.ClaudiaCustomizationPage = "uccelli";</script>
-    <script is:inline src={`${base}contact-customizer.js?v=4`}></script>
+    <script is:inline src={`${base}contact-customizer.js?v=20260809-2`}></script>
     <script is:inline>
       document.addEventListener("claudia:locale-ready", (event) => {
         const locale = event.detail?.locale === "en" ? "en" : "it";
@@ -133,7 +135,7 @@ const photos = [
   </head>
 
   <body>
-    <LanguageSwitcher />
+    <SitePageHeader pageNameIt="Uccelli" pageNameEn="Birds" editKey="uccelli-header" />
 
     <div class="birds-shell" data-contact-edit="uccelli-shell">
       <main class="contact-public birds-scroll-pane" data-contact-edit="uccelli-page">
@@ -237,19 +239,6 @@ const photos = [
       </main>
 
       <aside class="birds-fixed-image" data-contact-edit="uccelli-fixed-image-column">
-        <a
-          class="birds-home-link"
-          data-contact-edit="uccelli-home-link"
-          href={base}
-          aria-label="Torna alla pagina iniziale"
-          data-locale-aria-label-it="Torna alla pagina iniziale"
-          data-locale-aria-label-en="Back to the home page"
-        >
-          <span data-contact-edit="uccelli-home-arrow" aria-hidden="true">←</span>
-          <span data-locale-only="it" data-contact-edit="uccelli-home-label-it">torna alla home</span>
-          <span data-locale-only="en" data-contact-edit="uccelli-home-label-en" hidden>back to home</span>
-        </a>
-
         <img
           data-contact-edit="uccelli-fixed-image"
           src={`${base}images/uccelli/uccelli.jpg`}

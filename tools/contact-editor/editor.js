@@ -1,5 +1,7 @@
-import { loadPageConfiguration, savePageConfiguration, uploadEditorImage } from "./editor-api.js";
+import { deleteGuestbookEntry, loadGuestbookEntries, loadPageConfiguration, savePageConfiguration, uploadEditorImage } from "./editor-api.js";
 import { devices, pageDefaultVariables, pageDefinitions } from "./editor-registry.js";
+import { initializeWritingDashboard } from "./writing-dashboard.js";
+import { initializeSiteSettingsEditor } from "./site-settings-editor.js";
 
 (() => {
   "use strict";
@@ -18,6 +20,7 @@ import { devices, pageDefaultVariables, pageDefinitions } from "./editor-registr
   const redoButton = document.querySelector("[data-redo]");
   const textInput = document.querySelector("[data-text]");
   const fontUrlInput = document.querySelector("[data-font-url]");
+  const globalFontFamilyInput = document.querySelector("[data-global-font-family]");
   const scopeLabel = document.querySelector("[data-scope-label]");
   const publicLink = document.querySelector(".link-button");
   const pageSelect = document.querySelector("[data-page-select]");
@@ -29,9 +32,12 @@ import { devices, pageDefaultVariables, pageDefinitions } from "./editor-registr
   const imageFileInput = document.querySelector("[data-image-file]");
   const imageAltInput = document.querySelector("[data-image-alt]");
   const languageGroup = document.querySelector('[aria-label="Lingua della pagina"]');
+  const guestbookAdminPanel = document.querySelector("[data-guestbook-admin]");
+  const guestbookAdminList = document.querySelector("[data-guestbook-admin-list]");
+  const guestbookAdminStatus = document.querySelector("[data-guestbook-admin-status]");
   const channel = "BroadcastChannel" in window ? new BroadcastChannel("claudia-contact-editor") : null;
 
-  let configuration = { version: 1, updatedAt: null, global: { fontUrl: "", variables: {} }, elements: {} };
+  let configuration = { version: 1, updatedAt: null, global: { fontUrl: "", fontFamily: "", variables: {} }, elements: {} };
   let savedSnapshot = "";
   let selectedElement = null;
   let selectedSelector = "";
@@ -77,6 +83,48 @@ import { devices, pageDefaultVariables, pageDefinitions } from "./editor-registr
 
   const broadcastPreview = () => {
     channel?.postMessage({ type: "preview", configuration });
+  };
+
+  const renderGuestbookAdmin = (entries) => {
+    guestbookAdminList.replaceChildren();
+    if (!entries.length) {
+      guestbookAdminStatus.textContent = "Nessun messaggio pubblicato.";
+      guestbookAdminStatus.dataset.state = "";
+      return;
+    }
+    guestbookAdminStatus.textContent = `${entries.length} messagg${entries.length === 1 ? "io" : "i"} pubblicat${entries.length === 1 ? "o" : "i"}.`;
+    guestbookAdminStatus.dataset.state = "";
+    for (const entry of entries) {
+      const article = document.createElement("article");
+      article.className = "guestbook-admin__entry";
+      const header = document.createElement("header");
+      const name = document.createElement("strong");
+      const date = document.createElement("time");
+      const message = document.createElement("p");
+      const button = document.createElement("button");
+      name.textContent = String(entry.name || "");
+      date.dateTime = String(entry.createdAt || "");
+      date.textContent = new Intl.DateTimeFormat("it-IT", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(entry.createdAt));
+      message.textContent = String(entry.message || "");
+      button.type = "button";
+      button.dataset.guestbookDelete = String(entry.id || "");
+      button.textContent = "Elimina";
+      header.append(name, date);
+      article.append(header, message, button);
+      guestbookAdminList.appendChild(article);
+    }
+  };
+
+  const refreshGuestbookAdmin = async () => {
+    if (currentPage !== "contatti") return;
+    guestbookAdminStatus.textContent = "Carico i messaggi…";
+    guestbookAdminStatus.dataset.state = "";
+    try {
+      renderGuestbookAdmin(await loadGuestbookEntries());
+    } catch (error) {
+      guestbookAdminStatus.textContent = error.message || "Guestbook non disponibile";
+      guestbookAdminStatus.dataset.state = "error";
+    }
   };
 
   const applyConfiguration = () => {
@@ -469,6 +517,8 @@ import { devices, pageDefaultVariables, pageDefinitions } from "./editor-registr
     currentPage = pageDefinitions[pageName] ? pageName : "contatti";
     pageSelect.value = currentPage;
     document.querySelector(".palette-panel").hidden = currentPage === "bio" || currentPage === "collage";
+    guestbookAdminPanel.hidden = currentPage !== "contatti";
+    if (currentPage === "contatti") void refreshGuestbookAdmin();
     languageGroup.hidden = pageDefinitions[currentPage].languages === false;
     if (updateHistory) history.replaceState(null, "", `/__editor/?page=${encodeURIComponent(currentPage)}`);
     setLanguage(currentLanguage);
@@ -477,11 +527,13 @@ import { devices, pageDefaultVariables, pageDefinitions } from "./editor-registr
   const loadConfiguration = async () => {
     activeConfigurationPage = currentPage;
     configuration = await loadPageConfiguration(activeConfigurationPage);
-    configuration.global ||= { fontUrl: "", variables: {} };
+    configuration.global ||= { fontUrl: "", fontFamily: "", variables: {} };
+    configuration.global.fontFamily ||= "";
     configuration.global.variables ||= {};
     configuration.elements ||= {};
     savedSnapshot = snapshot();
     fontUrlInput.value = configuration.global.fontUrl || "";
+    globalFontFamilyInput.value = configuration.global.fontFamily || "";
     document.querySelectorAll("[data-variable]").forEach((input) => {
       input.value = configuration.global.variables[input.dataset.variable] || defaultVariables()[input.dataset.variable];
     });
@@ -594,6 +646,20 @@ import { devices, pageDefaultVariables, pageDefinitions } from "./editor-registr
       imageFileInput.value = "";
     }
   });
+  guestbookAdminList.addEventListener("click", async (event) => {
+    const button = event.target.closest("[data-guestbook-delete]");
+    if (!(button instanceof HTMLButtonElement) || !button.dataset.guestbookDelete) return;
+    if (!window.confirm("Eliminare definitivamente questo messaggio dal Guestbook pubblico?")) return;
+    button.disabled = true;
+    guestbookAdminStatus.textContent = "Elimino il messaggio…";
+    try {
+      renderGuestbookAdmin(await deleteGuestbookEntry(button.dataset.guestbookDelete));
+    } catch (error) {
+      guestbookAdminStatus.textContent = error.message || "Eliminazione non riuscita";
+      guestbookAdminStatus.dataset.state = "error";
+      button.disabled = false;
+    }
+  });
   document.querySelector("[data-image-show]").addEventListener("click", () => { updateStyle("display", "block"); loadControls(); });
   document.querySelector("[data-image-hide]").addEventListener("click", () => { updateStyle("display", "none"); loadControls(); });
   document.querySelector("[data-image-reset]").addEventListener("click", () => {
@@ -632,6 +698,9 @@ import { devices, pageDefaultVariables, pageDefinitions } from "./editor-registr
   });
   fontUrlInput.addEventListener("change", () => {
     mutate(() => { configuration.global.fontUrl = fontUrlInput.value.trim(); });
+  });
+  globalFontFamilyInput.addEventListener("input", () => {
+    mutate(() => { configuration.global.fontFamily = globalFontFamilyInput.value.trim(); });
   });
 
   document.querySelectorAll("[data-device]").forEach((button) => button.addEventListener("click", () => setDevice(button.dataset.device)));
@@ -676,8 +745,9 @@ import { devices, pageDefaultVariables, pageDefinitions } from "./editor-registr
     if (!window.confirm(`Ripristinare tutte le personalizzazioni di ${pageDefinitions[currentPage].label}?`)) return;
     mutate(() => {
       configuration.elements = {};
-      configuration.global = { fontUrl: "", variables: {} };
+      configuration.global = { fontUrl: "", fontFamily: "", variables: {} };
       fontUrlInput.value = "";
+      globalFontFamilyInput.value = "";
       document.querySelectorAll("[data-variable]").forEach((input) => { input.value = defaultVariables()[input.dataset.variable]; });
     });
     loadControls();
@@ -715,3 +785,6 @@ import { devices, pageDefaultVariables, pageDefinitions } from "./editor-registr
       setStageStatus("Impossibile caricare l’editor locale");
     });
 })();
+
+initializeWritingDashboard();
+initializeSiteSettingsEditor();

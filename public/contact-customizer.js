@@ -22,6 +22,7 @@
   };
   const STYLE_ID = `claudia-${PAGE}-customization`;
   const FONT_ID = `claudia-${PAGE}-custom-font`;
+  const GLOBAL_FONT_STYLE_ID = `claudia-${PAGE}-global-font`;
   const scopes = {
     base: (rules) => rules,
     tablet: (rules) => `@media (min-width: 761px) and (max-width: 1020px) {${rules}}`,
@@ -111,6 +112,15 @@
     document.head.appendChild(link);
   };
 
+  const applyGlobalFontFamily = (fontFamily) => {
+    document.getElementById(GLOBAL_FONT_STYLE_ID)?.remove();
+    if (!safeValue(fontFamily) || !fontFamily.trim()) return;
+    const style = document.createElement("style");
+    style.id = GLOBAL_FONT_STYLE_ID;
+    style.textContent = `body,body *{font-family:${fontFamily}!important}`;
+    document.head.appendChild(style);
+  };
+
   const applyVariables = (variables) => {
     for (const name of appliedVariables) document.documentElement.style.removeProperty(name);
     appliedVariables = [];
@@ -179,6 +189,7 @@
 
     applyVariables(config.global?.variables);
     applyFont(config.global?.fontUrl || "");
+    applyGlobalFontFamily(config.global?.fontFamily || "");
     document.dispatchEvent(new CustomEvent("claudia:contact-customized", { detail: config }));
   };
 
@@ -195,10 +206,11 @@
     updatedAt: configuration.updatedAt || merged.updatedAt || null,
     global: {
       fontUrl: configuration.global?.fontUrl || merged.global.fontUrl || "",
+      fontFamily: configuration.global?.fontFamily || merged.global.fontFamily || "",
       variables: { ...merged.global.variables, ...(configuration.global?.variables || {}) },
     },
     elements: { ...merged.elements, ...(configuration.elements || {}) },
-  }), { version: 1, updatedAt: null, global: { fontUrl: "", variables: {} }, elements: {} });
+  }), { version: 1, updatedAt: null, global: { fontUrl: "", fontFamily: "", variables: {} }, elements: {} });
 
   const load = async () => {
     try {

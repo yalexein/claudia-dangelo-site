@@ -34,14 +34,12 @@
 
   const main = document.querySelector("main");
   mark(main, "pagina");
-  mark(document.querySelector(".preview-bar"), "barra-anteprima");
+  mark(document.querySelector(".site-page-header"), "header-pagina");
+  markChildren(document.querySelector(".site-page-header"), "header-pagina");
 
   if (page === "scritture-home") {
-    mark(document.querySelector(".home-link"), "torna-home");
     mark(document.querySelector(".masthead"), "testata");
     mark(document.querySelector(".masthead h1"), "titolo");
-    mark(document.querySelector(".masthead > p"), "sottotitolo");
-    document.querySelectorAll(".edition-line span").forEach((element, index) => mark(element, `edizione-${index + 1}`));
     mark(document.querySelector(".categories"), "categorie-riga");
     document.querySelectorAll(".categories a").forEach((element) => mark(element, `categoria-${slug(element.textContent)}`));
 

@@ -44,6 +44,8 @@
       </div>
 
       <div class="topbar__actions">
+        <button class="compact" type="button" data-site-settings-open>Font del sito</button>
+        <button class="compact dashboard-button" type="button" data-writing-dashboard-open>Dashboard Scritture</button>
         <button class="compact" type="button" data-undo disabled aria-label="Annulla">↶</button>
         <button class="compact" type="button" data-redo disabled aria-label="Ripeti">↷</button>
         <a class="compact link-button" href="/contatti/?lang=it" target="_blank">Pagina pubblica ↗</a>
@@ -51,7 +53,7 @@
       </div>
     </header>
 
-    <main class="workspace">
+    <main class="workspace" data-page-editor-workspace>
       <section class="stage" aria-label="Anteprima modificabile">
         <div class="stage__tip"><span></span>Clicca qualsiasi elemento. Trascinalo per spostarlo.</div>
         <div class="viewport" data-viewport>
@@ -93,6 +95,19 @@
                 <span>Google Fonts URL <small>facoltativo</small></span>
                 <input type="url" placeholder="https://fonts.googleapis.com/css2?family=…" data-font-url />
               </label>
+              <label class="field">
+                <span>Font globale della pagina</span>
+                <input list="font-list" placeholder="es. Georgia, serif" data-global-font-family />
+              </label>
+            </details>
+          </section>
+
+          <section class="panel guestbook-admin-panel" data-guestbook-admin hidden>
+            <details open>
+              <summary>Guestbook pubblico</summary>
+              <p class="guestbook-admin__help">I messaggi pubblicati restano visibili nel sito. Da qui puoi eliminarli.</p>
+              <p class="guestbook-admin__status" data-guestbook-admin-status role="status"></p>
+              <div class="guestbook-admin__list" data-guestbook-admin-list></div>
             </details>
           </section>
 
@@ -234,13 +249,208 @@
       </aside>
     </main>
 
+    <main class="writing-dashboard" data-writing-dashboard hidden>
+      <header class="writing-dashboard__header">
+        <div>
+          <span class="eyebrow">Archivio editoriale</span>
+          <h1>Dashboard Scritture</h1>
+          <p>Crea, traduci, controlla in anteprima e pubblica Libri, Racconti, Articoli e Blog.</p>
+        </div>
+        <div class="writing-dashboard__header-actions">
+          <button class="compact" type="button" data-writing-dashboard-close>← Editor pagine</button>
+          <button class="save-button" type="button" data-writing-new>+ Nuova scheda</button>
+        </div>
+      </header>
+
+      <div class="writing-dashboard__body">
+        <aside class="writing-library" aria-label="Pubblicazioni">
+          <div class="writing-library__filters">
+            <label class="field"><span>Cerca</span><input type="search" placeholder="Titolo o testo…" data-writing-search /></label>
+            <label class="field"><span>Sezione</span><select data-writing-category-filter><option value="">Tutte</option><option value="libri">Libri</option><option value="racconti">Racconti</option><option value="articoli">Articoli</option><option value="blog">Blog</option></select></label>
+            <label class="field"><span>Stato</span><select data-writing-status-filter><option value="">Tutti</option><option value="published">Pubblicati</option><option value="draft">Bozze</option></select></label>
+          </div>
+          <p class="writing-library__count" data-writing-count></p>
+          <div class="writing-library__list" data-writing-list role="listbox" aria-label="Elenco pubblicazioni"></div>
+        </aside>
+
+        <section class="writing-composer" aria-label="Editor pubblicazione">
+          <div class="writing-composer__empty" data-writing-empty>
+            <strong>Scegli una scheda oppure creane una nuova.</strong>
+            <span>Il sito pubblico mostra soltanto le schede con stato “Pubblicato”.</span>
+          </div>
+
+          <form data-writing-form hidden>
+            <input type="hidden" data-writing-id />
+            <div class="writing-composer__toolbar">
+              <label class="field"><span>Sezione</span><select data-writing-field="category" required><option value="libri">Libro</option><option value="racconti">Racconto</option><option value="articoli">Articolo</option><option value="blog">Blog</option></select></label>
+              <label class="field"><span>Anno / numero</span><input data-writing-field="year" maxlength="30" placeholder="2026" /></label>
+              <label class="field"><span>Stato</span><select data-writing-field="status"><option value="draft">Bozza privata</option><option value="published">Pubblicato</option></select></label>
+              <label class="writing-featured"><input type="checkbox" data-writing-field="featured" /> In evidenza</label>
+            </div>
+
+            <div class="writing-locales">
+              <fieldset>
+                <legend>Italiano</legend>
+                <label class="field"><span>Titolo</span><input data-writing-field="titleIt" maxlength="220" required /></label>
+                <label class="field"><span>Rivista, editore o metadati</span><input data-writing-field="metadataIt" maxlength="700" /></label>
+                <label class="field"><span>Estratto o descrizione</span><textarea rows="9" data-writing-field="excerptIt" maxlength="6000"></textarea></label>
+                <div class="field rich-field">
+                  <span>Testo completo</span>
+                  <div class="rich-toolbar" data-rich-toolbar="it" aria-label="Formattazione testo italiano">
+                    <select data-rich-block title="Stile paragrafo"><option value="p">Paragrafo</option><option value="h2">Titolo 2</option><option value="h3">Titolo 3</option><option value="blockquote">Citazione</option></select>
+                    <select data-rich-font title="Font"><option value="Optima">Optima</option><option value="Avenir">Avenir</option><option value="Georgia">Georgia</option><option value="Baskerville">Baskerville</option><option value="Garamond">Garamond</option><option value="Didot">Didot</option><option value="Helvetica">Helvetica</option><option value="Courier New">Courier</option></select>
+                    <select data-rich-size title="Dimensione"><option value="3">Normale</option><option value="4">Grande</option><option value="5">Titolo</option><option value="2">Piccolo</option></select>
+                    <button type="button" data-rich-command="bold" title="Grassetto"><b>B</b></button>
+                    <button type="button" data-rich-command="italic" title="Corsivo"><i>I</i></button>
+                    <button type="button" data-rich-command="underline" title="Sottolineato"><u>U</u></button>
+                    <button type="button" data-rich-command="insertUnorderedList" title="Elenco puntato">• lista</button>
+                    <button type="button" data-rich-command="insertOrderedList" title="Elenco numerato">1. lista</button>
+                    <button type="button" data-rich-command="justifyLeft" title="Allinea a sinistra">←</button>
+                    <button type="button" data-rich-command="justifyCenter" title="Centra">↔</button>
+                    <button type="button" data-rich-command="justifyRight" title="Allinea a destra">→</button>
+                    <button type="button" data-rich-link title="Inserisci link">Link</button>
+                    <button type="button" data-rich-image-upload title="Carica immagine nel testo">Immagine</button>
+                    <button type="button" data-rich-command="removeFormat" title="Rimuovi formattazione">Pulisci</button>
+                  </div>
+                  <div class="rich-editor" contenteditable="true" data-rich-editor="it" role="textbox" aria-multiline="true" data-placeholder="Scrivi qui il testo completo in italiano…"></div>
+                  <textarea data-writing-field="contentIt" hidden></textarea>
+                </div>
+                <label class="field"><span>Testo alternativo immagine</span><input data-writing-field="imageAltIt" maxlength="500" /></label>
+              </fieldset>
+              <fieldset>
+                <legend>English</legend>
+                <label class="field"><span>Title</span><input data-writing-field="titleEn" maxlength="220" required /></label>
+                <label class="field"><span>Publication, publisher or metadata</span><input data-writing-field="metadataEn" maxlength="700" /></label>
+                <label class="field"><span>Excerpt or description</span><textarea rows="9" data-writing-field="excerptEn" maxlength="6000"></textarea></label>
+                <div class="field rich-field">
+                  <span>Full text</span>
+                  <div class="rich-toolbar" data-rich-toolbar="en" aria-label="English text formatting">
+                    <select data-rich-block title="Paragraph style"><option value="p">Paragraph</option><option value="h2">Heading 2</option><option value="h3">Heading 3</option><option value="blockquote">Quote</option></select>
+                    <select data-rich-font title="Font"><option value="Optima">Optima</option><option value="Avenir">Avenir</option><option value="Georgia">Georgia</option><option value="Baskerville">Baskerville</option><option value="Garamond">Garamond</option><option value="Didot">Didot</option><option value="Helvetica">Helvetica</option><option value="Courier New">Courier</option></select>
+                    <select data-rich-size title="Size"><option value="3">Normal</option><option value="4">Large</option><option value="5">Heading</option><option value="2">Small</option></select>
+                    <button type="button" data-rich-command="bold" title="Bold"><b>B</b></button>
+                    <button type="button" data-rich-command="italic" title="Italic"><i>I</i></button>
+                    <button type="button" data-rich-command="underline" title="Underline"><u>U</u></button>
+                    <button type="button" data-rich-command="insertUnorderedList" title="Bulleted list">• list</button>
+                    <button type="button" data-rich-command="insertOrderedList" title="Numbered list">1. list</button>
+                    <button type="button" data-rich-command="justifyLeft" title="Align left">←</button>
+                    <button type="button" data-rich-command="justifyCenter" title="Centre">↔</button>
+                    <button type="button" data-rich-command="justifyRight" title="Align right">→</button>
+                    <button type="button" data-rich-link title="Insert link">Link</button>
+                    <button type="button" data-rich-image-upload title="Upload image into text">Image</button>
+                    <button type="button" data-rich-command="removeFormat" title="Clear formatting">Clear</button>
+                  </div>
+                  <div class="rich-editor" contenteditable="true" data-rich-editor="en" role="textbox" aria-multiline="true" data-placeholder="Write the full English text here…"></div>
+                  <textarea data-writing-field="contentEn" hidden></textarea>
+                </div>
+                <label class="field"><span>Image alternative text</span><input data-writing-field="imageAltEn" maxlength="500" /></label>
+              </fieldset>
+            </div>
+
+            <div class="writing-media-fields">
+              <label class="field"><span>Link della pubblicazione</span><input type="url" data-writing-field="url" placeholder="https://…" /></label>
+              <label class="field"><span>URL immagine</span><input data-writing-field="imageUrl" placeholder="https://… oppure /editor-assets/…" /></label>
+              <label class="field"><span>Carica immagine <small>max 5 MB</small></span><input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-writing-image-file /></label>
+              <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-rich-image-file hidden />
+            </div>
+
+            <div class="writing-preview-grid">
+              <article class="writing-live-preview" data-writing-preview>
+                <span class="writing-live-preview__status">ANTEPRIMA</span>
+                <img data-writing-preview-image alt="" hidden />
+                <p data-writing-preview-meta></p>
+                <h2 data-writing-preview-title>Nuova pubblicazione</h2>
+                <p data-writing-preview-excerpt></p>
+                <div class="writing-live-preview__body" data-writing-preview-body></div>
+              </article>
+              <div class="writing-preview-language" aria-label="Lingua anteprima">
+                <button type="button" class="compact is-active" data-writing-preview-locale="it">IT</button>
+                <button type="button" class="compact" data-writing-preview-locale="en">EN</button>
+              </div>
+            </div>
+
+            <p class="writing-composer__status" data-writing-status role="status"></p>
+            <div class="writing-composer__actions">
+              <button class="compact danger" type="button" data-writing-delete>Elimina</button>
+              <span></span>
+              <button class="compact" type="button" data-writing-save-draft>Salva come bozza</button>
+              <button class="save-button" type="submit">Pubblica / aggiorna</button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </main>
+
+    <dialog class="site-settings-dialog" data-site-settings-dialog>
+      <form method="dialog" data-site-settings-form>
+        <header>
+          <div>
+            <span class="eyebrow">Impostazioni globali</span>
+            <h2>Font di tutto il sito</h2>
+          </div>
+          <button class="compact" type="button" aria-label="Chiudi" data-site-settings-close>×</button>
+        </header>
+        <p>Questo è il carattere predefinito di tutte le pagine. Le personalizzazioni tipografiche dei singoli elementi restano possibili.</p>
+        <label class="field"><span>Famiglia del font</span><input list="font-list" data-site-font-family value="Optima, Candara, 'Noto Sans', sans-serif" /></label>
+        <label class="field"><span>Google Fonts URL <small>facoltativo</small></span><input type="url" data-site-font-url placeholder="https://fonts.googleapis.com/css2?family=…" /></label>
+        <div class="site-settings-dialog__preview" data-site-font-preview>
+          <strong>Claudia D’Angelo</strong>
+          <span>Libri, racconti, articoli, collage e altre cose.</span>
+        </div>
+        <p class="site-settings-dialog__status" data-site-settings-status role="status"></p>
+        <footer>
+          <button class="compact" type="button" data-site-settings-close>Annulla</button>
+          <button class="save-button" type="submit">Salva per tutte le pagine</button>
+        </footer>
+      </form>
+    </dialog>
+
     <datalist id="font-list">
       <option value="'Bodoni Moda', Didot, Georgia, serif"></option>
       <option value="'IBM Plex Mono', 'PT Mono Local', monospace"></option>
+      <option value="Optima, Candara, 'Noto Sans', sans-serif"></option>
+      <option value="Avenir, 'Avenir Next', 'Segoe UI', sans-serif"></option>
+      <option value="'Avenir Next', Avenir, 'Helvetica Neue', sans-serif"></option>
+      <option value="Futura, 'Century Gothic', Avenir, sans-serif"></option>
+      <option value="'Gill Sans', 'Gill Sans MT', Calibri, sans-serif"></option>
+      <option value="'Helvetica Neue', Helvetica, Arial, sans-serif"></option>
       <option value="Georgia, serif"></option>
       <option value="Helvetica, Arial, sans-serif"></option>
       <option value="'Times New Roman', serif"></option>
       <option value="'Courier New', monospace"></option>
+      <option value="Baskerville, 'Baskerville Old Face', 'Times New Roman', serif"></option>
+      <option value="Garamond, 'Adobe Garamond Pro', Georgia, serif"></option>
+      <option value="Palatino, 'Palatino Linotype', 'Book Antiqua', serif"></option>
+      <option value="Didot, 'Bodoni 72', 'Bodoni MT', Georgia, serif"></option>
+      <option value="'Iowan Old Style', 'Palatino Linotype', Georgia, serif"></option>
+      <option value="Charter, 'Bitstream Charter', Georgia, serif"></option>
+      <option value="'Hoefler Text', Baskerville, Georgia, serif"></option>
+      <option value="'American Typewriter', Rockwell, serif"></option>
+      <option value="Rockwell, 'Rockwell Nova', 'Courier New', serif"></option>
+      <option value="'Bookman Old Style', Bookman, Georgia, serif"></option>
+      <option value="Cochin, Garamond, Georgia, serif"></option>
+      <option value="Copperplate, 'Copperplate Gothic Light', fantasy"></option>
+      <option value="Papyrus, fantasy"></option>
+      <option value="'Bradley Hand', 'Comic Sans MS', cursive"></option>
+      <option value="'Snell Roundhand', 'Brush Script MT', cursive"></option>
+      <option value="Inter, ui-sans-serif, system-ui, sans-serif"></option>
+      <option value="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"></option>
+      <option value="Arial, Helvetica, sans-serif"></option>
+      <option value="Verdana, Geneva, sans-serif"></option>
+      <option value="Tahoma, Geneva, sans-serif"></option>
+      <option value="'Trebuchet MS', Tahoma, sans-serif"></option>
+      <option value="'Century Gothic', CenturyGothic, AppleGothic, sans-serif"></option>
+      <option value="Calibri, Candara, 'Segoe UI', sans-serif"></option>
+      <option value="Corbel, 'Lucida Grande', sans-serif"></option>
+      <option value="'Lucida Grande', 'Lucida Sans Unicode', sans-serif"></option>
+      <option value="Menlo, Monaco, Consolas, monospace"></option>
+      <option value="Monaco, 'Lucida Console', monospace"></option>
+      <option value="Consolas, 'Liberation Mono', monospace"></option>
+      <option value="ui-monospace, SFMono-Regular, Menlo, Monaco, monospace"></option>
+      <option value="ui-serif, 'Iowan Old Style', Palatino, Georgia, serif"></option>
+      <option value="ui-rounded, 'Arial Rounded MT Bold', sans-serif"></option>
+      <option value="'Arial Narrow', Arial, sans-serif"></option>
+      <option value="Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif"></option>
     </datalist>
 
     <script type="module" src="editor.js"></script>

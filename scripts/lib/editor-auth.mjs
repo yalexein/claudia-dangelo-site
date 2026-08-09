@@ -120,6 +120,7 @@ export function createEditorAuth({
     establishLegacySession,
     establishSession,
     isAuthorized,
+    isPublicEditorRequest,
     mutationOriginIsAllowed,
     sessionIsValid,
   };

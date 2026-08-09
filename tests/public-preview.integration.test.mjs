@@ -44,6 +44,55 @@ test("serve sito, editor, configurazioni runtime e asset", { timeout: 20_000 }, 
     assert.equal((await fetch(`${origin}/`)).status, 200);
     assert.equal((await fetch(`${origin}/collage/`)).status, 200);
     assert.equal((await fetch(`${origin}/__editor/?page=collage`)).status, 200);
+    const initialPosts = (await (await fetch(`${origin}/api/editor-writing-posts`)).json()).posts;
+    assert.equal(initialPosts.length, 20);
+
+    const siteSettings = await (await fetch(`${origin}/api/site-settings`)).json();
+    assert.match(siteSettings.fontFamily, /^Optima/);
+    const saveSiteSettings = await fetch(`${origin}/api/site-settings`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fontFamily: "Avenir, sans-serif", fontUrl: "" }),
+    });
+    assert.equal(saveSiteSettings.status, 200);
+    assert.match(await (await fetch(`${origin}/site-settings.css`)).text(), /Avenir, sans-serif/);
+
+    const guestbookPost = await fetch(`${origin}/api/guestbook`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "Visitatrice", message: "Messaggio persistente", website: "" }),
+    });
+    assert.equal(guestbookPost.status, 201);
+    const guestbookEntry = (await guestbookPost.json()).entries[0];
+    assert.equal((await (await fetch(`${origin}/api/guestbook`)).json()).entries[0].message, "Messaggio persistente");
+    assert.equal((await fetch(`${origin}/api/editor-guestbook`)).status, 200);
+    const guestbookDelete = await fetch(`${origin}/api/editor-guestbook?id=${encodeURIComponent(guestbookEntry.id)}`, {
+      method: "DELETE",
+    });
+    assert.equal(guestbookDelete.status, 200);
+    assert.deepEqual((await guestbookDelete.json()).entries, []);
+
+    const createDraftResponse = await fetch(`${origin}/api/editor-writing-posts`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ category: "blog", status: "draft", titleIt: "Nuova bozza", contentIt: "<h2>Nota</h2><script>alert(1)</script>" }),
+    });
+    assert.equal(createDraftResponse.status, 201);
+    const draft = (await createDraftResponse.json()).post;
+    assert.equal(draft.titleEn, "");
+    assert.doesNotMatch(draft.contentIt, /script|alert/);
+    const publicBeforePublish = (await (await fetch(`${origin}/api/writing-posts`)).json()).posts;
+    assert.equal(publicBeforePublish.some((post) => post.id === draft.id), false);
+
+    const publishResponse = await fetch(`${origin}/api/editor-writing-posts?id=${encodeURIComponent(draft.id)}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...draft, status: "published", titleIt: "Nuovo post", titleEn: "New post", contentEn: "<p>Full post</p>" }),
+    });
+    assert.equal(publishResponse.status, 200);
+    const publicAfterPublish = (await (await fetch(`${origin}/api/writing-posts`)).json()).posts;
+    assert.equal(publicAfterPublish.some((post) => post.id === draft.id && post.titleEn === "New post"), true);
+    assert.equal((await fetch(`${origin}/api/editor-writing-posts?id=${encodeURIComponent(draft.id)}`, { method: "DELETE" })).status, 200);
 
     const configuration = {
       version: 1,

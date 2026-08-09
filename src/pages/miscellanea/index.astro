@@ -30,15 +30,36 @@ const archives = [
   ["Memoryscapes", "https://www.memoryscapes.it/", "una raccolta di memorie filmate italiane del secolo scorso"],
   ["Public Domain Image Archive", "https://pdimagearchive.org/", "una collezione di oltre 10mila immagini senza copyright dai musei di tutto il mondo"],
 ] as const;
+
+const writingEn = writing.map(([name, url, note]) => [
+  name,
+  url,
+  note === "risorsa utilissima per autorx che vivono e lavorano in Irlanda"
+    ? "a very useful resource for authors living and working in Ireland"
+    : note === "corsi di scrittura in lingua inglese, anche online!"
+      ? "English-language writing courses, also available online!"
+      : note,
+] as const);
+
+const archivesEn = archives.map(([name, url, note]) => [
+  name,
+  url,
+  ({
+    "4000+ film gratis online": "4,000+ films available free online",
+    "Film in russo con sottotitoli in inglese": "Russian films with English subtitles",
+    "filmoteca dei migliori film russi e sovietici": "an archive of outstanding Russian and Soviet cinema",
+    "in inglese": "in English",
+    "una raccolta di memorie filmate italiane del secolo scorso": "a collection of filmed Italian memories from the last century",
+    "una collezione di oltre 10mila immagini senza copyright dai musei di tutto il mondo": "a collection of more than 10,000 public-domain images from museums around the world",
+  } as Record<string, string>)[note] || note,
+] as const);
 ---
 
-<LandingLayout title="Miscellanea — Claudia D'Angelo">
+<LandingLayout title="Miscellanea — Claudia D'Angelo" pageNameIt="Miscellanea" pageNameEn="Miscellanea" pageHeaderEditKey="miscellanea-header">
   <script is:inline>window.ClaudiaCustomizationPage = "miscellanea";</script>
-  <script is:inline src={`${base}contact-customizer.js?v=5`}></script>
+  <script is:inline src={`${base}contact-customizer.js?v=20260809-2`}></script>
 
   <article class="miscellanea-page" data-locale-only="it" data-contact-edit="miscellanea-page-it">
-    <a class="miscellanea-home" href={base} aria-label="Torna alla home" data-contact-edit="miscellanea-home-it">← <span data-contact-edit="miscellanea-home-label-it">torna alla home</span></a>
-
     <header class="miscellanea-title" data-contact-edit="miscellanea-title-wrap-it">
       <h1 data-contact-edit="miscellanea-title-it">Miscellanea</h1>
     </header>
@@ -60,7 +81,7 @@ const archives = [
         <span class="miscellanea-tape" aria-hidden="true" data-contact-edit="miscellanea-tape-it"></span>
         <h2 data-contact-edit="miscellanea-writing-title-it">Strumenti per la scrittura</h2>
         <ul data-contact-edit="miscellanea-writing-list-it">
-          {writing.map(([name, url, note], index) => (
+          {writingEn.map(([name, url, note], index) => (
             <li data-contact-edit={`miscellanea-writing-item-it-${index + 1}`}>
               <a href={url} target="_blank" rel="noreferrer" data-contact-edit={`miscellanea-writing-link-it-${index + 1}`}>{name}</a>
               {note && <small data-contact-edit={`miscellanea-writing-note-it-${index + 1}`}>{note}</small>}
@@ -73,7 +94,7 @@ const archives = [
         <span class="miscellanea-pin" aria-hidden="true" data-contact-edit="miscellanea-pin-it"></span>
         <h2 data-contact-edit="miscellanea-archives-title-it">Open Archives</h2>
         <ul data-contact-edit="miscellanea-archives-list-it">
-          {archives.map(([name, url, note], index) => (
+          {archivesEn.map(([name, url, note], index) => (
             <li data-contact-edit={`miscellanea-archives-item-it-${index + 1}`}>
               <a href={url} target="_blank" rel="noreferrer" data-contact-edit={`miscellanea-archives-link-it-${index + 1}`}>{name}</a>
               {note && <small data-contact-edit={`miscellanea-archives-note-it-${index + 1}`}>{note}</small>}
@@ -82,12 +103,10 @@ const archives = [
         </ul>
       </section>
 
-      <p class="miscellanea-status" data-contact-edit="miscellanea-status-it">in aggiornamento</p>
     </div>
   </article>
 
   <article class="miscellanea-page" data-locale-only="en" data-contact-edit="miscellanea-page-en" hidden>
-    <a class="miscellanea-home" href={base} aria-label="Return home" data-contact-edit="miscellanea-home-en">← <span data-contact-edit="miscellanea-home-label-en">return home</span></a>
     <header class="miscellanea-title" data-contact-edit="miscellanea-title-wrap-en"><h1 data-contact-edit="miscellanea-title-en">Miscellanea</h1></header>
     <div class="miscellanea-board" data-contact-edit="miscellanea-board-en">
       <figure class="miscellanea-photo" data-contact-edit="miscellanea-photo-en">
@@ -111,7 +130,6 @@ const archives = [
           ))}
         </ul>
       </section>
-      <p class="miscellanea-status" data-contact-edit="miscellanea-status-en">being updated</p>
     </div>
   </article>
 </LandingLayout>

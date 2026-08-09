@@ -1,0 +1,14 @@
+:root {
+  --site-font-family: Optima, Candara, "Noto Sans", sans-serif;
+}
+
+html body {
+  font-family: var(--site-font-family) !important;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}

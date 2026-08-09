@@ -12,6 +12,9 @@ const photoSrc = `${base}images/cv/me-presentazione-roma.svg`;
   descriptionIt="Curriculum letterario e artistico di Claudia D'Angelo."
   descriptionEn="Writing and visual-art résumé of Claudia D'Angelo."
   customizationPage="cv"
+  pageNameIt="CV"
+  pageNameEn="CV"
+  pageHeaderEditKey="cv-header"
 >
   <section class="cv-page" data-contact-edit="cv-page">
     <div class="cv-layout" data-contact-edit="cv-layout">
@@ -57,15 +60,15 @@ const photoSrc = `${base}images/cv/me-presentazione-roma.svg`;
         <h1 class="cv-title" data-contact-edit="cv-title">Claudia D'Angelo</h1>
 
         <div class="cv-tabs" role="tablist" aria-label="Seleziona la sezione del curriculum" data-contact-edit="cv-tabs">
-          <button class="cv-tab" type="button" role="tab" aria-selected="false" aria-controls="cv-home-panel" data-cv-tab="home" data-contact-edit="cv-tab-home">Home</button>
+          <button class="cv-tab" type="button" role="tab" aria-selected="false" aria-controls="cv-home-panel" data-cv-tab="home" data-contact-edit="cv-tab-home">Bio</button>
           <button class="cv-tab cv-tab--active" type="button" role="tab" aria-selected="true" aria-controls="cv-autrice-panel" data-cv-tab="autrice" data-contact-edit="cv-tab-writing">Writing</button>
           <button class="cv-tab" type="button" role="tab" aria-selected="false" aria-controls="cv-collagista-panel" data-cv-tab="collagista" data-contact-edit="cv-tab-visual-art">Visual art</button>
           <span class="cv-tabs-spacer"></span>
-          <a class="cv-tab cv-tab--site-link" href={base} title="Vai al sito" data-contact-edit="cv-home-link">↗</a>
         </div>
 
         <div id="cv-home-panel" class="bio-body cv-body" role="tabpanel" data-contact-edit="cv-home-panel" hidden>
-          <p data-contact-edit="cv-home-introduction">Italian writer, linguist, and visual artist based in Dublin. I write fiction and essays, with a particular focus on cinema and anime. My debut novel was published in 2024, and my short stories and articles have appeared in Italian magazines, both online and in print.</p>
+          <p data-contact-edit="cv-home-introduction">I write and make collages. I find it difficult to separate the two artistic practices because, whether I like it or not, they continuously influence one another in a play of mistakes and affinities. In my writing there is always an uncanny, fantastical element that projects us into another dimension: a kind of glitch that transforms reality into a new world—wonderful and frightening at the same time, yet familiar—revealing its inconsistencies and exploring humanity’s guilt and anxieties. My writing is also often a play of structures, recurrences and echoes, as in oral stories and fairy tales. Most of my collages begin with paper on paper. I retrieve images from magazines, newspapers and supermarket leaflets—it is an ecological discipline—cut them out and rearrange them, guided by the (in)congruities that emerge. In other cases I work digitally, retracing the same gesture as paper collage through overlaps, cuts and masking. I play with perspective and create ironic images, as well as new creatures and new worlds whose resemblance to our bodies and our earth generates horror or wonder.</p>
+          <p data-contact-edit="cv-home-location">I was born and raised in Italy, and moved to Dublin at the end of 2021. I continued to write in Italian, but recently I have also begun writing in English.</p>
         </div>
 
         <div id="cv-autrice-panel" class="bio-body cv-body cv-body--active" role="tabpanel" data-contact-edit="cv-writing-panel">
@@ -141,6 +144,77 @@ const photoSrc = `${base}images/cv/me-presentazione-roma.svg`;
         </div>
       </main>
     </div>
+
+    <script is:inline>
+      (() => {
+        const italian = new Map([
+          ["Writing", "Scrittura"],
+          ["Visual art", "Arte visiva"],
+          ["I write and make collages. I find it difficult to separate the two artistic practices because, whether I like it or not, they continuously influence one another in a play of mistakes and affinities. In my writing there is always an uncanny, fantastical element that projects us into another dimension: a kind of glitch that transforms reality into a new world—wonderful and frightening at the same time, yet familiar—revealing its inconsistencies and exploring humanity’s guilt and anxieties. My writing is also often a play of structures, recurrences and echoes, as in oral stories and fairy tales. Most of my collages begin with paper on paper. I retrieve images from magazines, newspapers and supermarket leaflets—it is an ecological discipline—cut them out and rearrange them, guided by the (in)congruities that emerge. In other cases I work digitally, retracing the same gesture as paper collage through overlaps, cuts and masking. I play with perspective and create ironic images, as well as new creatures and new worlds whose resemblance to our bodies and our earth generates horror or wonder.", "Scrivo e faccio collage. Mi è difficile scindere le due pratiche artistiche perché nolente o volente si influenzano a vicenda, continuamente, in un gioco di errori e affinità. Nella mia scrittura c’è sempre un elemento perturbante e fantastico che ci proietta in un’altra dimensione, una sorta di glitch che trasforma la realtà in un mondo nuovo (meraviglioso e spaventoso allo stesso tempo) eppure familiare, ne rivela le incongruenze, esplora le colpe e le ansie del genere umano. Ma la mia scrittura è anche, spesso, un gioco di strutture, ricorrenze, richiami, come nelle storie orali e le fiabe. La maggior parte dei miei collage nasce dalla carta sulla carta. Recupero immagini da riviste, giornali, depliant del supermercato- è una disciplina ecologica, le ritaglio e le ricompongo lasciandomi guidare dalle (in)congruenze che affiorano. In altri casi lavoro in digitale, ripercorro lo stesso gesto dei collage su carta, fatto di sovrapposizioni, tagli, mascheramenti. Gioco con le prospettive, creo immagini ironiche, ma anche nuove creature, nuovi mondi, la cui somiglianza coi nostri corpi e con la nostra terra genera orrore o meraviglia."],
+          ["I was born and raised in Italy, and moved to Dublin at the end of 2021. I continued to write in Italian, but recently I have also begun writing in English.", "Sono nata e cresciuta in Italia, e mi sono trasferita a Dublino alla fine del 2021. Ho continuato a scrivere in italiano, ma di recente ho cominciato a scrivere anche in inglese."],
+          ["Novel", "Romanzo"],
+          ["Short Fiction in anthologies and print magazines", "Racconti in antologie e riviste cartacee"],
+          ["Short Fiction in online magazines", "Racconti in riviste online"],
+          ["Articles and essays", "Articoli e saggi"],
+          ["Editorial collaboration", "Collaborazioni editoriali"],
+          ["Exhibition", "Mostre"],
+          ["Selected cover and editorial work", "Copertine e lavori editoriali selezionati"],
+          ["Selected artistic projects", "Progetti artistici selezionati"],
+          ["Workshops", "Laboratori"],
+          ["Forthcoming", "In uscita"],
+          [", debut novel, Moscabianca.", ", romanzo d’esordio, Moscabianca."],
+          [", no.1.", ", n. 1."],
+          [", no.8.", ", n. 8."],
+          [", co-authored with three other writers under the collective name La Vecchia Verde (Pidgin).", ", scritto con altre tre autrici sotto il nome collettivo La Vecchia Verde (Pidgin)."],
+          [", selected for the “8x8” competition organised by the literary agency Oblique.", ", selezionato per il concorso “8x8” organizzato dall’agenzia letteraria Oblique."],
+          ["”, published in", "”, pubblicato su"],
+          ["; also discussed on the radio programme", "; discusso anche nel programma radiofonico"],
+          ["(RSI, July 2025).", "(RSI, luglio 2025)."],
+          ["Member of the editorial team of the literary fanzine", "Membro della redazione della fanzine letteraria"],
+          [", contributing as editor, writer, and visual artist.", ", con contributi come editor, autrice e artista visiva."],
+          [", public exhibition of selected works at Tabula Rasa, Naples, Italy.", ", mostra pubblica di opere selezionate presso Tabula Rasa, Napoli."],
+          ["Collage selected through an open call for the cover of an upcoming issue of the", "Collage selezionato tramite open call per la copertina di un prossimo numero dello"],
+          [", themed “Hope”.", ", dedicato al tema della speranza."],
+          ["Cover artworks for the", "Copertine per la collana"],
+          ["book series, published by Arcoiris edizioni", "pubblicata da Arcoiris edizioni"],
+          ["Four of my collages included in", "Quattro miei collage inclusi in"],
+          [", vol. 1, Psicografici editori.", ", vol. 1, Psicografici editori."],
+          ["Cover artwork for", "Copertina per"],
+          [", no. 55, published by Mimesis.", ", n. 55, pubblicato da Mimesis."],
+          ["Cover artwork for music releases by", "Copertine per pubblicazioni musicali di"],
+          [", no.3, Archaeo Press Publishing.", ", n. 3, Archaeo Press Publishing."],
+          [", experimental short film written, directed, and performed.", ", cortometraggio sperimentale scritto, diretto e interpretato."],
+          ["Collage workshops facilitated in Dublin, Ireland, and Naples, Italy, for children and adult participants.", "Laboratori di collage condotti a Dublino e Napoli per bambine, bambini e persone adulte."],
+        ]);
+        const originals = new WeakMap();
+
+        const translate = (locale) => {
+          const walker = document.createTreeWalker(document.querySelector(".cv-page"), NodeFilter.SHOW_TEXT);
+          for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+            if (!originals.has(node)) originals.set(node, node.nodeValue || "");
+            const original = originals.get(node) || "";
+            if (locale !== "it") {
+              node.nodeValue = original;
+              continue;
+            }
+            const trimmed = original.trim();
+            const replacement = italian.get(trimmed);
+            if (!replacement) continue;
+            const leading = original.match(/^\s*/)?.[0] || "";
+            const trailing = original.match(/\s*$/)?.[0] || "";
+            node.nodeValue = `${leading}${replacement}${trailing}`;
+          }
+          document.querySelector(".cv-tabs")?.setAttribute("aria-label", locale === "it" ? "Seleziona la sezione del curriculum" : "Choose a résumé section");
+          document.querySelector(".cv-contacts")?.setAttribute("aria-label", locale === "it" ? "Contatti" : "Contacts");
+        };
+
+        document.addEventListener("claudia:locale-ready", (event) => {
+          const locale = event.detail?.locale === "en" ? "en" : "it";
+          translate(locale);
+          window.setTimeout(() => translate(locale), 0);
+        });
+      })();
+    </script>
 
     <script is:inline>
       (() => {

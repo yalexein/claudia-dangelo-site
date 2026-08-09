@@ -5,6 +5,7 @@ import { cleanEditorConfiguration, createEditorPages } from "../scripts/lib/edit
 const cleaned = cleanEditorConfiguration({
   global: {
     fontUrl: "https://fonts.googleapis.com/css2?family=Inter",
+    fontFamily: "Inter, sans-serif",
     variables: {
       "--contact-aqua": "#ffffff",
       "--not-allowed": "red",
@@ -32,6 +33,7 @@ const cleaned = cleanEditorConfiguration({
 
 test("sanitizza configurazioni e conserva solo contratti supportati", () => {
   assert.equal(cleaned.global.fontUrl, "https://fonts.googleapis.com/css2?family=Inter");
+  assert.equal(cleaned.global.fontFamily, "Inter, sans-serif");
   assert.deepEqual(cleaned.global.variables, { "--contact-aqua": "#ffffff" });
   assert.equal(cleaned.elements['[data-contact-edit="collage-image-1"]'].src, "/uploads/editor/collage/opera.png");
   assert.deepEqual(cleaned.elements['[data-contact-edit="collage-image-1"]'].styles.base, {

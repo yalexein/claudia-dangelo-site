@@ -10,12 +10,12 @@ export const pageDefinitions = {
   uccelli: { label: "Uccelli", path: "/uccelli/" },
   miscellanea: { label: "Miscellanea", path: "/miscellanea/" },
   cv: { label: "CV", path: "/cv/" },
-  collage: { label: "Collage", path: "/collage/", languages: false },
-  "scritture-home": { label: "Scritture — prima pagina", path: "/scritture-esplorazioni/g1-revisione.html", languages: false },
-  "scritture-libri": { label: "Scritture — Libri", path: "/scritture-esplorazioni/libri.html", languages: false },
-  "scritture-racconti": { label: "Scritture — Racconti", path: "/scritture-esplorazioni/racconti.html", languages: false },
-  "scritture-articoli": { label: "Scritture — Articoli", path: "/scritture-esplorazioni/articoli.html", languages: false },
-  "scritture-blog": { label: "Scritture — Blog", path: "/scritture-esplorazioni/blog.html", languages: false },
+  collage: { label: "Collage", path: "/collage/" },
+  "scritture-home": { label: "Scritture — prima pagina", path: "/scritture-esplorazioni/g1-revisione.html" },
+  "scritture-libri": { label: "Scritture — Libri", path: "/scritture-esplorazioni/libri.html" },
+  "scritture-racconti": { label: "Scritture — Racconti", path: "/scritture-esplorazioni/racconti.html" },
+  "scritture-articoli": { label: "Scritture — Articoli", path: "/scritture-esplorazioni/articoli.html" },
+  "scritture-blog": { label: "Scritture — Blog", path: "/scritture-esplorazioni/blog.html" },
 };
 
 export const pageDefaultVariables = {

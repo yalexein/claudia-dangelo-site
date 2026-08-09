@@ -221,7 +221,7 @@
     "blendMode": "normal",
     "hoverEffect": "glow",
     "clickEffect": "pulse",
-    "linkUrl": "/scritture-esplorazioni/g1-revisione.html",
+    "linkUrl": "/cv/",
     "trim": {
       "naturalWidth": 648,
       "naturalHeight": 861,
@@ -305,7 +305,7 @@
     "blendMode": "normal",
     "hoverEffect": "glow",
     "clickEffect": "pulse",
-    "linkUrl": "/cv/",
+    "linkUrl": "/scritture-esplorazioni/g1-revisione.html",
     "trim": {
       "naturalWidth": 620,
       "naturalHeight": 479,

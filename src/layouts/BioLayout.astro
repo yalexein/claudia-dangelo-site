@@ -1,11 +1,15 @@
 ---
-import LanguageSwitcher from "../components/LanguageSwitcher.astro";
+import SitePageHeader from "../components/SitePageHeader.astro";
+import "../styles/site-page-header.css";
 
 const {
   title = "Bio — Claudia D'Angelo",
   descriptionIt = "Biografia di Claudia D'Angelo: scrittrice, autrice di Le forze e artista del collage, tra Napoli e Dublino.",
   descriptionEn = "Biography of Claudia D'Angelo: writer, author of Le forze and collage artist, between Naples and Dublin.",
   customizationPage = "bio",
+  pageNameIt,
+  pageNameEn = pageNameIt,
+  pageHeaderEditKey = customizationPage,
 } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const webFontsHref =
@@ -45,15 +49,16 @@ const webFontsHref =
       data-locale-content-en={descriptionEn}
     />
     <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+    <link rel="stylesheet" href={`${base}site-settings.css?v=1`} />
     <script is:inline src={`${base}site-locale.js?v=2`}></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href={webFontsHref} />
     <script is:inline define:vars={{ customizationPage }}>window.ClaudiaCustomizationPage = customizationPage;</script>
-    <script is:inline src={`${base}contact-customizer.js?v=3`}></script>
+    <script is:inline src={`${base}contact-customizer.js?v=20260809-2`}></script>
   </head>
   <body>
-    <LanguageSwitcher />
+    {pageNameIt ? <SitePageHeader pageNameIt={pageNameIt} pageNameEn={pageNameEn} editKey={pageHeaderEditKey} /> : null}
     <slot />
   </body>
 </html>

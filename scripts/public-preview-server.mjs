@@ -7,6 +7,8 @@ import { fileURLToPath } from "node:url";
 import { createEditorAuth } from "./lib/editor-auth.mjs";
 import { createEditorPages } from "./lib/editor-registry.mjs";
 import { createEditorStorage } from "./lib/editor-storage.mjs";
+import { createSiteSettingsStorage } from "./lib/site-settings.mjs";
+import { createWritingPostsStorage } from "./lib/writing-posts.mjs";
 import {
   baseSecurityHeaders,
   cleanText,
@@ -36,6 +38,14 @@ let guestbookWriteQueue = Promise.resolve();
 
 const editorPages = createEditorPages(rootDir, dataDir);
 const editorStorage = createEditorStorage({ dataDir, editorPages });
+const writingPostsStorage = createWritingPostsStorage({
+  dataDir,
+  defaultPath: path.join(rootDir, "public", "writing-posts.json"),
+});
+const siteSettingsStorage = createSiteSettingsStorage({
+  dataDir,
+  defaultPath: path.join(rootDir, "public", "site-settings.json"),
+});
 const editorAuth = createEditorAuth({
   publicEditorHost: process.env.PUBLIC_EDITOR_HOST,
   publicEditorToken: process.env.PUBLIC_EDITOR_TOKEN,
@@ -109,6 +119,132 @@ async function handleGuestbook(request, response) {
     sendJson(response, 201, { entries: nextEntries });
   } catch (error) {
     sendJson(response, 400, { error: error?.message || "Messaggio non valido" });
+  }
+}
+
+async function handleEditorGuestbook(request, response, requestUrl) {
+  if (request.method === "GET") {
+    sendJson(response, 200, { entries: await readEntries() }, editorSecurityHeaders);
+    return;
+  }
+  if (request.method !== "DELETE") {
+    sendJson(response, 405, { error: "Metodo non supportato" }, editorSecurityHeaders);
+    return;
+  }
+
+  const id = cleanText(requestUrl.searchParams.get("id"), 100);
+  if (!id) {
+    sendJson(response, 400, { error: "Messaggio non specificato" }, editorSecurityHeaders);
+    return;
+  }
+
+  let removed = false;
+  let nextEntries = [];
+  guestbookWriteQueue = guestbookWriteQueue.then(async () => {
+    const entries = await readEntries();
+    nextEntries = entries.filter((entry) => {
+      const matches = entry?.id === id;
+      if (matches) removed = true;
+      return !matches;
+    });
+    if (removed) await saveEntries(nextEntries);
+  });
+  await guestbookWriteQueue;
+
+  if (!removed) {
+    sendJson(response, 404, { error: "Messaggio non trovato" }, editorSecurityHeaders);
+    return;
+  }
+  sendJson(response, 200, { entries: nextEntries }, editorSecurityHeaders);
+}
+
+async function handlePublicWritingPosts(request, response) {
+  if (request.method !== "GET") {
+    sendJson(response, 405, { error: "Metodo non supportato" });
+    return;
+  }
+  sendJson(response, 200, { posts: await writingPostsStorage.list({ publishedOnly: true }) });
+}
+
+async function handleSiteSettings(request, response) {
+  if (request.method === "GET") {
+    sendJson(response, 200, await siteSettingsStorage.read(), editorSecurityHeaders);
+    return;
+  }
+  if (request.method !== "PUT") {
+    sendJson(response, 405, { error: "Metodo non supportato" }, editorSecurityHeaders);
+    return;
+  }
+  try {
+    sendJson(response, 200, await siteSettingsStorage.save(await readJsonBody(request, 8 * 1024)), editorSecurityHeaders);
+  } catch (error) {
+    sendJson(response, 400, { error: error?.message || "Impostazioni non valide" }, editorSecurityHeaders);
+  }
+}
+
+async function handleSiteSettingsCss(request, response) {
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    response.writeHead(405, baseSecurityHeaders).end("Method not allowed");
+    return;
+  }
+  const body = await siteSettingsStorage.css();
+  response.writeHead(200, {
+    ...baseSecurityHeaders,
+    "Cache-Control": "no-cache",
+    "Content-Type": "text/css; charset=utf-8",
+    "Content-Length": Buffer.byteLength(body),
+  });
+  response.end(request.method === "HEAD" ? undefined : body);
+}
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  }[character]));
+}
+
+function serveEditorLogin(response, requestUrl) {
+  const allowedParams = ["dashboard", "page", "lang"];
+  const hiddenFields = allowedParams.map((name) => {
+    const value = requestUrl.searchParams.get(name);
+    return value ? `<input type="hidden" name="${name}" value="${escapeHtml(value)}">` : "";
+  }).join("");
+  const body = `<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Accesso editor · Claudia</title><style>:root{color-scheme:dark}*{box-sizing:border-box}body{display:grid;min-height:100vh;margin:0;place-items:center;background:#0f1110;color:#f4f0e7;font:16px Optima,Avenir,sans-serif}.card{width:min(440px,calc(100% - 32px));padding:34px;border:1px solid #38403b;border-radius:16px;background:#171a19;box-shadow:0 24px 80px #0008}.mark{display:grid;width:52px;height:52px;margin-bottom:24px;place-items:center;border-radius:50%;background:#70cabc;color:#082a26;font:700 28px Georgia,serif}h1{margin:0 0 8px;font-size:31px}p{margin:0 0 24px;color:#a6aaa4;line-height:1.5}label{display:grid;gap:8px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}input{width:100%;height:48px;padding:0 13px;border:1px solid #4b544f;border-radius:8px;background:#0f1110;color:#fff;font:16px ui-monospace,monospace}button{width:100%;height:48px;margin-top:14px;border:0;border-radius:8px;background:#70cabc;color:#082a26;font-weight:800;cursor:pointer}</style></head><body><main class="card"><div class="mark">C</div><h1>Editor sito</h1><p>Inserisci la chiave di accesso dell’editor. La sessione resta protetta e la chiave viene rimossa subito dall’indirizzo.</p><form method="get" action="${escapeHtml(requestUrl.pathname)}">${hiddenFields}<label>Chiave di accesso<input type="password" name="access" required autocomplete="current-password" autofocus></label><button type="submit">Entra nell’editor</button></form></main></body></html>`;
+  response.writeHead(401, {
+    ...editorSecurityHeaders,
+    "Content-Type": "text/html; charset=utf-8",
+    "Content-Length": Buffer.byteLength(body),
+  }).end(body);
+}
+
+async function handleEditorWritingPosts(request, response, requestUrl) {
+  try {
+    if (request.method === "GET") {
+      sendJson(response, 200, { posts: await writingPostsStorage.list() }, editorSecurityHeaders);
+      return;
+    }
+
+    const id = cleanText(requestUrl.searchParams.get("id"), 100);
+    if (request.method === "POST") {
+      const post = await writingPostsStorage.create(await readJsonBody(request, 256 * 1024));
+      sendJson(response, 201, { post }, editorSecurityHeaders);
+      return;
+    }
+    if (request.method === "PUT") {
+      if (!id) throw Object.assign(new Error("Pubblicazione non specificata"), { statusCode: 400 });
+      const post = await writingPostsStorage.update(id, await readJsonBody(request, 256 * 1024));
+      sendJson(response, 200, { post }, editorSecurityHeaders);
+      return;
+    }
+    if (request.method === "DELETE") {
+      if (!id) throw Object.assign(new Error("Pubblicazione non specificata"), { statusCode: 400 });
+      await writingPostsStorage.remove(id);
+      sendJson(response, 200, { id }, editorSecurityHeaders);
+      return;
+    }
+    sendJson(response, 405, { error: "Metodo non supportato" }, editorSecurityHeaders);
+  } catch (error) {
+    sendJson(response, error?.statusCode || 400, { error: error?.message || "Pubblicazione non valida" }, editorSecurityHeaders);
   }
 }
 
@@ -244,6 +380,9 @@ const server = createServer((request, response) => {
   const editorProtectedRoute = requestUrl.pathname === "/api/contact-editor"
     || requestUrl.pathname === "/api/site-editor"
     || requestUrl.pathname === "/api/editor-assets"
+    || requestUrl.pathname === "/api/editor-guestbook"
+    || requestUrl.pathname === "/api/editor-writing-posts"
+    || requestUrl.pathname === "/api/site-settings"
     || requestUrl.pathname === "/__editor"
     || requestUrl.pathname.startsWith("/__editor/");
 
@@ -257,6 +396,11 @@ const server = createServer((request, response) => {
     return;
   }
 
+  if (requestUrl.pathname === "/" && editorAuth.configured && editorAuth.isPublicEditorRequest(request)) {
+    response.writeHead(302, { ...editorSecurityHeaders, Location: "/__editor/" }).end();
+    return;
+  }
+
   if (
     editorProtectedRoute
     && request.method === "GET"
@@ -266,6 +410,10 @@ const server = createServer((request, response) => {
     )
   ) return;
   if (editorProtectedRoute && !editorAuth.isAuthorized(request)) {
+    if (request.method === "GET" && (requestUrl.pathname === "/__editor" || requestUrl.pathname.startsWith("/__editor/"))) {
+      serveEditorLogin(response, requestUrl);
+      return;
+    }
     response.writeHead(404, editorSecurityHeaders).end("Not found");
     return;
   }
@@ -278,6 +426,14 @@ const server = createServer((request, response) => {
     void handleGuestbook(request, response);
     return;
   }
+  if (requestUrl.pathname === "/api/writing-posts") {
+    void handlePublicWritingPosts(request, response);
+    return;
+  }
+  if (requestUrl.pathname === "/site-settings.css") {
+    void handleSiteSettingsCss(request, response);
+    return;
+  }
   if (requestUrl.pathname === "/api/contact-editor") {
     void handleEditorPageApi(request, response, editorPages.contatti);
     return;
@@ -288,6 +444,18 @@ const server = createServer((request, response) => {
   }
   if (requestUrl.pathname === "/api/editor-assets") {
     void handleEditorAssetUpload(request, response, requestUrl);
+    return;
+  }
+  if (requestUrl.pathname === "/api/editor-guestbook") {
+    void handleEditorGuestbook(request, response, requestUrl);
+    return;
+  }
+  if (requestUrl.pathname === "/api/editor-writing-posts") {
+    void handleEditorWritingPosts(request, response, requestUrl);
+    return;
+  }
+  if (requestUrl.pathname === "/api/site-settings") {
+    void handleSiteSettings(request, response);
     return;
   }
   if (requestUrl.pathname === "/__editor" || requestUrl.pathname === "/__editor/contatti" || requestUrl.pathname === "/__editor/contatti/") {

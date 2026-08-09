@@ -81,12 +81,15 @@ export function cleanEditorConfiguration(input) {
   const output = {
     version: 1,
     updatedAt: new Date().toISOString(),
-    global: { fontUrl: "", variables: {} },
+    global: { fontUrl: "", fontFamily: "", variables: {} },
     elements: {},
   };
 
   const fontUrl = String(input?.global?.fontUrl || "").trim().slice(0, 500);
   if (!fontUrl || fontUrl.startsWith("https://fonts.googleapis.com/")) output.global.fontUrl = fontUrl;
+
+  const fontFamily = cleanCssValue(input?.global?.fontFamily, 180);
+  if (fontFamily) output.global.fontFamily = fontFamily;
 
   for (const [name, value] of Object.entries(input?.global?.variables || {})) {
     if (!editorVariables.has(name)) continue;

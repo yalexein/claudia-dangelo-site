@@ -1,6 +1,7 @@
 ---
-import LanguageSwitcher from "../../components/LanguageSwitcher.astro";
+import SitePageHeader from "../../components/SitePageHeader.astro";
 import "../../styles/contatti.css";
+import "../../styles/site-page-header.css";
 import {
   siBluesky,
   siFacebook,
@@ -53,6 +54,7 @@ const contactIconLibrary = {
     <meta property="og:locale:alternate" content="en_US" />
     <title>Contatti — Claudia D'Angelo</title>
     <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+    <link rel="stylesheet" href={`${base}site-settings.css?v=1`} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -61,10 +63,10 @@ const contactIconLibrary = {
     />
     <script is:inline src={`${base}site-locale.js?v=2`}></script>
     <script id="contact-icon-library" type="application/json" set:html={JSON.stringify(contactIconLibrary)}></script>
-    <script is:inline src={`${base}contact-customizer.js?v=1`}></script>
+    <script is:inline src={`${base}contact-customizer.js?v=20260809-2`}></script>
   </head>
   <body>
-    <LanguageSwitcher />
+    <SitePageHeader pageNameIt="Contatti" pageNameEn="Contact" editKey="contact-header" />
 
     <main class="contact-public" data-contact-edit="page">
       <div class="contact-shell" data-contact-edit="layout">
@@ -81,18 +83,6 @@ const contactIconLibrary = {
             decoding="async"
           />
 
-          <a
-            class="contact-home"
-            data-contact-edit="home-link"
-            href={base}
-            aria-label="Torna alla pagina iniziale"
-            data-locale-aria-label-it="Torna alla pagina iniziale"
-            data-locale-aria-label-en="Back to the home page"
-          >
-            <span data-contact-edit="home-arrow" aria-hidden="true">←</span>
-            <span data-locale-only="it" data-contact-edit="home-label-it">torna alla home</span>
-            <span data-locale-only="en" data-contact-edit="home-label-en" hidden>back to home</span>
-          </a>
         </figure>
 
         <section class="contact-panel" data-contact-edit="panel" aria-label="Contatti / Contact">

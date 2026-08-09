@@ -1,0 +1,25 @@
+---
+import LanguageSwitcher from "./LanguageSwitcher.astro";
+
+const {
+  pageNameIt,
+  pageNameEn = pageNameIt,
+  editKey = "page-header",
+  extraClass = "",
+} = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+
+<nav class:list={["site-page-header", extraClass]} aria-label="Navigazione principale" data-contact-edit={`${editKey}-wrap`}>
+  <a href={base} data-contact-edit={`${editKey}-home`}>
+    <span aria-hidden="true">←</span>
+    <span>home</span>
+  </a>
+  <span class="site-page-header__title" data-contact-edit={`${editKey}-title`}>
+    <span data-locale-only="it">{pageNameIt}</span>
+    <span data-locale-only="en" hidden>{pageNameEn}</span>
+  </span>
+  <div class="site-page-header__language" data-contact-edit={`${editKey}-language`}>
+    <LanguageSwitcher />
+  </div>
+</nav>

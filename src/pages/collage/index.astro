@@ -1,5 +1,7 @@
 ---
 const base = import.meta.env.BASE_URL;
+import SitePageHeader from "../../components/SitePageHeader.astro";
+import "../../styles/site-page-header.css";
 ---
 <!doctype html>
 <html lang="it" data-visit-theme="day">
@@ -10,6 +12,7 @@ const base = import.meta.env.BASE_URL;
     <meta name="theme-color" content="#f7f5ef" />
     <title>Collage — Claudia D'Angelo</title>
     <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+    <link rel="stylesheet" href={`${base}site-settings.css?v=1`} />
     <script is:inline>
       (() => {
         const applyVisitTheme = () => {
@@ -25,13 +28,10 @@ const base = import.meta.env.BASE_URL;
       })();
     </script>
     <link rel="stylesheet" href={`${base}collage-poster-mockups/style.css?v=9`} />
+    <script is:inline src={`${base}site-locale.js?v=2`}></script>
   </head>
   <body class="composition-page">
-    <nav class="composition-nav" aria-label="Navigazione Collage" data-contact-edit="collage-navigation">
-      <a href={base} data-contact-edit="collage-home-link">← home</a>
-      <span data-contact-edit="collage-nav-title">collage di collage</span>
-      <span aria-hidden="true"></span>
-    </nav>
+    <SitePageHeader pageNameIt="Collage" pageNameEn="Collage" editKey="collage-header" extraClass="composition-nav" />
 
     <main class="contact-public composition" aria-label="Collage di collage di Claudia D'Angelo" data-contact-edit="collage-stage">
       <div class="composition-word" aria-label="Collage" data-contact-edit="collage-word">
@@ -46,8 +46,6 @@ const base = import.meta.env.BASE_URL;
 
       <div class="composition-images" data-composition-images data-contact-edit="collage-images"></div>
 
-      <p class="composition-note composition-note--top" data-contact-edit="collage-note-top">24 opere · ritagli · sovrapposizioni</p>
-      <p class="composition-note composition-note--bottom" data-contact-edit="collage-note-bottom">clicca un collage per aprire l’originale</p>
       <p class="composition-signature" data-contact-edit="collage-signature">CLAUDIA D’ANGELO<br />2022—2026</p>
     </main>
 
@@ -58,6 +56,6 @@ const base = import.meta.env.BASE_URL;
 
     <script is:inline src={`${base}collage-poster-mockups/mockup.js?v=9`}></script>
     <script is:inline>window.ClaudiaCustomizationPage = "collage";</script>
-    <script is:inline src={`${base}contact-customizer.js?v=7`}></script>
+    <script is:inline src={`${base}contact-customizer.js?v=20260809-2`}></script>
   </body>
 </html>

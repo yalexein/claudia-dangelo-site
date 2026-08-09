@@ -19,7 +19,7 @@ try {
 const bioImage = `data:image/jpeg;base64,${imageBuffer.toString("base64")}`;
 ---
 
-<BioLayout title="Bio — Claudia D'Angelo">
+<BioLayout title="Bio — Claudia D'Angelo" pageNameIt="Bio" pageNameEn="Bio" pageHeaderEditKey="bio-header">
   <main class="contact-public bio-public-page" data-contact-edit="bio-page">
     <aside class="bio-image-column" data-contact-edit="bio-image-column">
       <figure class="bio-image-frame" data-contact-edit="bio-image-frame">
@@ -32,18 +32,6 @@ const bioImage = `data:image/jpeg;base64,${imageBuffer.toString("base64")}`;
         />
       </figure>
 
-      <a
-        class="bio-home-link"
-        data-contact-edit="bio-home-link"
-        href={base}
-        aria-label="Torna alla pagina iniziale"
-        data-locale-aria-label-it="Torna alla pagina iniziale"
-        data-locale-aria-label-en="Back to the home page"
-      >
-        <span data-contact-edit="bio-home-arrow" aria-hidden="true">←</span>
-        <span data-locale-only="it" data-contact-edit="bio-home-label-it">torna alla home</span>
-        <span data-locale-only="en" data-contact-edit="bio-home-label-en" hidden>back to home</span>
-      </a>
     </aside>
 
     <article class="bio-copy" data-contact-edit="bio-copy">

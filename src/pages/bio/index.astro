@@ -1,22 +1,9 @@
 ---
-import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
 import BioLayout from "../../layouts/BioLayout.astro";
 import "../../styles/bio.css";
 
 const base = import.meta.env.BASE_URL;
-const sourceImage = process.env.CLAUDIA_BIO_IMAGE || "/Users/yalexein/Downloads/casa 3.jpg";
-let imageBuffer: Buffer;
-try {
-  imageBuffer = execFileSync(
-    "ffmpeg",
-    ["-loglevel", "error", "-i", sourceImage, "-vf", "scale=1600:-2", "-q:v", "7", "-f", "image2pipe", "-vcodec", "mjpeg", "-"],
-    { maxBuffer: 18 * 1024 * 1024 },
-  );
-} catch {
-  imageBuffer = readFileSync(sourceImage);
-}
-const bioImage = `data:image/jpeg;base64,${imageBuffer.toString("base64")}`;
+const bioImage = `${base}images/bio/casa-3.jpg`;
 ---
 
 <BioLayout title="Bio — Claudia D'Angelo" pageNameIt="Bio" pageNameEn="Bio" pageHeaderEditKey="bio-header">
